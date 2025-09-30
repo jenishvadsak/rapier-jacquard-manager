@@ -1010,6 +1010,59 @@
     .excel-export {
         margin-top: 10px;
     }
+    
+    /* Queue number styling */
+    .queue-number {
+        background-color: var(--primary);
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: bold;
+        margin-right: 8px;
+    }
+    
+    /* Compact logout button */
+    .logout-btn {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        border: 1px solid #6c757d;
+        color: #6c757d;
+        background: transparent;
+    }
+    
+    .logout-btn:hover {
+        background-color: rgba(108, 117, 125, 0.1);
+    }
+    
+    /* Compact program form for mobile */
+    .compact-form .form-group {
+        margin-bottom: 8px;
+    }
+    
+    .compact-form .form-label {
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+    }
+    
+    .compact-form .form-control, 
+    .compact-form .form-select {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+    }
+    
+    /* Hide search in non-machine tabs */
+    .search-container {
+        display: none;
+    }
+    
+    .machines-tab-active .search-container {
+        display: block;
+    }
     </style>
 </head>
 <body>
@@ -1065,10 +1118,12 @@
                     <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
                 </h2>
                 <div class="d-flex gap-2 align-items-center">
-                    <div class="search-box">
-                        <input type="text" class="form-control form-control-sm" id="adminMachineSearch" placeholder="Search machines...">
+                    <div class="search-container">
+                        <div class="search-box">
+                            <input type="text" class="form-control form-control-sm" id="adminMachineSearch" placeholder="Search machines...">
+                        </div>
                     </div>
-                    <button class="btn btn-outline-danger btn-sm" onclick="confirmLogout()">
+                    <button class="btn logout-btn" onclick="confirmLogout()">
                         <i class="fas fa-sign-out-alt me-1"></i>Logout
                     </button>
                 </div>
@@ -1076,22 +1131,22 @@
 
             <ul class="nav nav-tabs nav-justified mb-3" role="tablist">
                 <li class="nav-item">
-                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#admMachines">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#admMachines" onclick="toggleSearchVisibility('machines')">
                         <i class="fas fa-cogs me-1"></i>Machines
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#admPrograms">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#admPrograms" onclick="toggleSearchVisibility('programs')">
                         <i class="fas fa-plus-circle me-1"></i>Create Program
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#admHistory">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#admHistory" onclick="toggleSearchVisibility('history')">
                         <i class="fas fa-history me-1"></i>History
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#admQueue">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#admQueue" onclick="toggleSearchVisibility('queue')">
                         <i class="fas fa-list me-1"></i>Queue
                     </button>
                 </li>
@@ -1103,7 +1158,7 @@
                 </div>
 
                 <div id="admPrograms" class="tab-pane fade">
-                    <div class="program-form">
+                    <div class="program-form compact-form">
                         <h5 class="mb-4">
                             <i class="fas fa-plus-circle me-2 text-primary"></i>Create New Program
                         </h5>
@@ -1265,10 +1320,12 @@
                     <i class="fas fa-tools me-2"></i>Operator Dashboard
                 </h2>
                 <div class="d-flex gap-2 align-items-center">
-                    <div class="search-box">
-                        <input type="text" class="form-control form-control-sm" id="operatorMachineSearch" placeholder="Search machines...">
+                    <div class="search-container">
+                        <div class="search-box">
+                            <input type="text" class="form-control form-control-sm" id="operatorMachineSearch" placeholder="Search machines...">
+                        </div>
                     </div>
-                    <button class="btn btn-outline-danger btn-sm" onclick="confirmLogout()">
+                    <button class="btn logout-btn" onclick="confirmLogout()">
                         <i class="fas fa-sign-out-alt me-1"></i>Logout
                     </button>
                 </div>
@@ -1276,17 +1333,17 @@
             
             <ul class="nav nav-tabs nav-justified mb-3" role="tablist">
                 <li class="nav-item">
-                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#opMachines">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#opMachines" onclick="toggleSearchVisibility('machines')">
                         <i class="fas fa-cogs me-1"></i>Machines
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#opQueue">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#opQueue" onclick="toggleSearchVisibility('queue')">
                         <i class="fas fa-list me-1"></i>Queue
                     </button>
                 </li>
                 <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#opHistory">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#opHistory" onclick="toggleSearchVisibility('history')">
                         <i class="fas fa-history me-1"></i>History
                     </button>
                 </li>
@@ -1960,7 +2017,7 @@ function renderMachinesGrid() {
                             </button>
                             
                             ${currentUser === 'admin' && currentProgram.status === 'pending' ? `
-                                <button class="btn btn-warning btn-sm" onclick="editProgram('${currentProgram.id}')">
+                                <button class="btn btn-warning btn-sm" onclick="requestEditProgram('${currentProgram.id}')">
                                     <i class="fas fa-edit"></i>
                                 </button>
                                 <button class="btn btn-danger btn-sm" onclick="requestDeleteProgram('${currentProgram.id}')">
@@ -2115,7 +2172,7 @@ function renderMachineQueueCard(machineNumber, currentProgram, queuePrograms) {
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <h6 class="mb-1">${currentProgram.designName}</h6>
+                                    <h6 class="mb-1"><span class="queue-number">1</span>${currentProgram.designName}</h6>
                                     <p class="mb-1 small">Rounds: ${currentProgram.rounds}</p>
                                     <p class="mb-0 small">Status: <span class="status-badge status-${currentProgram.status}">${currentProgram.status}</span></p>
                                     ${currentProgram.priority === 'urgent' ? '<span class="badge bg-danger mt-1">URGENT</span>' : ''}
@@ -2136,13 +2193,13 @@ function renderMachineQueueCard(machineNumber, currentProgram, queuePrograms) {
                     <div>
                         <h6 class="fw-semibold mb-3">Queued Programs (${queuePrograms.length})</h6>
                         <div class="row g-2">
-                            ${queuePrograms.map(program => `
+                            ${queuePrograms.map((program, index) => `
                                 <div class="col-12 col-md-6 col-lg-4">
                                     <div class="card ${program.priority === 'urgent' ? 'border-danger' : ''}">
                                         <div class="card-body">
                                             <div class="d-flex justify-content-between align-items-start">
                                                 <div>
-                                                    <h6 class="mb-1">${program.designName}</h6>
+                                                    <h6 class="mb-1"><span class="queue-number">${index + 2}</span>${program.designName}</h6>
                                                     <p class="mb-1 small">Rounds: ${program.rounds}</p>
                                                     <p class="mb-0 small">Status: <span class="status-badge status-${program.status}">${program.status}</span></p>
                                                     ${program.priority === 'urgent' ? '<span class="badge bg-danger mt-1">URGENT</span>' : ''}
@@ -2315,7 +2372,7 @@ function renderOperatorQueueView(searchTerm = '') {
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <h6 class="mb-1">${currentProgram.designName}</h6>
+                                        <h6 class="mb-1"><span class="queue-number">1</span>${currentProgram.designName}</h6>
                                         <p class="mb-1 small">Rounds: ${currentProgram.rounds}</p>
                                         <p class="mb-0 small">Status: <span class="status-badge status-${currentProgram.status}">${currentProgram.status}</span></p>
                                         ${currentProgram.priority === 'urgent' ? '<span class="badge bg-danger mt-1">URGENT</span>' : ''}
@@ -2336,13 +2393,13 @@ function renderOperatorQueueView(searchTerm = '') {
                         <div>
                             <h6 class="fw-semibold mb-3">Queued Programs (${queuePrograms.length})</h6>
                             <div class="row g-2">
-                                ${queuePrograms.map(program => `
+                                ${queuePrograms.map((program, index) => `
                                     <div class="col-12 col-md-6 col-lg-4">
                                         <div class="card ${program.priority === 'urgent' ? 'border-danger' : ''}">
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-start">
                                                     <div>
-                                                        <h6 class="mb-1">${program.designName}</h6>
+                                                        <h6 class="mb-1"><span class="queue-number">${index + 2}</span>${program.designName}</h6>
                                                         <p class="mb-1 small">Rounds: ${program.rounds}</p>
                                                         <p class="mb-0 small">Status: <span class="status-badge status-${program.status}">${program.status}</span></p>
                                                         ${program.priority === 'urgent' ? '<span class="badge bg-danger mt-1">URGENT</span>' : ''}
@@ -2675,6 +2732,15 @@ function requestCompleteProgram(machineNumber, programId) {
     modal.show();
 }
 
+function requestEditProgram(programId) {
+    currentAction = 'edit';
+    currentProgramId = programId;
+    document.getElementById('passwordModalText').textContent = 'Enter 4-digit password to edit program';
+    document.getElementById('passwordInput').value = '';
+    const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+    modal.show();
+}
+
 function requestDeleteProgram(programId) {
     const program = programs.find(p => p.id === programId);
     if (!program) {
@@ -2708,6 +2774,8 @@ async function verifyPassword() {
             await startProgram(currentMachineNumber, currentProgramId);
         } else if (currentAction === 'complete') {
             await completeProgram(currentMachineNumber, currentProgramId);
+        } else if (currentAction === 'edit') {
+            editProgram(currentProgramId);
         } else if (currentAction === 'delete') {
             await deleteProgram(currentProgramId);
         }
@@ -3407,6 +3475,38 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
+// --- SEARCH VISIBILITY TOGGLE ---
+function toggleSearchVisibility(tab) {
+    const adminDashboard = document.getElementById('adminDashboard');
+    const operatorDashboard = document.getElementById('operatorDashboard');
+    
+    if (adminDashboard && !adminDashboard.classList.contains('d-none')) {
+        const searchContainer = adminDashboard.querySelector('.search-container');
+        if (searchContainer) {
+            if (tab === 'machines') {
+                searchContainer.style.display = 'block';
+                adminDashboard.classList.add('machines-tab-active');
+            } else {
+                searchContainer.style.display = 'none';
+                adminDashboard.classList.remove('machines-tab-active');
+            }
+        }
+    }
+    
+    if (operatorDashboard && !operatorDashboard.classList.contains('d-none')) {
+        const searchContainer = operatorDashboard.querySelector('.search-container');
+        if (searchContainer) {
+            if (tab === 'machines') {
+                searchContainer.style.display = 'block';
+                operatorDashboard.classList.add('machines-tab-active');
+            } else {
+                searchContainer.style.display = 'none';
+                operatorDashboard.classList.remove('machines-tab-active');
+            }
+        }
+    }
+}
+
 // Make functions available globally
 window.loginAsAdmin = loginAsAdmin;
 window.loginAsOperator = loginAsOperator;
@@ -3434,6 +3534,7 @@ window.renderOperatorQueueView = renderOperatorQueueView;
 window.toggleHistoryView = toggleHistoryView;
 window.installPwa = installPwa;
 window.dismissPwaPrompt = dismissPwaPrompt;
+window.requestEditProgram = requestEditProgram;
 </script>
 </body>
 </html>
