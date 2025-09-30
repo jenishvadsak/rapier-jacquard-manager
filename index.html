@@ -1,1065 +1,1141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Rapier Jacquard Manager</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
-<style>
-:root {
-    --primary: #2c3e50;
-    --secondary: #3498db;
-    --danger: #e74c3c;
-    --success: #27ae60;
-    --warning: #f39c12;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f8f9fa;
-    padding-bottom: 20px;
-}
-
-.app-header {
-    box-shadow: 0 2px 10px rgba(0,0,0,.08);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
-.login-screen {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    min-height: 100vh;
-    color: #fff;
-}
-
-.login-card, .program-form, .dashboard-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 6px 20px rgba(0,0,0,.08);
-    border: 1px solid #e9ecef;
-}
-
-.machine-card {
-    border-radius: 12px;
-    margin-bottom: 16px;
-    border: none;
-    box-shadow: 0 4px 6px rgba(0,0,0,.1);
-    transition: all 0.3s ease;
-}
-
-.machine-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(0,0,0,.15);
-}
-
-.feeder-badge {
-    font-size: 0.7rem;
-    margin: 1px;
-    display: inline-block;
-    padding: 2px 6px;
-}
-
-.nav-tabs .nav-link.active {
-    font-weight: 600;
-    border-bottom: 3px solid var(--secondary);
-    color: var(--secondary);
-}
-
-.thumbnail {
-    max-width: 120px;
-    max-height: 80px;
-    cursor: pointer;
-    border-radius: 8px;
-    object-fit: cover;
-    border: 2px solid #e9ecef;
-}
-
-.small-muted {
-    color: #6c757d;
-    font-size: 0.85rem;
-}
-
-.progress-container {
-    margin-top: 5px;
-    display: none;
-}
-
-.status-badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-}
-
-.status-pending { background: #e3f2fd; color: #1976d2; }
-.status-running { background: #fff3e0; color: #f57c00; }
-.status-completed { background: #e8f5e8; color: #2e7d32; }
-.status-urgent { background: #ffebee; color: #c62828; }
-
-.program-queue-dropdown {
-    max-height: 200px;
-    overflow-y: auto;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    z-index: 1050;
-}
-
-.loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    display: none;
-    z-index: 9999;
-}
-
-.loading-spinner {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.feeder-item {
-    margin-bottom: 12px;
-    padding: 12px;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    background: #f8f9fa;
-}
-
-.add-feeder-btn {
-    margin-top: 10px;
-}
-
-.image-modal-img {
-    max-width: 100%;
-    max-height: 80vh;
-    border-radius: 8px;
-}
-
-.queue-badge {
-    font-size: 0.7rem;
-}
-
-/* Mobile-first responsive design improvements */
-@media (max-width: 768px) {
-    .container {
-        padding: 0 10px;
-    }
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#2c3e50">
+    <meta name="description" content="Rapier Jacquard Manager - Industrial Program Management">
+    <title>Rapier Jacquard Manager</title>
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+    <style>
+    :root {
+        --primary: #2c3e50;
+        --secondary: #3498db;
+        --danger: #e74c3c;
+        --success: #27ae60;
+        --warning: #f39c12;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f8f9fa;
+        padding-bottom: 20px;
+    }
+
+    .app-header {
+        box-shadow: 0 2px 10px rgba(0,0,0,.08);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    .login-screen {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        min-height: 100vh;
+        color: #fff;
+    }
+
+    .login-card, .program-form, .dashboard-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 6px 20px rgba(0,0,0,.08);
+        border: 1px solid #e9ecef;
+    }
+
     .machine-card {
-        margin-bottom: 12px;
+        border-radius: 12px;
+        margin-bottom: 16px;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,.1);
+        transition: all 0.3s ease;
     }
-    
-    .btn-group .btn {
-        margin-bottom: 6px;
-        font-size: 0.8rem;
-        padding: 6px 12px;
+
+    .machine-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0,0,0,.15);
     }
-    
-    .status-badge {
-        padding: 4px 8px;
+
+    .feeder-badge {
         font-size: 0.7rem;
+        margin: 1px;
+        display: inline-block;
+        padding: 2px 6px;
     }
-    
-    .thumbnail {
-        max-width: 80px;
-        max-height: 60px;
-    }
-    
-    .program-form {
-        padding: 15px;
-    }
-    
-    .feeder-item {
-        padding: 8px;
-    }
-    
-    .nav-tabs .nav-link {
-        font-size: 0.9rem;
-        padding: 8px 12px;
-    }
-    
-    .date-filters {
-        flex-direction: column;
-    }
-    
-    .date-filters .form-control {
-        margin-bottom: 8px;
-    }
-    
-    .feeder-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 4px !important;
-    }
-    
-    /* Header optimizations */
-    .app-header .navbar-brand {
-        font-size: 1rem;
-    }
-    
-    .app-header .text-light small {
-        font-size: 0.75rem;
-    }
-    
-    /* Dashboard controls */
-    .d-flex.justify-content-between.align-items-center.mb-3 {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    
-    .d-flex.justify-content-between.align-items-center.mb-3 .search-box {
-        width: 100%;
-        max-width: none;
-    }
-    
-    /* Tab navigation */
-    .nav-tabs.nav-justified {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        white-space: nowrap;
-    }
-    
-    .nav-tabs.nav-justified .nav-item {
-        flex: 0 0 auto;
-        min-width: 120px;
-    }
-    
-    .nav-tabs.nav-justified .nav-link {
-        font-size: 0.8rem;
-        padding: 8px 10px;
-        text-align: center;
-    }
-    
-    /* Machine grid layout */
-    #machinesGrid, #operatorMachinesGrid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-    
-    .machine-card {
-        margin-bottom: 0;
-    }
-    
-    .machine-card .card-body {
-        padding: 10px;
-    }
-    
-    .machine-card .card-title {
-        font-size: 0.9rem;
-        margin-bottom: 5px;
-    }
-    
-    .machine-card .program-info p {
-        font-size: 0.75rem;
-        margin-bottom: 3px;
-    }
-    
-    /* Feeder grid optimization */
-    .feeder-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 4px !important;
-    }
-    
-    .feeder-grid-item {
-        font-size: 0.7rem;
-        padding: 2px;
-    }
-    
-    .feeder-grid-item .feeder-number {
-        font-size: 0.65rem;
-    }
-    
-    .feeder-grid-item .feeder-value {
-        font-size: 0.6rem;
-        word-break: break-word;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-height: 1.2rem;
-        line-height: 1.2;
-    }
-    
-    /* Action buttons optimization */
-    .action-buttons {
-        flex-direction: column;
-        gap: 4px;
-    }
-    
-    .action-buttons .btn {
-        min-width: auto;
-        font-size: 0.75rem;
-        padding: 4px 8px;
-    }
-    
-    /* History Table Optimizations */
-    .dashboard-card {
-        padding: 12px;
-    }
-    
-    .dashboard-card h5 {
-        font-size: 1rem;
-        margin-bottom: 12px;
-    }
-    
-    /* History filter controls */
-    .d-flex.flex-column.flex-md-row.align-items-start.align-items-md-center.justify-content-between.mb-3 {
-        flex-direction: column;
-        gap: 8px;
-    }
-    
-    .d-flex.flex-column.flex-md-row.align-items-start.align-items-md-center.justify-content-between.mb-3 h5 {
-        margin-bottom: 0;
-    }
-    
-    .d-flex.gap-2.align-items-center.w-100.w-md-auto {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .d-flex.gap-2.align-items-center.w-100.w-md-auto label {
-        font-size: 0.8rem;
-        margin-bottom: 0;
-        white-space: nowrap;
-    }
-    
-    .machine-select-table {
-        min-width: auto;
-        flex: 1;
-        margin-left: 8px;
-    }
-    
-    /* Date filters for export */
-    .d-flex.flex-column.flex-md-row.gap-2.mb-3.date-filters {
-        gap: 6px;
-    }
-    
-    .d-flex.flex-column.flex-md-row.gap-2.mb-3.date-filters .form-control {
-        font-size: 0.8rem;
-        padding: 6px 8px;
-    }
-    
-    .d-flex.flex-column.flex-md-row.gap-2.mb-3.date-filters .btn {
-        font-size: 0.8rem;
-        padding: 6px 10px;
-    }
-    
-    /* Table optimizations */
-    .table-responsive {
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-    }
-    
-    .table-responsive table {
-        font-size: 0.7rem;
-        margin-bottom: 0;
-    }
-    
-    .table-responsive th,
-    .table-responsive td {
-        padding: 4px 6px;
-        vertical-align: middle;
-    }
-    
-    .table-responsive thead th {
-        font-size: 0.65rem;
+
+    .nav-tabs .nav-link.active {
         font-weight: 600;
-        padding: 6px 4px;
-        background-color: #f8f9fa;
+        border-bottom: 3px solid var(--secondary);
+        color: var(--secondary);
     }
-    
-    /* Hide less important columns on mobile */
-    .table-responsive th:nth-child(5), /* Created */
-    .table-responsive td:nth-child(5),
-    .table-responsive th:nth-child(6), /* Started */
-    .table-responsive td:nth-child(6),
-    .table-responsive th:nth-child(7), /* Completed */
-    .table-responsive td:nth-child(7) {
+
+    .thumbnail {
+        max-width: 120px;
+        max-height: 80px;
+        cursor: pointer;
+        border-radius: 8px;
+        object-fit: cover;
+        border: 2px solid #e9ecef;
+    }
+
+    .small-muted {
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+
+    .progress-container {
+        margin-top: 5px;
         display: none;
     }
-    
-    /* Keep only essential columns: Machine, Design, Rounds, Status */
-    .table-responsive th:nth-child(1),
-    .table-responsive td:nth-child(1),
-    .table-responsive th:nth-child(2),
-    .table-responsive td:nth-child(2),
-    .table-responsive th:nth-child(3),
-    .table-responsive td:nth-child(3),
-    .table-responsive th:nth-child(4),
-    .table-responsive td:nth-child(4) {
-        display: table-cell;
-    }
-    
-    /* Compact status badges */
+
     .status-badge {
-        font-size: 0.6rem;
-        padding: 2px 5px;
-        border-radius: 10px;
-        white-space: nowrap;
-    }
-    
-    /* Reduce table row height */
-    .table-responsive tbody tr {
-        height: 35px;
-    }
-    
-    /* Pagination optimization */
-    .pagination {
-        margin-top: 12px;
-    }
-    
-    .pagination .page-link {
+        padding: 6px 12px;
+        border-radius: 20px;
         font-size: 0.75rem;
-        padding: 4px 8px;
-        margin: 0 1px;
+        font-weight: 600;
     }
-    
-    /* Export button optimization */
-    .btn-primary .fas {
-        font-size: 0.7rem;
-        margin-right: 4px;
+
+    .status-pending { background: #e3f2fd; color: #1976d2; }
+    .status-running { background: #fff3e0; color: #f57c00; }
+    .status-completed { background: #e8f5e8; color: #2e7d32; }
+    .status-urgent { background: #ffebee; color: #c62828; }
+
+    .program-queue-dropdown {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        z-index: 1050;
     }
-    
-    /* Queue view optimizations */
-    .queue-header {
-        padding: 15px;
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: none;
+        z-index: 9999;
     }
-    
-    .queue-header h3 {
-        font-size: 1.3rem;
+
+    .loading-spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
     }
-    
-    .queue-card .card-header h5 {
-        font-size: 1rem;
-    }
-    
-    .queue-card .card-body {
+
+    .feeder-item {
+        margin-bottom: 12px;
         padding: 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        background: #f8f9fa;
     }
-    
-    /* Modal optimizations */
-    .modal-dialog {
-        margin: 10px;
+
+    .add-feeder-btn {
+        margin-top: 10px;
     }
-    
-    .modal-content {
+
+    .image-modal-img {
+        max-width: 100%;
+        max-height: 80vh;
         border-radius: 8px;
     }
-    
-    .modal-body {
-        padding: 15px;
+
+    .queue-badge {
+        font-size: 0.7rem;
     }
-    
-    /* Login screen optimizations */
-    .login-card {
-        margin: 15px;
+
+    /* PWA Install Prompt */
+    .pwa-install-prompt {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: white;
+        border-radius: 12px;
         padding: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        z-index: 10000;
+        max-width: 300px;
+        border: 1px solid #e9ecef;
+        display: none;
     }
-    
-    /* Search box full width */
-    .search-box {
-        max-width: none;
+
+    .pwa-install-prompt.show {
+        display: block;
+        animation: slideInUp 0.3s ease;
+    }
+
+    @keyframes slideInUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .pwa-install-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .pwa-install-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--primary);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        color: white;
+    }
+
+    .pwa-install-buttons {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .pwa-install-buttons .btn {
+        flex: 1;
+    }
+
+    /* Mobile-first responsive design improvements */
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 10px;
+        }
+        
+        .machine-card {
+            margin-bottom: 12px;
+        }
+        
+        .btn-group .btn {
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            font-size: 0.7rem;
+        }
+        
+        .thumbnail {
+            max-width: 80px;
+            max-height: 60px;
+        }
+        
+        .program-form {
+            padding: 15px;
+        }
+        
+        .feeder-item {
+            padding: 8px;
+        }
+        
+        .nav-tabs .nav-link {
+            font-size: 0.9rem;
+            padding: 8px 12px;
+        }
+        
+        .date-filters {
+            flex-direction: column;
+        }
+        
+        .date-filters .form-control {
+            margin-bottom: 8px;
+        }
+        
+        .feeder-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 4px !important;
+        }
+        
+        /* Header optimizations */
+        .app-header .navbar-brand {
+            font-size: 1rem;
+        }
+        
+        .app-header .text-light small {
+            font-size: 0.75rem;
+        }
+        
+        /* Dashboard controls */
+        .d-flex.justify-content-between.align-items-center.mb-3 {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .d-flex.justify-content-between.align-items-center.mb-3 .search-box {
+            width: 100%;
+            max-width: none;
+        }
+        
+        /* Tab navigation */
+        .nav-tabs.nav-justified {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            white-space: nowrap;
+        }
+        
+        .nav-tabs.nav-justified .nav-item {
+            flex: 0 0 auto;
+            min-width: 120px;
+        }
+        
+        .nav-tabs.nav-justified .nav-link {
+            font-size: 0.8rem;
+            padding: 8px 10px;
+            text-align: center;
+        }
+        
+        /* Machine grid layout */
+        #machinesGrid, #operatorMachinesGrid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        .machine-card {
+            margin-bottom: 0;
+        }
+        
+        .machine-card .card-body {
+            padding: 10px;
+        }
+        
+        .machine-card .card-title {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .machine-card .program-info p {
+            font-size: 0.75rem;
+            margin-bottom: 3px;
+        }
+        
+        /* Feeder grid optimization */
+        .feeder-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 4px !important;
+        }
+        
+        .feeder-grid-item {
+            font-size: 0.7rem;
+            padding: 2px;
+        }
+        
+        .feeder-grid-item .feeder-number {
+            font-size: 0.65rem;
+        }
+        
+        .feeder-grid-item .feeder-value {
+            font-size: 0.6rem;
+            word-break: break-word;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-height: 1.2rem;
+            line-height: 1.2;
+        }
+        
+        /* Action buttons optimization */
+        .action-buttons {
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .action-buttons .btn {
+            min-width: auto;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+        }
+        
+        /* History Table Optimizations */
+        .dashboard-card {
+            padding: 12px;
+        }
+        
+        .dashboard-card h5 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+        
+        /* History filter controls */
+        .d-flex.flex-column.flex-md-row.align-items-start.align-items-md-center.justify-content-between.mb-3 {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .d-flex.flex-column.flex-md-row.align-items-start.align-items-md-center.justify-content-between.mb-3 h5 {
+            margin-bottom: 0;
+        }
+        
+        .d-flex.gap-2.align-items-center.w-100.w-md-auto {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .d-flex.gap-2.align-items-center.w-100.w-md-auto label {
+            font-size: 0.8rem;
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+        
+        .machine-select-table {
+            min-width: auto;
+            flex: 1;
+            margin-left: 8px;
+        }
+        
+        /* Date filters for export */
+        .d-flex.flex-column.flex-md-row.gap-2.mb-3.date-filters {
+            gap: 6px;
+        }
+        
+        .d-flex.flex-column.flex-md-row.gap-2.mb-3.date-filters .form-control {
+            font-size: 0.8rem;
+            padding: 6px 8px;
+        }
+        
+        .d-flex.flex-column.flex-md-row.gap-2.mb-3.date-filters .btn {
+            font-size: 0.8rem;
+            padding: 6px 10px;
+        }
+        
+        /* Table optimizations */
+        .table-responsive {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+        
+        .table-responsive table {
+            font-size: 0.7rem;
+            margin-bottom: 0;
+        }
+        
+        .table-responsive th,
+        .table-responsive td {
+            padding: 4px 6px;
+            vertical-align: middle;
+        }
+        
+        .table-responsive thead th {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 6px 4px;
+            background-color: #f8f9fa;
+        }
+        
+        /* Hide less important columns on mobile */
+        .table-responsive th:nth-child(5), /* Created */
+        .table-responsive td:nth-child(5),
+        .table-responsive th:nth-child(6), /* Started */
+        .table-responsive td:nth-child(6),
+        .table-responsive th:nth-child(7), /* Completed */
+        .table-responsive td:nth-child(7) {
+            display: none;
+        }
+        
+        /* Keep only essential columns: Machine, Design, Rounds, Status */
+        .table-responsive th:nth-child(1),
+        .table-responsive td:nth-child(1),
+        .table-responsive th:nth-child(2),
+        .table-responsive td:nth-child(2),
+        .table-responsive th:nth-child(3),
+        .table-responsive td:nth-child(3),
+        .table-responsive th:nth-child(4),
+        .table-responsive td:nth-child(4) {
+            display: table-cell;
+        }
+        
+        /* Compact status badges */
+        .status-badge {
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+        
+        /* Reduce table row height */
+        .table-responsive tbody tr {
+            height: 35px;
+        }
+        
+        /* Pagination optimization */
+        .pagination {
+            margin-top: 12px;
+        }
+        
+        .pagination .page-link {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            margin: 0 1px;
+        }
+        
+        /* Export button optimization */
+        .btn-primary .fas {
+            font-size: 0.7rem;
+            margin-right: 4px;
+        }
+        
+        /* Queue view optimizations */
+        .queue-header {
+            padding: 15px;
+        }
+        
+        .queue-header h3 {
+            font-size: 1.3rem;
+        }
+        
+        .queue-card .card-header h5 {
+            font-size: 1rem;
+        }
+        
+        .queue-card .card-body {
+            padding: 12px;
+        }
+        
+        /* Modal optimizations */
+        .modal-dialog {
+            margin: 10px;
+        }
+        
+        .modal-content {
+            border-radius: 8px;
+        }
+        
+        .modal-body {
+            padding: 15px;
+        }
+        
+        /* Login screen optimizations */
+        .login-card {
+            margin: 15px;
+            padding: 15px;
+        }
+        
+        /* Search box full width */
+        .search-box {
+            max-width: none;
+            width: 100%;
+        }
+        
+        /* Button group optimization */
+        .btn-group .btn {
+            margin-bottom: 4px;
+            font-size: 0.75rem;
+            padding: 5px 10px;
+        }
+        
+        /* Program details modal optimization */
+        .program-details .row {
+            margin-bottom: 8px;
+        }
+        
+        /* PWA Install Prompt mobile adjustments */
+        .pwa-install-prompt {
+            bottom: 10px;
+            right: 10px;
+            left: 10px;
+            max-width: none;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .login-card {
+            margin: 10px;
+            padding: 15px;
+        }
+        
+        .machine-card .card-body {
+            padding: 12px;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+        }
+        
+        h5 {
+            font-size: 1.1rem;
+        }
+        
+        .feeder-grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        /* Further optimization for very small screens */
+        #machinesGrid, #operatorMachinesGrid {
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+        
+        .nav-tabs.nav-justified .nav-item {
+            min-width: 100px;
+        }
+        
+        .nav-tabs.nav-justified .nav-link {
+            font-size: 0.75rem;
+            padding: 6px 8px;
+        }
+        
+        .feeder-grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .machine-card .card-body {
+            padding: 8px;
+        }
+        
+        .action-buttons .btn {
+            font-size: 0.7rem;
+            padding: 3px 6px;
+        }
+        
+        .status-badge {
+            font-size: 0.6rem;
+            padding: 2px 4px;
+        }
+        
+        .thumbnail {
+            max-width: 50px;
+            max-height: 35px;
+        }
+        
+        .queue-card .card-body {
+            padding: 8px;
+        }
+        
+        .program-form {
+            padding: 10px;
+        }
+        
+        .table-responsive table {
+            font-size: 0.65rem;
+        }
+        
+        .table-responsive th,
+        .table-responsive td {
+            padding: 2px 4px;
+        }
+        
+        /* Even more compact on very small screens */
+        .table-responsive th:nth-child(3), /* Rounds */
+        .table-responsive td:nth-child(3) {
+            display: none;
+        }
+        
+        /* Keep only Machine, Design, Status */
+        .status-badge {
+            font-size: 0.55rem;
+            padding: 1px 4px;
+        }
+        
+        /* Machine filter optimization */
+        .d-flex.gap-2.align-items-center.w-100.w-md-auto {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+        
+        .d-flex.gap-2.align-items-center.w-100.w-md-auto label {
+            font-size: 0.75rem;
+        }
+        
+        .machine-select-table {
+            width: 100%;
+            margin-left: 0;
+        }
+        
+        /* Date filters */
+        .d-flex.flex-column.flex-md-row.gap-2.mb-3.date-filters .form-control {
+            font-size: 0.75rem;
+        }
+        
+        .d-flex.flex-column.flex-md-row.gap-2.mb-3.date-filters .btn {
+            font-size: 0.75rem;
+        }
+    }
+
+    /* Mobile table optimizations */
+    @media (max-width: 768px) {
+        .table-responsive table {
+            font-size: 0.8rem;
+        }
+        
+        .table-responsive th,
+        .table-responsive td {
+            padding: 4px 6px;
+        }
+        
+        /* Hide less important columns on mobile */
+        .table-responsive th:nth-child(5),
+        .table-responsive td:nth-child(5),
+        .table-responsive th:nth-child(6),
+        .table-responsive td:nth-child(6) {
+            display: none;
+        }
+    }
+
+    /* Custom dropdown styling */
+    .dropdown-menu {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .dropdown-item {
+        padding: 8px 12px;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .dropdown-item:last-child {
+        border-bottom: none;
+    }
+
+    .dropdown-item:hover {
+        background: #f8f9fa;
+    }
+
+    /* Form enhancements */
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        padding: 8px 12px;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--secondary);
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    /* Button enhancements */
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    /* Card header enhancements */
+    .card-title {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    /* Alert enhancements */
+    .alert {
+        border-radius: 8px;
+        border: none;
+    }
+
+    /* Badge enhancements */
+    .badge {
+        font-weight: 500;
+    }
+
+    /* Table responsive */
+    .table-responsive {
+        border-radius: 8px;
+    }
+
+    /* Pagination */
+    .pagination {
+        margin-bottom: 0;
+    }
+
+    .page-link {
+        border-radius: 6px;
+        margin: 0 2px;
+        border: 1px solid #dee2e6;
+    }
+
+    /* Modal enhancements */
+    .modal-content {
+        border-radius: 12px;
+        border: none;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #e9ecef;
+        padding: 15px 20px;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #e9ecef;
+        padding: 15px 20px;
+    }
+
+    /* Feeder input styling */
+    .feeder-input-group {
+        background: white;
+        border-radius: 8px;
+        padding: 8px;
+        border: 1px solid #dee2e6;
+    }
+
+    .feeder-input {
+        border: none;
+        background: transparent;
         width: 100%;
+        padding: 4px 8px;
     }
-    
-    /* Button group optimization */
-    .btn-group .btn {
+
+    .feeder-input:focus {
+        outline: none;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    /* Action buttons */
+    .action-buttons {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+
+    .action-buttons .btn {
+        flex: 1;
+        min-width: 80px;
+    }
+
+    /* Queue item styling */
+    .queue-item {
+        padding: 8px;
+        border-radius: 6px;
         margin-bottom: 4px;
-        font-size: 0.75rem;
-        padding: 5px 10px;
+        background: #f8f9fa;
+        border-left: 3px solid var(--secondary);
     }
-    
-    /* Program details modal optimization */
-    .program-details .row {
+
+    .queue-item.urgent {
+        border-left-color: var(--danger);
+        background: #fff5f5;
+    }
+
+    /* Search box */
+    .search-box {
+        max-width: 300px;
+    }
+
+    /* Date filter layout */
+    .date-filters {
+        gap: 8px;
+    }
+
+    .date-filters .form-control {
+        min-width: 150px;
+    }
+
+    /* Machine selection in table */
+    .machine-select-table {
+        min-width: 120px;
+    }
+
+    /* Login form enhancements */
+    .login-form .form-control {
+        padding: 12px 15px;
+    }
+
+    /* Prevent delete for running programs */
+    .btn-danger:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .auth-error {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+
+    /* Feeder grid layout */
+    .feeder-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .feeder-grid-item {
+        text-align: center;
+        padding: 4px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        font-size: 0.9rem; /* Increased font size */
+    }
+
+    .feeder-grid-item .feeder-number {
+        font-weight: bold;
+        color: var(--primary);
+        font-size: 0.85rem; /* Increased font size */
+    }
+
+    .feeder-grid-item .feeder-value {
+        color: var(--secondary);
+        word-break: break-word;
+        font-size: 0.8rem; /* Increased font size */
+    }
+
+    /* Dropdown container */
+    .dropdown-container {
+        position: relative;
+    }
+
+    .dropdown-container .dropdown-menu {
+        width: 100%;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    /* Queue page styling */
+    .queue-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+
+    .queue-card {
+        border-radius: 12px;
+        margin-bottom: 16px;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,.1);
+        transition: all 0.3s ease;
+    }
+
+    .queue-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0,0,0,.15);
+    }
+
+    .queue-card .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        font-weight: 600;
+    }
+
+    .empty-queue {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+
+    .empty-queue i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #dee2e6;
+    }
+
+    /* Operator queue styling */
+    .operator-queue-card {
+        border-left: 4px solid var(--secondary);
+    }
+
+    .operator-queue-card.urgent {
+        border-left-color: var(--danger);
+    }
+
+    /* Add to your CSS */
+    .table-container {
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .table-fixed-header {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 10;
+    }
+
+    .load-more-row {
+        text-align: center;
+        padding: 15px;
+    }
+
+    /* Optimize table rendering */
+    .table-hover tbody tr {
+        transition: all 0.1s ease;
+    }
+
+    /* Reduce reflows for large tables */
+    .table-responsive {
+        will-change: transform;
+    }
+
+    /* Touch-friendly improvements */
+    .btn, .form-control, .form-select, .nav-link {
+        touch-action: manipulation;
+    }
+
+    /* Prevent zoom on form inputs */
+    @media (max-width: 768px) {
+        input, select, textarea {
+            font-size: 16px; /* Prevents zoom on iOS */
+        }
+    }
+
+    /* Improved scrolling for mobile */
+    .mobile-scroll-container {
+        -webkit-overflow-scrolling: touch;
+        overflow-x: auto;
+    }
+
+    /* Optimize dropdowns for mobile */
+    .dropdown-menu {
+        max-height: 200px;
+        overflow-y: auto;
+    }
+
+    /* Ensure proper spacing for stacked elements */
+    .mobile-stack > * {
         margin-bottom: 8px;
     }
-}
 
-@media (max-width: 576px) {
-    .login-card {
-        margin: 10px;
-        padding: 15px;
+    .mobile-stack > *:last-child {
+        margin-bottom: 0;
     }
-    
-    .machine-card .card-body {
-        padding: 12px;
+
+    /* Ultra-compact history view for very small screens */
+    @media (max-width: 400px) {
+        .table-responsive table {
+            font-size: 0.6rem;
+        }
+        
+        .table-responsive th,
+        .table-responsive td {
+            padding: 2px 3px;
+        }
+        
+        .status-badge {
+            font-size: 0.5rem;
+            padding: 1px 3px;
+        }
+        
+        /* Show only Machine and Status on ultra-small screens */
+        .table-responsive th:nth-child(2), /* Design */
+        .table-responsive td:nth-child(2) {
+            display: none;
+        }
+        
+        .table-responsive th:nth-child(1),
+        .table-responsive td:nth-child(1),
+        .table-responsive th:nth-child(4),
+        .table-responsive td:nth-child(4) {
+            display: table-cell;
+        }
     }
-    
-    h2 {
-        font-size: 1.5rem;
+
+    /* Card-based history view for mobile */
+    .history-cards-view {
+        display: none;
     }
-    
-    h5 {
-        font-size: 1.1rem;
-    }
-    
-    .feeder-grid {
-        grid-template-columns: 1fr !important;
-    }
-    
-    /* Further optimization for very small screens */
-    #machinesGrid, #operatorMachinesGrid {
-        grid-template-columns: 1fr;
-        gap: 6px;
-    }
-    
-    .nav-tabs.nav-justified .nav-item {
-        min-width: 100px;
-    }
-    
-    .nav-tabs.nav-justified .nav-link {
+
+    .history-card {
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 8px;
+        margin-bottom: 6px;
         font-size: 0.75rem;
-        padding: 6px 8px;
     }
-    
-    .feeder-grid {
-        grid-template-columns: 1fr !important;
+
+    .history-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
     }
-    
-    .machine-card .card-body {
-        padding: 8px;
+
+    .history-card-machine {
+        font-weight: 600;
+        color: var(--primary);
     }
-    
-    .action-buttons .btn {
-        font-size: 0.7rem;
-        padding: 3px 6px;
-    }
-    
-    .status-badge {
-        font-size: 0.6rem;
-        padding: 2px 4px;
-    }
-    
-    .thumbnail {
-        max-width: 50px;
-        max-height: 35px;
-    }
-    
-    .queue-card .card-body {
-        padding: 8px;
-    }
-    
-    .program-form {
-        padding: 10px;
-    }
-    
-    .table-responsive table {
+
+    .history-card-status {
         font-size: 0.65rem;
+        padding: 2px 6px;
+        border-radius: 8px;
     }
-    
-    .table-responsive th,
-    .table-responsive td {
-        padding: 2px 4px;
+
+    .history-card-design {
+        font-weight: 500;
+        margin-bottom: 2px;
     }
-    
-    /* Even more compact on very small screens */
-    .table-responsive th:nth-child(3), /* Rounds */
-    .table-responsive td:nth-child(3) {
+
+    .history-card-details {
+        display: flex;
+        justify-content: space-between;
+        color: #6c757d;
+        font-size: 0.7rem;
+    }
+
+    /* Ensure proper display of history cards when enabled */
+    .show-cards-view .history-cards-view {
+        display: block;
+    }
+
+    .show-cards-view .history-table-view {
         display: none;
     }
-    
-    /* Keep only Machine, Design, Status */
-    .status-badge {
-        font-size: 0.55rem;
-        padding: 1px 4px;
-    }
-    
-    /* Machine filter optimization */
-    .d-flex.gap-2.align-items-center.w-100.w-md-auto {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
-    }
-    
-    .d-flex.gap-2.align-items-center.w-100.w-md-auto label {
-        font-size: 0.75rem;
-    }
-    
-    .machine-select-table {
-        width: 100%;
-        margin-left: 0;
-    }
-    
-    /* Date filters */
-    .d-flex.flex-column.flex-md-row.gap-2.mb-3.date-filters .form-control {
-        font-size: 0.75rem;
-    }
-    
-    .d-flex.flex-column.flex-md-row.gap-2.mb-3.date-filters .btn {
-        font-size: 0.75rem;
-    }
-}
 
-/* Mobile table optimizations */
-@media (max-width: 768px) {
-    .table-responsive table {
+    /* Toggle button for view switching */
+    .view-toggle-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
         font-size: 0.8rem;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
     }
-    
-    .table-responsive th,
-    .table-responsive td {
-        padding: 4px 6px;
+
+    .view-toggle-btn:hover {
+        background: #f8f9fa;
     }
-    
-    /* Hide less important columns on mobile */
-    .table-responsive th:nth-child(5),
-    .table-responsive td:nth-child(5),
-    .table-responsive th:nth-child(6),
-    .table-responsive td:nth-child(6) {
-        display: none;
+
+    /* Loading state for history */
+    .history-loading {
+        text-align: center;
+        padding: 20px;
+        color: #6c757d;
     }
-}
 
-/* Custom dropdown styling */
-.dropdown-menu {
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.dropdown-item {
-    padding: 8px 12px;
-    border-bottom: 1px solid #f8f9fa;
-}
-
-.dropdown-item:last-child {
-    border-bottom: none;
-}
-
-.dropdown-item:hover {
-    background: #f8f9fa;
-}
-
-/* Form enhancements */
-.form-control, .form-select {
-    border-radius: 8px;
-    border: 1px solid #dee2e6;
-    padding: 8px 12px;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: var(--secondary);
-    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-}
-
-/* Button enhancements */
-.btn {
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.btn-sm {
-    padding: 6px 12px;
-    font-size: 0.85rem;
-}
-
-/* Card header enhancements */
-.card-title {
-    color: var(--primary);
-    font-weight: 600;
-}
-
-/* Alert enhancements */
-.alert {
-    border-radius: 8px;
-    border: none;
-}
-
-/* Badge enhancements */
-.badge {
-    font-weight: 500;
-}
-
-/* Table responsive */
-.table-responsive {
-    border-radius: 8px;
-}
-
-/* Pagination */
-.pagination {
-    margin-bottom: 0;
-}
-
-.page-link {
-    border-radius: 6px;
-    margin: 0 2px;
-    border: 1px solid #dee2e6;
-}
-
-/* Modal enhancements */
-.modal-content {
-    border-radius: 12px;
-    border: none;
-}
-
-.modal-header {
-    border-bottom: 1px solid #e9ecef;
-    padding: 15px 20px;
-}
-
-.modal-footer {
-    border-top: 1px solid #e9ecef;
-    padding: 15px 20px;
-}
-
-/* Feeder input styling */
-.feeder-input-group {
-    background: white;
-    border-radius: 8px;
-    padding: 8px;
-    border: 1px solid #dee2e6;
-}
-
-.feeder-input {
-    border: none;
-    background: transparent;
-    width: 100%;
-    padding: 4px 8px;
-}
-
-.feeder-input:focus {
-    outline: none;
-    background: #f8f9fa;
-    border-radius: 4px;
-}
-
-/* Action buttons */
-.action-buttons {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-}
-
-.action-buttons .btn {
-    flex: 1;
-    min-width: 80px;
-}
-
-/* Queue item styling */
-.queue-item {
-    padding: 8px;
-    border-radius: 6px;
-    margin-bottom: 4px;
-    background: #f8f9fa;
-    border-left: 3px solid var(--secondary);
-}
-
-.queue-item.urgent {
-    border-left-color: var(--danger);
-    background: #fff5f5;
-}
-
-/* Search box */
-.search-box {
-    max-width: 300px;
-}
-
-/* Date filter layout */
-.date-filters {
-    gap: 8px;
-}
-
-.date-filters .form-control {
-    min-width: 150px;
-}
-
-/* Machine selection in table */
-.machine-select-table {
-    min-width: 120px;
-}
-
-/* Login form enhancements */
-.login-form .form-control {
-    padding: 12px 15px;
-}
-
-/* Prevent delete for running programs */
-.btn-danger:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.auth-error {
-    color: #dc3545;
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-    display: none;
-}
-
-/* Feeder grid layout */
-.feeder-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    margin-top: 8px;
-}
-
-.feeder-grid-item {
-    text-align: center;
-    padding: 4px;
-    background: #f8f9fa;
-    border-radius: 4px;
-    font-size: 0.9rem; /* Increased font size */
-}
-
-.feeder-grid-item .feeder-number {
-    font-weight: bold;
-    color: var(--primary);
-    font-size: 0.85rem; /* Increased font size */
-}
-
-.feeder-grid-item .feeder-value {
-    color: var(--secondary);
-    word-break: break-word;
-    font-size: 0.8rem; /* Increased font size */
-}
-
-/* Dropdown container */
-.dropdown-container {
-    position: relative;
-}
-
-.dropdown-container .dropdown-menu {
-    width: 100%;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-/* Queue page styling */
-.queue-header {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-}
-
-.queue-card {
-    border-radius: 12px;
-    margin-bottom: 16px;
-    border: none;
-    box-shadow: 0 4px 6px rgba(0,0,0,.1);
-    transition: all 0.3s ease;
-}
-
-.queue-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 15px rgba(0,0,0,.15);
-}
-
-.queue-card .card-header {
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
-    font-weight: 600;
-}
-
-.empty-queue {
-    text-align: center;
-    padding: 40px 20px;
-    color: #6c757d;
-}
-
-.empty-queue i {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    color: #dee2e6;
-}
-
-/* Operator queue styling */
-.operator-queue-card {
-    border-left: 4px solid var(--secondary);
-}
-
-.operator-queue-card.urgent {
-    border-left-color: var(--danger);
-}
-
-/* Add to your CSS */
-.table-container {
-    max-height: 600px;
-    overflow-y: auto;
-}
-
-.table-fixed-header {
-    position: sticky;
-    top: 0;
-    background: white;
-    z-index: 10;
-}
-
-.load-more-row {
-    text-align: center;
-    padding: 15px;
-}
-
-/* Optimize table rendering */
-.table-hover tbody tr {
-    transition: all 0.1s ease;
-}
-
-/* Reduce reflows for large tables */
-.table-responsive {
-    will-change: transform;
-}
-
-/* Touch-friendly improvements */
-.btn, .form-control, .form-select, .nav-link {
-    touch-action: manipulation;
-}
-
-/* Prevent zoom on form inputs */
-@media (max-width: 768px) {
-    input, select, textarea {
-        font-size: 16px; /* Prevents zoom on iOS */
+    .history-loading .spinner-border {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 8px;
     }
-}
-
-/* Improved scrolling for mobile */
-.mobile-scroll-container {
-    -webkit-overflow-scrolling: touch;
-    overflow-x: auto;
-}
-
-/* Optimize dropdowns for mobile */
-.dropdown-menu {
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-/* Ensure proper spacing for stacked elements */
-.mobile-stack > * {
-    margin-bottom: 8px;
-}
-
-.mobile-stack > *:last-child {
-    margin-bottom: 0;
-}
-
-/* Ultra-compact history view for very small screens */
-@media (max-width: 400px) {
-    .table-responsive table {
-        font-size: 0.6rem;
-    }
-    
-    .table-responsive th,
-    .table-responsive td {
-        padding: 2px 3px;
-    }
-    
-    .status-badge {
-        font-size: 0.5rem;
-        padding: 1px 3px;
-    }
-    
-    /* Show only Machine and Status on ultra-small screens */
-    .table-responsive th:nth-child(2), /* Design */
-    .table-responsive td:nth-child(2) {
-        display: none;
-    }
-    
-    .table-responsive th:nth-child(1),
-    .table-responsive td:nth-child(1),
-    .table-responsive th:nth-child(4),
-    .table-responsive td:nth-child(4) {
-        display: table-cell;
-    }
-}
-
-/* Card-based history view for mobile */
-.history-cards-view {
-    display: none;
-}
-
-.history-card {
-    background: white;
-    border: 1px solid #dee2e6;
-    border-radius: 6px;
-    padding: 8px;
-    margin-bottom: 6px;
-    font-size: 0.75rem;
-}
-
-.history-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 4px;
-}
-
-.history-card-machine {
-    font-weight: 600;
-    color: var(--primary);
-}
-
-.history-card-status {
-    font-size: 0.65rem;
-    padding: 2px 6px;
-    border-radius: 8px;
-}
-
-.history-card-design {
-    font-weight: 500;
-    margin-bottom: 2px;
-}
-
-.history-card-details {
-    display: flex;
-    justify-content: space-between;
-    color: #6c757d;
-    font-size: 0.7rem;
-}
-
-/* Ensure proper display of history cards when enabled */
-.show-cards-view .history-cards-view {
-    display: block;
-}
-
-.show-cards-view .history-table-view {
-    display: none;
-}
-
-/* Toggle button for view switching */
-.view-toggle-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: none;
-    border: none;
-    font-size: 0.8rem;
-    color: #6c757d;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    border: 1px solid #dee2e6;
-}
-
-.view-toggle-btn:hover {
-    background: #f8f9fa;
-}
-
-/* Loading state for history */
-.history-loading {
-    text-align: center;
-    padding: 20px;
-    color: #6c757d;
-}
-
-.history-loading .spinner-border {
-    width: 1rem;
-    height: 1rem;
-    margin-right: 8px;
-}
-</style>
+    </style>
 </head>
 <body>
 <header class="app-header">
@@ -1414,6 +1490,23 @@ body {
     </div>
 </div>
 
+<!-- PWA Install Prompt -->
+<div class="pwa-install-prompt" id="pwaInstallPrompt">
+    <div class="pwa-install-header">
+        <div class="pwa-install-icon">
+            <i class="fas fa-industry"></i>
+        </div>
+        <div>
+            <h6 class="mb-0">Install App</h6>
+            <p class="mb-0 small text-muted">Install Rapier Jacquard Manager for better experience</p>
+        </div>
+    </div>
+    <div class="pwa-install-buttons">
+        <button class="btn btn-secondary btn-sm" onclick="dismissPwaPrompt()">Later</button>
+        <button class="btn btn-primary btn-sm" onclick="installPwa()">Install</button>
+    </div>
+</div>
+
 <!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-spinner text-center">
@@ -1553,6 +1646,10 @@ let uploading = false;
 let feederCount = 1;
 let filteredMachines = [];
 
+// PWA variables
+let deferredPrompt = null;
+let isAppInstalled = false;
+
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -1564,6 +1661,10 @@ function initializeApp() {
     setupSearchFunctionality();
     setupAuthStateListener();
     addViewToggleButton();
+    setupPWA();
+    
+    // Check if user was previously logged in
+    checkPreviousLogin();
 }
 
 function setupEventListeners() {
@@ -1628,6 +1729,11 @@ function setupAuthStateListener() {
         if (user) {
             // User is signed in
             const userRole = USER_ROLES[user.email] || 'operator';
+            
+            // Store login state
+            localStorage.setItem('userLoggedIn', 'true');
+            localStorage.setItem('userEmail', user.email);
+            
             if (userRole === 'admin') {
                 loginAsAdmin();
             } else {
@@ -1635,11 +1741,31 @@ function setupAuthStateListener() {
             }
         } else {
             // User is signed out
+            localStorage.removeItem('userLoggedIn');
+            localStorage.removeItem('userEmail');
             document.getElementById('loginScreen').classList.remove('d-none');
             document.getElementById('adminDashboard').classList.add('d-none');
             document.getElementById('operatorDashboard').classList.add('d-none');
         }
     });
+}
+
+function checkPreviousLogin() {
+    const wasLoggedIn = localStorage.getItem('userLoggedIn') === 'true';
+    const userEmail = localStorage.getItem('userEmail');
+    
+    if (wasLoggedIn && userEmail) {
+        // Auto-login the user
+        document.getElementById('loginEmail').value = userEmail;
+        document.getElementById('loginPassword').focus();
+        
+        // Show a message that user can login again
+        setTimeout(() => {
+            if (!currentUser) {
+                showNotification('Welcome back! Please enter your password to continue.', 'info');
+            }
+        }, 500);
+    }
 }
 
 function filterMachines(searchTerm, userType) {
@@ -1673,6 +1799,10 @@ function authenticateUser(email, password) {
             // Signed in successfully
             const user = userCredential.user;
             const userRole = USER_ROLES[user.email] || 'operator';
+            
+            // Store login state
+            localStorage.setItem('userLoggedIn', 'true');
+            localStorage.setItem('userEmail', user.email);
             
             // Clear login form
             document.getElementById('loginEmail').value = '';
@@ -1739,6 +1869,7 @@ function loginAsAdmin() {
     setUserLabel();
     showDashboard('admin');
     loadPrograms();
+    showNotification('Welcome back, Admin!', 'success');
 }
 
 function loginAsOperator() {
@@ -1746,6 +1877,7 @@ function loginAsOperator() {
     setUserLabel();
     showDashboard('operator');
     loadPrograms();
+    showNotification('Welcome back, Operator!', 'success');
 }
 
 function confirmLogout() {
@@ -1771,6 +1903,12 @@ function logout() {
         const operatorSearch = document.getElementById('operatorMachineSearch');
         if (adminSearch) adminSearch.value = '';
         if (operatorSearch) operatorSearch.value = '';
+        
+        // Clear stored login state
+        localStorage.removeItem('userLoggedIn');
+        localStorage.removeItem('userEmail');
+        
+        showNotification('You have been logged out successfully.', 'info');
     }).catch((error) => {
         console.error('Logout error:', error);
     });
@@ -3352,6 +3490,111 @@ document.getElementById('designImage').addEventListener('change', function(e) {
     }
 });
 
+// --- PWA FUNCTIONALITY ---
+function setupPWA() {
+    // Check if app is already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        isAppInstalled = true;
+        console.log('App is running in standalone mode');
+    }
+    
+    // Listen for beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault();
+        // Stash the event so it can be triggered later
+        deferredPrompt = e;
+        
+        // Show install prompt if app is not installed
+        if (!isAppInstalled) {
+            setTimeout(() => {
+                showPwaPrompt();
+            }, 3000); // Show after 3 seconds
+        }
+    });
+    
+    // Listen for app installed event
+    window.addEventListener('appinstalled', (e) => {
+        isAppInstalled = true;
+        deferredPrompt = null;
+        hidePwaPrompt();
+        showNotification('App installed successfully!', 'success');
+    });
+    
+    // Check if app is already installed on page load
+    if (window.navigator.standalone === true) {
+        isAppInstalled = true;
+    }
+}
+
+function showPwaPrompt() {
+    const prompt = document.getElementById('pwaInstallPrompt');
+    if (prompt && deferredPrompt && !isAppInstalled) {
+        prompt.classList.add('show');
+    }
+}
+
+function hidePwaPrompt() {
+    const prompt = document.getElementById('pwaInstallPrompt');
+    if (prompt) {
+        prompt.classList.remove('show');
+    }
+}
+
+function dismissPwaPrompt() {
+    hidePwaPrompt();
+    // Don't show again for 7 days
+    localStorage.setItem('pwaPromptDismissed', Date.now().toString());
+}
+
+function installPwa() {
+    if (deferredPrompt) {
+        // Show the install prompt
+        deferredPrompt.prompt();
+        
+        // Wait for the user to respond to the prompt
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+            } else {
+                console.log('User dismissed the install prompt');
+            }
+            deferredPrompt = null;
+        });
+    }
+    hidePwaPrompt();
+}
+
+// --- NOTIFICATION SYSTEM ---
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 1060;
+        min-width: 300px;
+        max-width: 500px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
 // Make functions available globally
 window.loginAsAdmin = loginAsAdmin;
 window.loginAsOperator = loginAsOperator;
@@ -3377,6 +3620,8 @@ window.viewOperatorMachineQueue = viewOperatorMachineQueue;
 window.renderQueueView = renderQueueView;
 window.renderOperatorQueueView = renderOperatorQueueView;
 window.toggleHistoryView = toggleHistoryView;
+window.installPwa = installPwa;
+window.dismissPwaPrompt = dismissPwaPrompt;
 </script>
 </body>
 </html>
