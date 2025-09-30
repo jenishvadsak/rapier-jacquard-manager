@@ -1,0 +1,2771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rapier Jacquard Manager</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+<style>
+:root {
+    --primary: #2c3e50;
+    --secondary: #3498db;
+    --danger: #e74c3c;
+    --success: #27ae60;
+    --warning: #f39c12;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f8f9fa;
+    padding-bottom: 20px;
+}
+
+.app-header {
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.login-screen {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    min-height: 100vh;
+    color: #fff;
+}
+
+.login-card, .program-form, .dashboard-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.08);
+    border: 1px solid #e9ecef;
+}
+
+.machine-card {
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,.1);
+    transition: all 0.3s ease;
+}
+
+.machine-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,.15);
+}
+
+.feeder-badge {
+    font-size: 0.7rem;
+    margin: 1px;
+    display: inline-block;
+    padding: 2px 6px;
+}
+
+.nav-tabs .nav-link.active {
+    font-weight: 600;
+    border-bottom: 3px solid var(--secondary);
+    color: var(--secondary);
+}
+
+.thumbnail {
+    max-width: 120px;
+    max-height: 80px;
+    cursor: pointer;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #e9ecef;
+}
+
+.small-muted {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.progress-container {
+    margin-top: 5px;
+    display: none;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-pending { background: #e3f2fd; color: #1976d2; }
+.status-running { background: #fff3e0; color: #f57c00; }
+.status-completed { background: #e8f5e8; color: #2e7d32; }
+.status-urgent { background: #ffebee; color: #c62828; }
+
+.program-queue-dropdown {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    z-index: 1050;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.feeder-item {
+    margin-bottom: 12px;
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.add-feeder-btn {
+    margin-top: 10px;
+}
+
+.image-modal-img {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 8px;
+}
+
+.queue-badge {
+    font-size: 0.7rem;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .machine-card {
+        margin-bottom: 12px;
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 6px;
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+    
+    .status-badge {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+    
+    .thumbnail {
+        max-width: 80px;
+        max-height: 60px;
+    }
+    
+    .program-form {
+        padding: 15px;
+    }
+    
+    .feeder-item {
+        padding: 8px;
+    }
+    
+    .nav-tabs .nav-link {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+    
+    .date-filters {
+        flex-direction: column;
+    }
+    
+    .date-filters .form-control {
+        margin-bottom: 8px;
+    }
+    
+    .feeder-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 4px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .login-card {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .machine-card .card-body {
+        padding: 12px;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    h5 {
+        font-size: 1.1rem;
+    }
+    
+    .feeder-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Mobile table optimizations */
+@media (max-width: 768px) {
+    .table-responsive table {
+        font-size: 0.8rem;
+    }
+    
+    .table-responsive th,
+    .table-responsive td {
+        padding: 4px 6px;
+    }
+    
+    /* Hide less important columns on mobile */
+    .table-responsive th:nth-child(5),
+    .table-responsive td:nth-child(5),
+    .table-responsive th:nth-child(6),
+    .table-responsive td:nth-child(6) {
+        display: none;
+    }
+}
+
+/* Custom dropdown styling */
+.dropdown-menu {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.dropdown-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item:hover {
+    background: #f8f9fa;
+}
+
+/* Form enhancements */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 8px 12px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Button enhancements */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+/* Card header enhancements */
+.card-title {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* Alert enhancements */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+/* Badge enhancements */
+.badge {
+    font-weight: 500;
+}
+
+/* Table responsive */
+.table-responsive {
+    border-radius: 8px;
+}
+
+/* Pagination */
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-link {
+    border-radius: 6px;
+    margin: 0 2px;
+    border: 1px solid #dee2e6;
+}
+
+/* Modal enhancements */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+}
+
+.modal-header {
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px 20px;
+}
+
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 15px 20px;
+}
+
+/* Feeder input styling */
+.feeder-input-group {
+    background: white;
+    border-radius: 8px;
+    padding: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.feeder-input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    padding: 4px 8px;
+}
+
+.feeder-input:focus {
+    outline: none;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+/* Action buttons */
+.action-buttons {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+    flex: 1;
+    min-width: 80px;
+}
+
+/* Queue item styling */
+.queue-item {
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    background: #f8f9fa;
+    border-left: 3px solid var(--secondary);
+}
+
+.queue-item.urgent {
+    border-left-color: var(--danger);
+    background: #fff5f5;
+}
+
+/* Search box */
+.search-box {
+    max-width: 300px;
+}
+
+/* Date filter layout */
+.date-filters {
+    gap: 8px;
+}
+
+.date-filters .form-control {
+    min-width: 150px;
+}
+
+/* Machine selection in table */
+.machine-select-table {
+    min-width: 120px;
+}
+
+/* Login form enhancements */
+.login-form .form-control {
+    padding: 12px 15px;
+}
+
+/* Prevent delete for running programs */
+.btn-danger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.auth-error {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: none;
+}
+
+/* Feeder grid layout */
+.feeder-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.feeder-grid-item {
+    text-align: center;
+    padding: 4px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-size: 0.9rem; /* Increased font size */
+}
+
+.feeder-grid-item .feeder-number {
+    font-weight: bold;
+    color: var(--primary);
+    font-size: 0.85rem; /* Increased font size */
+}
+
+.feeder-grid-item .feeder-value {
+    color: var(--secondary);
+    word-break: break-word;
+    font-size: 0.8rem; /* Increased font size */
+}
+
+/* Dropdown container */
+.dropdown-container {
+    position: relative;
+}
+
+.dropdown-container .dropdown-menu {
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* Queue page styling */
+.queue-header {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.queue-card {
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,.1);
+    transition: all 0.3s ease;
+}
+
+.queue-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,.15);
+}
+
+.queue-card .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    font-weight: 600;
+}
+
+.empty-queue {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
+
+.empty-queue i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #dee2e6;
+}
+
+/* Operator queue styling */
+.operator-queue-card {
+    border-left: 4px solid var(--secondary);
+}
+
+.operator-queue-card.urgent {
+    border-left-color: var(--danger);
+}
+/* Add to your CSS */
+.table-container {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.table-fixed-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+}
+
+.load-more-row {
+    text-align: center;
+    padding: 15px;
+}
+
+/* Optimize table rendering */
+.table-hover tbody tr {
+    transition: all 0.1s ease;
+}
+
+/* Reduce reflows for large tables */
+.table-responsive {
+    will-change: transform;
+}
+</style>
+</head>
+<body>
+<header class="app-header">
+<nav class="navbar navbar-dark bg-primary">
+<div class="container">
+    <span class="navbar-brand">
+        <i class="fas fa-industry me-2"></i>Rapier Jacquard Manager
+    </span>
+    <div class="text-light">
+        <small id="currentUserType">Not Logged In</small>
+    </div>
+</div>
+</nav>
+</header>
+
+<div class="container-fluid main-container">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="row min-vh-100 justify-content-center align-items-center">
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="login-card text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-industry fa-4x text-primary"></i>
+                    </div>
+                    <h3 class="mb-3">Jacquard Manager</h3>
+                    <p class="text-muted mb-4">Login to continue</p>
+                    <form id="loginForm" class="login-form">
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="loginEmail" required 
+                                   placeholder="Enter your email">
+                            <div class="auth-error" id="loginEmailError"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" required 
+                                   placeholder="Enter your password">
+                            <div class="auth-error" id="loginPasswordError"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="d-none py-3">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="mb-0">
+                    <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
+                </h2>
+                <div class="d-flex gap-2 align-items-center">
+                    <div class="search-box">
+                        <input type="text" class="form-control form-control-sm" id="adminMachineSearch" placeholder="Search machines...">
+                    </div>
+                    <button class="btn btn-outline-danger btn-sm" onclick="confirmLogout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                    </button>
+                </div>
+            </div>
+
+            <ul class="nav nav-tabs nav-justified mb-3" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#admMachines">
+                        <i class="fas fa-cogs me-1"></i>Machines
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#admPrograms">
+                        <i class="fas fa-plus-circle me-1"></i>Create Program
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#admHistory">
+                        <i class="fas fa-history me-1"></i>History
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#admQueue">
+                        <i class="fas fa-list me-1"></i>Queue View
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div id="admMachines" class="tab-pane fade show active">
+                    <div class="row g-2" id="machinesGrid"></div>
+                </div>
+
+                <div id="admPrograms" class="tab-pane fade">
+                    <div class="program-form">
+                        <h5 class="mb-4">
+                            <i class="fas fa-plus-circle me-2 text-primary"></i>Create New Program
+                        </h5>
+                        <form id="programForm" novalidate>
+                            <div class="row g-2 mb-3">
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label fw-semibold">Machine Number</label>
+                                    <select id="machineNumber" class="form-select" required>
+                                        <option value="">Select Machine</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label fw-semibold">Rounds</label>
+                                    <input type="number" class="form-control" id="rounds" min="1" required>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label fw-semibold">Priority</label>
+                                    <select class="form-select" id="priority" required>
+                                        <option value="normal">Normal</option>
+                                        <option value="urgent">Urgent</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Design Name</label>
+                                    <input type="text" class="form-control" id="designName" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6 class="fw-semibold mb-3">
+                                    <i class="fas fa-list-ol me-2 text-primary"></i>Feeder Configuration
+                                </h6>
+                                <p class="text-muted small mb-3">
+                                    Enter yarn type for each feeder (1-12 maximum, all feeders are required)
+                                </p>
+                                <div id="feederConfig">
+                                    <div class="feeder-item">
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-8 col-md-9">
+                                                <label class="form-label small fw-semibold">Feeder 1</label>
+                                                <div class="feeder-input-group">
+                                                    <input type="text" class="feeder-input feeder-yarn" placeholder="Enter yarn type" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-4 col-md-3 d-flex align-items-end">
+                                                <button type="button" class="btn btn-danger btn-sm w-100 remove-feeder" style="display:none;">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-secondary btn-sm add-feeder-btn" onclick="addFeeder()">
+                                    <i class="fas fa-plus me-1"></i>Add Feeder
+                                </button>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Design Image (optional)</label>
+                                <input id="designImage" type="file" accept="image/png,image/jpeg" class="form-control">
+                                <div id="designPreviewWrap" class="mt-2"></div>
+                                <div class="progress-container">
+                                    <div class="progress mt-2">
+                                        <div id="uploadProgress" class="progress-bar" role="progressbar" style="width:0%">0%</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button id="submitProgramBtn" class="btn btn-success flex-fill" type="submit">
+                                    <i class="fas fa-save me-1"></i>Save Program
+                                </button>
+                                <button class="btn btn-secondary flex-fill" type="reset">
+                                    <i class="fas fa-undo me-1"></i>Reset Form
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="admHistory" class="tab-pane fade">
+                    <div class="dashboard-card">
+                        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-3">
+                            <h5 class="mb-2 mb-md-0">
+                                <i class="fas fa-history me-2 text-primary"></i>Program History
+                            </h5>
+                            <div class="d-flex gap-2 align-items-center w-100 w-md-auto">
+                                <label class="mb-0 me-2 small fw-semibold">Machine:</label>
+                                <select id="historyMachineFilter" class="form-select machine-select-table">
+                                    <option value="all">All Machines</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-column flex-md-row gap-2 mb-3 date-filters">
+                            <input type="date" id="excelStartDate" class="form-control">
+                            <input type="date" id="excelEndDate" class="form-control">
+                            <button class="btn btn-primary flex-fill" onclick="exportHistoryToExcel()">
+                                <i class="fas fa-file-excel me-1"></i>Export to Excel
+                            </button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Machine</th>
+                                        <th>Design</th>
+                                        <th>Rounds</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Started</th>
+                                        <th>Completed</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="programHistory"></tbody>
+                            </table>
+                        </div>
+
+                        <nav class="mt-3">
+                            <ul id="historyPagination" class="pagination justify-content-center"></ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <div id="admQueue" class="tab-pane fade">
+                    <div class="queue-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1">
+                                    <i class="fas fa-list me-2"></i>Program Queue
+                                </h3>
+                                <p class="mb-0">View all queued programs across all machines</p>
+                            </div>
+                            <div class="search-box">
+                                <input type="text" class="form-control" id="queueSearch" placeholder="Search programs...">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="queueContent">
+                        <!-- Queue content will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Operator Dashboard -->
+    <div id="operatorDashboard" class="d-none py-3">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="mb-0">
+                    <i class="fas fa-tools me-2"></i>Operator Dashboard
+                </h2>
+                <div class="d-flex gap-2 align-items-center">
+                    <div class="search-box">
+                        <input type="text" class="form-control form-control-sm" id="operatorMachineSearch" placeholder="Search machines...">
+                    </div>
+                    <button class="btn btn-outline-danger btn-sm" onclick="confirmLogout()">
+                        <i class="fas fa-sign-out-alt me-1"></i>Logout
+                    </button>
+                </div>
+            </div>
+            
+            <ul class="nav nav-tabs nav-justified mb-3" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#opMachines">
+                        <i class="fas fa-cogs me-1"></i>Machines
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#opQueue">
+                        <i class="fas fa-list me-1"></i>Queue View
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#opHistory">
+                        <i class="fas fa-history me-1"></i>History
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div id="opMachines" class="tab-pane fade show active">
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        View assigned programs and update machine status
+                    </div>
+                    
+                    <div class="row g-2" id="operatorMachinesGrid"></div>
+                </div>
+
+                <div id="opQueue" class="tab-pane fade">
+                    <div class="queue-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1">
+                                    <i class="fas fa-list me-2"></i>Program Queue
+                                </h3>
+                                <p class="mb-0">View all queued programs across all machines</p>
+                            </div>
+                            <div class="search-box">
+                                <input type="text" class="form-control" id="operatorQueueSearch" placeholder="Search programs...">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="operatorQueueContent">
+                        <!-- Operator queue content will be loaded here -->
+                    </div>
+                </div>
+
+                <div id="opHistory" class="tab-pane fade">
+                    <div class="dashboard-card">
+                        <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-3">
+                            <h5 class="mb-2 mb-md-0">
+                                <i class="fas fa-history me-2 text-primary"></i>Program History
+                            </h5>
+                            <div class="d-flex gap-2 align-items-center w-100 w-md-auto">
+                                <label class="mb-0 me-2 small fw-semibold">Machine:</label>
+                                <select id="operatorHistoryMachineFilter" class="form-select machine-select-table">
+                                    <option value="all">All Machines</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Machine</th>
+                                        <th>Design</th>
+                                        <th>Rounds</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Started</th>
+                                        <th>Completed</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="operatorProgramHistory"></tbody>
+                            </table>
+                        </div>
+
+                        <nav class="mt-3">
+                            <ul id="operatorHistoryPagination" class="pagination justify-content-center"></ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner text-center">
+        <div class="spinner-border text-light" style="width: 3rem; height: 3rem;"></div>
+        <div class="text-light mt-3 fw-semibold">Processing...</div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-body text-center p-3">
+                <img id="imageModalImg" src="" class="image-modal-img">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Program Details Modal -->
+<div class="modal fade" id="programDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Program Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="programDetailsContent">
+                <!-- Program details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Modal -->
+<div class="modal fade" id="passwordModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Enter Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-3" id="passwordModalText">Enter 4-digit password to confirm action</p>
+                <input type="password" class="form-control text-center" id="passwordInput" maxlength="4" placeholder="****">
+                <div class="text-center mt-3">
+                    <button class="btn btn-primary w-100" onclick="verifyPassword()">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Program Modal -->
+<div class="modal fade" id="editProgramModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Program</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="editProgramContent">
+                <!-- Edit form will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Logout</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">Are you sure you want to logout?</p>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-secondary flex-fill" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-danger flex-fill" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase + libs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// --- Firebase config ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDHBa63-zdatu-5xvHA7tdJMeBx9wFb9fw",
+  authDomain: "rapier-manager.firebaseapp.com",
+  projectId: "rapier-manager",
+  storageBucket: "rapier-manager.firebasestorage.app",
+  messagingSenderId: "161632944775",
+  appId: "1:161632944775:web:be4a6493d8614938ceae22"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+// --- SETTINGS ---
+const PASSWORD = "1234";
+const TOTAL_MACHINES = 24;
+const HISTORY_PAGE_SIZE = 10;
+
+// User roles mapping
+const USER_ROLES = {
+    'admin@jacquard.com': 'admin',
+    'operator@jacquard.com': 'operator'
+};
+
+// --- APPLICATION STATE ---
+let currentUser = null;
+let machines = [];
+let programs = [];
+let programHistory = [];
+let currentAction = null;
+let currentMachineNumber = null;
+let currentProgramId = null;
+let uploading = false;
+let feederCount = 1;
+let filteredMachines = [];
+
+// --- INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', function() {
+    initializeApp();
+});
+
+function initializeApp() {
+    loadMachines();
+    setupEventListeners();
+    setupSearchFunctionality();
+    setupAuthStateListener();
+}
+
+function setupEventListeners() {
+    document.getElementById('programForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        requestCreateProgram();
+    });
+    
+    document.getElementById('programForm').addEventListener('reset', function() {
+        resetFeederInputs();
+    });
+
+    // Login form handler
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        authenticateUser(email, password);
+    });
+
+    // History machine filter event listener
+    document.getElementById('historyMachineFilter').addEventListener('change', function() {
+        renderProgramHistory();
+    });
+
+    // Operator history machine filter event listener
+    document.getElementById('operatorHistoryMachineFilter').addEventListener('change', function() {
+        renderOperatorProgramHistory();
+    });
+
+    // Queue search functionality
+    document.getElementById('queueSearch').addEventListener('input', function(e) {
+        renderQueueView(e.target.value);
+    });
+
+    // Operator queue search functionality
+    document.getElementById('operatorQueueSearch').addEventListener('input', function(e) {
+        renderOperatorQueueView(e.target.value);
+    });
+}
+
+function setupSearchFunctionality() {
+    // Admin search
+    const adminSearch = document.getElementById('adminMachineSearch');
+    if (adminSearch) {
+        adminSearch.addEventListener('input', function(e) {
+            filterMachines(e.target.value, 'admin');
+        });
+    }
+
+    // Operator search
+    const operatorSearch = document.getElementById('operatorMachineSearch');
+    if (operatorSearch) {
+        operatorSearch.addEventListener('input', function(e) {
+            filterMachines(e.target.value, 'operator');
+        });
+    }
+}
+
+function setupAuthStateListener() {
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            // User is signed in
+            const userRole = USER_ROLES[user.email] || 'operator';
+            if (userRole === 'admin') {
+                loginAsAdmin();
+            } else {
+                loginAsOperator();
+            }
+        } else {
+            // User is signed out
+            document.getElementById('loginScreen').classList.remove('d-none');
+            document.getElementById('adminDashboard').classList.add('d-none');
+            document.getElementById('operatorDashboard').classList.add('d-none');
+        }
+    });
+}
+
+function filterMachines(searchTerm, userType) {
+    if (!searchTerm) {
+        filteredMachines = machines;
+    } else {
+        filteredMachines = machines.filter(machine => {
+            const machinePrograms = programs.filter(p => p.machineNumber === machine.machineNumber && p.status !== 'completed');
+            const currentProgram = machinePrograms.length > 0 ? machinePrograms[0] : null;
+            
+            // Search by machine number or program design name
+            return machine.machineNumber.toString().includes(searchTerm) ||
+                   (currentProgram && currentProgram.designName.toLowerCase().includes(searchTerm.toLowerCase()));
+        });
+    }
+    
+    if (userType === 'admin') {
+        renderMachinesGrid();
+    } else {
+        renderOperatorMachinesGrid();
+    }
+}
+
+// --- AUTHENTICATION FUNCTIONS ---
+function authenticateUser(email, password) {
+    showLoading(true);
+    clearAuthErrors();
+    
+    auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            // Signed in successfully
+            const user = userCredential.user;
+            const userRole = USER_ROLES[user.email] || 'operator';
+            
+            // Clear login form
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            // Login user based on role
+            if (userRole === 'admin') {
+                loginAsAdmin();
+            } else {
+                loginAsOperator();
+            }
+        })
+        .catch((error) => {
+            console.error('Login error:', error);
+            handleAuthError(error);
+        })
+        .finally(() => {
+            showLoading(false);
+        });
+}
+
+function clearAuthErrors() {
+    document.getElementById('loginEmailError').style.display = 'none';
+    document.getElementById('loginPasswordError').style.display = 'none';
+}
+
+function handleAuthError(error) {
+    let errorMessage = '';
+    
+    switch (error.code) {
+        case 'auth/invalid-email':
+            errorMessage = 'Invalid email address format.';
+            document.getElementById('loginEmailError').textContent = errorMessage;
+            document.getElementById('loginEmailError').style.display = 'block';
+            break;
+        case 'auth/user-disabled':
+            errorMessage = 'This account has been disabled.';
+            document.getElementById('loginEmailError').textContent = errorMessage;
+            document.getElementById('loginEmailError').style.display = 'block';
+            break;
+        case 'auth/user-not-found':
+            errorMessage = 'No account found with this email.';
+            document.getElementById('loginEmailError').textContent = errorMessage;
+            document.getElementById('loginEmailError').style.display = 'block';
+            break;
+        case 'auth/wrong-password':
+            errorMessage = 'Incorrect password.';
+            document.getElementById('loginPasswordError').textContent = errorMessage;
+            document.getElementById('loginPasswordError').style.display = 'block';
+            break;
+        case 'auth/too-many-requests':
+            errorMessage = 'Too many failed login attempts. Please try again later.';
+            alert(errorMessage);
+            break;
+        default:
+            errorMessage = 'Login failed. Please try again.';
+            alert(errorMessage);
+    }
+}
+
+// --- LOGIN/LOGOUT ---
+function loginAsAdmin() {
+    currentUser = 'admin';
+    setUserLabel();
+    showDashboard('admin');
+    loadPrograms();
+}
+
+function loginAsOperator() {
+    currentUser = 'operator';
+    setUserLabel();
+    showDashboard('operator');
+    loadPrograms();
+}
+
+function confirmLogout() {
+    const modal = new bootstrap.Modal(document.getElementById('logoutConfirmModal'));
+    modal.show();
+}
+
+function logout() {
+    auth.signOut().then(() => {
+        // Close logout confirmation modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('logoutConfirmModal'));
+        if (modal) modal.hide();
+        
+        currentUser = null;
+        setUserLabel();
+        document.getElementById('loginScreen').classList.remove('d-none');
+        document.getElementById('adminDashboard').classList.add('d-none');
+        document.getElementById('operatorDashboard').classList.add('d-none');
+        document.getElementById('programForm').reset();
+        
+        // Clear search
+        const adminSearch = document.getElementById('adminMachineSearch');
+        const operatorSearch = document.getElementById('operatorMachineSearch');
+        if (adminSearch) adminSearch.value = '';
+        if (operatorSearch) operatorSearch.value = '';
+    }).catch((error) => {
+        console.error('Logout error:', error);
+    });
+}
+
+function setUserLabel() {
+    document.getElementById('currentUserType').textContent = currentUser ? 
+        (currentUser === 'admin' ? 'Admin' : 'Operator') : 'Not Logged In';
+}
+
+// --- DASHBOARD MANAGEMENT ---
+function showDashboard(user) {
+    document.getElementById('loginScreen').classList.add('d-none');
+    document.getElementById('adminDashboard').classList.toggle('d-none', user !== 'admin');
+    document.getElementById('operatorDashboard').classList.toggle('d-none', user !== 'operator');
+    populateMachineDropdown();
+    populateHistoryFilters();
+    populateOperatorHistoryFilters();
+}
+
+function populateMachineDropdown() {
+    const select = document.getElementById('machineNumber');
+    select.innerHTML = '<option value="">Select Machine</option>';
+    
+    for (let i = 1; i <= TOTAL_MACHINES; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = `Machine ${i}`;
+        select.appendChild(option);
+    }
+}
+
+function populateHistoryFilters() {
+    const select = document.getElementById('historyMachineFilter');
+    select.innerHTML = '<option value="all">All Machines</option>';
+    
+    for (let i = 1; i <= TOTAL_MACHINES; i++) {
+        select.innerHTML += `<option value="${i}">Machine ${i}</option>`;
+    }
+}
+
+function populateOperatorHistoryFilters() {
+    const select = document.getElementById('operatorHistoryMachineFilter');
+    select.innerHTML = '<option value="all">All Machines</option>';
+    
+    for (let i = 1; i <= TOTAL_MACHINES; i++) {
+        select.innerHTML += `<option value="${i}">Machine ${i}</option>`;
+    }
+}
+
+// --- MACHINE MANAGEMENT ---
+function loadMachines() {
+    machines = [];
+    for (let i = 1; i <= TOTAL_MACHINES; i++) {
+        machines.push({
+            id: i,
+            machineNumber: i,
+            status: 'idle',
+            currentProgram: null,
+            lastUpdated: new Date()
+        });
+    }
+    filteredMachines = [...machines];
+    renderMachinesGrid();
+}
+
+function loadPrograms() {
+    // Use efficient query with limits for real-time updates
+    const programsQuery = db.collection("programs")
+        .orderBy("createdAt", "desc")
+        .limit(200); // Increased but reasonable limit
+
+    programsQuery.onSnapshot((snapshot) => {
+        programs = [];
+        programHistory = [];
+        
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const program = {
+                id: doc.id,
+                machineNumber: data.machineNumber,
+                designName: data.designName,
+                rounds: data.rounds,
+                priority: data.priority || 'normal',
+                feeders: data.feeders || {},
+                status: data.status || 'pending',
+                photoData: data.photoData || null,
+                createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
+                startedAt: data.startedAt ? data.startedAt.toDate() : null,
+                completedAt: data.completedAt ? data.completedAt.toDate() : null
+            };
+            
+            programs.push(program);
+            // Only keep recent history for performance
+            if (programHistory.length < 100) {
+                programHistory.push(program);
+            }
+        });
+        
+        // Batch UI updates
+        setTimeout(() => {
+            renderMachinesGrid();
+            renderOperatorMachinesGrid();
+            renderProgramHistory();
+            renderOperatorProgramHistory();
+            renderQueueView();
+            renderOperatorQueueView();
+        }, 100);
+        
+    }, (error) => {
+        console.error("Error loading programs:", error);
+    });
+}
+
+// Clean up images from completed programs to save database space
+async function cleanupCompletedProgramImages() {
+    const completedPrograms = programs.filter(p => p.status === 'completed' && p.photoData);
+    
+    for (const program of completedPrograms) {
+        try {
+            // Remove photoData from completed programs
+            await db.collection("programs").doc(program.id).update({
+                photoData: null
+            });
+        } catch (error) {
+            console.error("Error cleaning up program image:", error);
+        }
+    }
+}
+
+function renderMachinesGrid() {
+    const grid = document.getElementById('machinesGrid');
+    grid.innerHTML = '';
+
+    const machinesToRender = filteredMachines.length > 0 ? filteredMachines : machines;
+
+    machinesToRender.forEach(machine => {
+        let machinePrograms = programs.filter(p => p.machineNumber === machine.machineNumber && p.status !== 'completed');
+        
+        // Sort programs: urgent first, then by creation date
+        machinePrograms.sort((a, b) => {
+            if (a.priority === 'urgent' && b.priority !== 'urgent') return -1;
+            if (a.priority !== 'urgent' && b.priority === 'urgent') return 1;
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
+        
+        const currentProgram = machinePrograms.length > 0 ? machinePrograms[0] : null;
+        const queuePrograms = machinePrograms.slice(1);
+        
+        const card = document.createElement('div');
+        card.className = 'col-12 col-sm-6 col-lg-4 col-xl-3';
+        
+        card.innerHTML = `
+            <div class="card machine-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-cog me-2 text-primary"></i>Machine ${machine.machineNumber}
+                        </h6>
+                        <span class="status-badge status-${currentProgram ? currentProgram.status : 'idle'} ${currentProgram && currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
+                            ${currentProgram ? (currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status) : 'IDLE'}
+                        </span>
+                    </div>
+                    
+                    ${currentProgram ? `
+                        <div class="program-info">
+                            <p class="mb-1 small"><strong>Design:</strong> ${currentProgram.designName}</p>
+                            <p class="mb-2 small"><strong>Rounds:</strong> ${currentProgram.rounds}</p>
+                            
+                            <div class="feeders-info mb-3">
+                                <small class="text-muted">Feeders Configuration:</small>
+                                <div class="feeder-grid">
+                                    ${createFeederGrid(currentProgram)}
+                                </div>
+                            </div>
+                            
+                            ${currentProgram.photoData ? `
+                                <div class="text-center mb-2">
+                                    <img src="${currentProgram.photoData}" class="thumbnail" onclick="showImageInModal('${currentProgram.photoData}')"/>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="action-buttons">
+                            ${currentProgram.status === 'running' ? `
+                                <button class="btn btn-success btn-sm" onclick="requestCompleteProgram(${machine.machineNumber}, '${currentProgram.id}')">
+                                    <i class="fas fa-check me-1"></i>Complete
+                                </button>
+                            ` : ''}
+                            
+                            ${currentProgram.status === 'pending' ? `
+                                <button class="btn btn-warning btn-sm" onclick="requestStartProgram(${machine.machineNumber}, '${currentProgram.id}')">
+                                    <i class="fas fa-play me-1"></i>Start
+                                </button>
+                            ` : ''}
+                            
+                            <button class="btn btn-info btn-sm" onclick="showProgramDetails('${currentProgram.id}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            
+                            ${currentUser === 'admin' && currentProgram.status === 'pending' ? `
+                                <button class="btn btn-warning btn-sm" onclick="editProgram('${currentProgram.id}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="requestDeleteProgram('${currentProgram.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            ` : `
+                                <button class="btn btn-danger btn-sm" disabled title="Cannot delete running/completed programs">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            `}
+                        </div>
+                    ` : `
+                        <p class="text-muted small mb-3">No program assigned</p>
+                        ${currentUser === 'admin' ? `
+                            <button class="btn btn-primary btn-sm w-100" onclick="assignProgram(${machine.machineNumber})">
+                                <i class="fas fa-plus me-1"></i>Assign Program
+                            </button>
+                        ` : ''}
+                    `}
+                    
+                    ${queuePrograms.length > 0 ? `
+                        <div class="mt-3">
+                            <button class="btn btn-outline-primary btn-sm w-100" onclick="viewMachineQueue(${machine.machineNumber})">
+                                <i class="fas fa-list me-1"></i>View Queue (${queuePrograms.length})
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        
+        grid.appendChild(card);
+    });
+}
+
+function createFeederGrid(program) {
+    let gridHtml = '';
+    
+    // Show feeders 1-12 in order, only if they have non-empty values
+    for (let i = 1; i <= 12; i++) {
+        const feederKey = `feeder${i}`;
+        const yarnValue = program.feeders[feederKey];
+        
+        // Check if yarnValue exists and is not empty, null, or placeholder text
+        if (yarnValue && 
+            yarnValue.trim() !== '' && 
+            yarnValue.trim() !== 'Not Configured' && 
+            yarnValue.trim() !== '-' &&
+            yarnValue.trim() !== 'null') {
+            gridHtml += `
+                <div class="feeder-grid-item">
+                    <div class="feeder-number">F${i}</div>
+                    <div class="feeder-value">${yarnValue}</div>
+                </div>
+            `;
+        }
+    }
+    
+    // If no feeders have values, show a message
+    if (gridHtml === '') {
+        gridHtml = `
+            <div class="feeder-grid-item text-muted">
+                <div class="feeder-number">-</div>
+                <div class="feeder-value">No feeders configured</div>
+            </div>
+        `;
+    }
+    
+    return gridHtml;
+}
+
+function renderOperatorMachinesGrid() {
+    const grid = document.getElementById('operatorMachinesGrid');
+    grid.innerHTML = '';
+
+    // Operators only see machines with active programs
+    const activeMachines = machines.filter(machine => {
+        const machinePrograms = programs.filter(p => p.machineNumber === machine.machineNumber && p.status !== 'completed');
+        return machinePrograms.length > 0;
+    });
+
+    if (activeMachines.length === 0) {
+        grid.innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                    <h5>No machines assigned</h5>
+                    <p class="mb-0">Wait for admin to assign programs to machines</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    activeMachines.forEach(machine => {
+        let machinePrograms = programs.filter(p => p.machineNumber === machine.machineNumber && p.status !== 'completed');
+        
+        // Sort programs: urgent first, then by creation date
+        machinePrograms.sort((a, b) => {
+            if (a.priority === 'urgent' && b.priority !== 'urgent') return -1;
+            if (a.priority !== 'urgent' && b.priority === 'urgent') return 1;
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
+        
+        const currentProgram = machinePrograms[0];
+        const queuePrograms = machinePrograms.slice(1);
+        
+        const card = document.createElement('div');
+        card.className = 'col-12 col-sm-6 col-lg-4';
+        
+        card.innerHTML = `
+            <div class="card machine-card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-cog me-2 text-primary"></i>Machine ${machine.machineNumber}
+                        </h6>
+                        <span class="status-badge status-${currentProgram.status} ${currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
+                            ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status}
+                        </span>
+                    </div>
+                    
+                    <div class="program-info">
+                        <p class="mb-1 small"><strong>Design:</strong> ${currentProgram.designName}</p>
+                        <p class="mb-2 small"><strong>Rounds:</strong> ${currentProgram.rounds}</p>
+                        
+                        <div class="feeders-info mb-3">
+                            <small class="text-muted">Feeders Configuration:</small>
+                            <div class="feeder-grid">
+                                ${createFeederGrid(currentProgram)}
+                            </div>
+                        </div>
+                        
+                        ${currentProgram.photoData ? `
+                            <div class="text-center mb-2">
+                                <img src="${currentProgram.photoData}" class="thumbnail" onclick="showImageInModal('${currentProgram.photoData}')"/>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="action-buttons">
+                        ${currentProgram.status === 'pending' ? `
+                            <button class="btn btn-warning btn-sm" onclick="requestStartProgram(${machine.machineNumber}, '${currentProgram.id}')">
+                                <i class="fas fa-play me-1"></i>Start
+                            </button>
+                        ` : ''}
+                        
+                        ${currentProgram.status === 'running' ? `
+                            <button class="btn btn-success btn-sm" onclick="requestCompleteProgram(${machine.machineNumber}, '${currentProgram.id}')">
+                                <i class="fas fa-check me-1"></i>Complete
+                            </button>
+                        ` : ''}
+                        
+                        <button class="btn btn-info btn-sm" onclick="showProgramDetails('${currentProgram.id}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    
+                    ${queuePrograms.length > 0 ? `
+                        <div class="mt-3">
+                            <button class="btn btn-outline-primary btn-sm w-100" onclick="viewOperatorMachineQueue(${machine.machineNumber})">
+                                <i class="fas fa-list me-1"></i>View Queue (${queuePrograms.length})
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        
+        grid.appendChild(card);
+    });
+}
+
+// --- QUEUE VIEW FUNCTIONALITY ---
+const QUEUE_CHUNK_SIZE = 10;
+let currentQueueChunk = 1;
+
+function renderMachineQueueCard(machineNumber, currentProgram, queuePrograms) {
+    return `
+        <div class="card queue-card ${currentProgram.priority === 'urgent' ? 'urgent' : ''}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-cog me-2"></i>Machine ${machineNumber}
+                </h5>
+                <span class="badge bg-primary">${1 + queuePrograms.length} program${1 + queuePrograms.length > 1 ? 's' : ''}</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h6 class="fw-semibold mb-3">Current Program</h6>
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">${currentProgram.designName}</h6>
+                                    <p class="mb-1 small">Rounds: ${currentProgram.rounds}</p>
+                                    <p class="mb-0 small">Status: <span class="status-badge status-${currentProgram.status}">${currentProgram.status}</span></p>
+                                    ${currentProgram.priority === 'urgent' ? '<span class="badge bg-danger mt-1">URGENT</span>' : ''}
+                                </div>
+                                <div class="text-end">
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-info" onclick="showProgramDetails('${currentProgram.id}')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                ${queuePrograms.length > 0 ? `
+                    <div>
+                        <h6 class="fw-semibold mb-3">Queued Programs (${queuePrograms.length})</h6>
+                        <div class="row g-2">
+                            ${queuePrograms.map(program => `
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="card ${program.priority === 'urgent' ? 'border-danger' : ''}">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="mb-1">${program.designName}</h6>
+                                                    <p class="mb-1 small">Rounds: ${program.rounds}</p>
+                                                    <p class="mb-0 small">Status: <span class="status-badge status-${program.status}">${program.status}</span></p>
+                                                    ${program.priority === 'urgent' ? '<span class="badge bg-danger mt-1">URGENT</span>' : ''}
+                                                </div>
+                                                <div class="text-end">
+                                                    <div class="mt-2">
+                                                        <button class="btn btn-sm btn-info" onclick="showProgramDetails('${program.id}')">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : `
+                    <div class="empty-queue">
+                        <i class="fas fa-check-circle"></i>
+                        <p class="mb-0">No programs in queue</p>
+                    </div>
+                `}
+            </div>
+        </div>
+    `;
+}
+
+function renderQueueView(searchTerm = '', resetChunk = true) {
+    if (resetChunk) {
+        currentQueueChunk = 1;
+    }
+    
+    const queueContent = document.getElementById('queueContent');
+    
+    // Group programs by machine
+    const machineQueues = {};
+    
+    programs.forEach(program => {
+        if (program.status !== 'completed') {
+            if (!machineQueues[program.machineNumber]) {
+                machineQueues[program.machineNumber] = [];
+            }
+            machineQueues[program.machineNumber].push(program);
+        }
+    });
+    
+    // Sort programs in each machine queue
+    Object.keys(machineQueues).forEach(machineNumber => {
+        machineQueues[machineNumber].sort((a, b) => {
+            if (a.priority === 'urgent' && b.priority !== 'urgent') return -1;
+            if (a.priority !== 'urgent' && b.priority === 'urgent') return 1;
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
+    });
+    
+    // Calculate how many machines to show
+    const machineNumbers = Object.keys(machineQueues).sort();
+    const machinesToShow = machineNumbers.slice(0, currentQueueChunk * QUEUE_CHUNK_SIZE);
+    
+    let queueHtml = '';
+    
+    machinesToShow.forEach(machineNumber => {
+        const machinePrograms = machineQueues[machineNumber];
+        
+        // Filter by search term if provided
+        let filteredPrograms = machinePrograms;
+        if (searchTerm) {
+            filteredPrograms = machinePrograms.filter(program => 
+                program.designName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                program.machineNumber.toString().includes(searchTerm)
+            );
+        }
+        
+        if (filteredPrograms.length === 0) return;
+        
+        const currentProgram = filteredPrograms[0];
+        const queuePrograms = filteredPrograms.slice(1);
+        
+        queueHtml += renderMachineQueueCard(machineNumber, currentProgram, queuePrograms);
+    });
+    
+    // Add Load More button if there are more machines
+    if (machinesToShow.length < machineNumbers.length) {
+        queueHtml += `
+            <div class="text-center mt-4">
+                <button class="btn btn-outline-primary" onclick="loadMoreQueues()">
+                    <i class="fas fa-chevron-down me-2"></i>
+                    Load More (${machineNumbers.length - machinesToShow.length} remaining)
+                </button>
+            </div>
+        `;
+    }
+    
+    if (queueHtml === '') {
+        queueHtml = `
+            <div class="empty-queue">
+                <i class="fas fa-inbox"></i>
+                <h4>No programs in queue</h4>
+                <p class="mb-0">All machines are idle or no programs match your search</p>
+            </div>
+        `;
+    }
+    
+    queueContent.innerHTML = queueHtml;
+}
+
+function loadMoreQueues() {
+    currentQueueChunk++;
+    renderQueueView(document.getElementById('queueSearch').value, false);
+}
+
+function renderOperatorQueueView(searchTerm = '') {
+    const queueContent = document.getElementById('operatorQueueContent');
+    
+    // Group programs by machine
+    const machineQueues = {};
+    
+    programs.forEach(program => {
+        if (program.status !== 'completed') {
+            if (!machineQueues[program.machineNumber]) {
+                machineQueues[program.machineNumber] = [];
+            }
+            machineQueues[program.machineNumber].push(program);
+        }
+    });
+    
+    // Sort programs in each machine queue
+    Object.keys(machineQueues).forEach(machineNumber => {
+        machineQueues[machineNumber].sort((a, b) => {
+            if (a.priority === 'urgent' && b.priority !== 'urgent') return -1;
+            if (a.priority !== 'urgent' && b.priority === 'urgent') return 1;
+            return new Date(a.createdAt) - new Date(b.createdAt);
+        });
+    });
+    
+    let queueHtml = '';
+    
+    // Create queue cards for each machine
+    Object.keys(machineQueues).sort().forEach(machineNumber => {
+        const machinePrograms = machineQueues[machineNumber];
+        
+        // Filter by search term if provided
+        let filteredPrograms = machinePrograms;
+        if (searchTerm) {
+            filteredPrograms = machinePrograms.filter(program => 
+                program.designName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                program.machineNumber.toString().includes(searchTerm)
+            );
+        }
+        
+        if (filteredPrograms.length === 0) return;
+        
+        const currentProgram = filteredPrograms[0];
+        const queuePrograms = filteredPrograms.slice(1);
+        
+        queueHtml += `
+            <div class="card operator-queue-card mb-4 ${currentProgram.priority === 'urgent' ? 'urgent' : ''}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>Machine ${machineNumber}
+                    </h5>
+                    <span class="badge bg-primary">${filteredPrograms.length} program${filteredPrograms.length > 1 ? 's' : ''}</span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6 class="fw-semibold mb-3">Current Program</h6>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">${currentProgram.designName}</h6>
+                                        <p class="mb-1 small">Rounds: ${currentProgram.rounds}</p>
+                                        <p class="mb-0 small">Status: <span class="status-badge status-${currentProgram.status}">${currentProgram.status}</span></p>
+                                        ${currentProgram.priority === 'urgent' ? '<span class="badge bg-danger mt-1">URGENT</span>' : ''}
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-info" onclick="showProgramDetails('${currentProgram.id}')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${queuePrograms.length > 0 ? `
+                        <div>
+                            <h6 class="fw-semibold mb-3">Queued Programs (${queuePrograms.length})</h6>
+                            <div class="row g-2">
+                                ${queuePrograms.map(program => `
+                                    <div class="col-12 col-md-6 col-lg-4">
+                                        <div class="card ${program.priority === 'urgent' ? 'border-danger' : ''}">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        <h6 class="mb-1">${program.designName}</h6>
+                                                        <p class="mb-1 small">Rounds: ${program.rounds}</p>
+                                                        <p class="mb-0 small">Status: <span class="status-badge status-${program.status}">${program.status}</span></p>
+                                                        ${program.priority === 'urgent' ? '<span class="badge bg-danger mt-1">URGENT</span>' : ''}
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <div class="mt-2">
+                                                            <button class="btn btn-sm btn-info" onclick="showProgramDetails('${program.id}')">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="empty-queue">
+                            <i class="fas fa-check-circle"></i>
+                            <p class="mb-0">No programs in queue</p>
+                        </div>
+                    `}
+                </div>
+            </div>
+        `;
+    });
+    
+    if (queueHtml === '') {
+        queueHtml = `
+            <div class="empty-queue">
+                <i class="fas fa-inbox"></i>
+                <h4>No programs in queue</h4>
+                <p class="mb-0">All machines are idle or no programs match your search</p>
+            </div>
+        `;
+    }
+    
+    queueContent.innerHTML = queueHtml;
+}
+
+function viewMachineQueue(machineNumber) {
+    // Switch to queue tab
+    const queueTab = document.querySelector('[data-bs-target="#admQueue"]');
+    if (queueTab) {
+        queueTab.click();
+    }
+    
+    // Set search to filter by machine number
+    document.getElementById('queueSearch').value = machineNumber;
+    renderQueueView(machineNumber.toString());
+}
+
+function viewOperatorMachineQueue(machineNumber) {
+    // Switch to queue tab
+    const queueTab = document.querySelector('[data-bs-target="#opQueue"]');
+    if (queueTab) {
+        queueTab.click();
+    }
+    
+    // Set search to filter by machine number
+    document.getElementById('operatorQueueSearch').value = machineNumber;
+    renderOperatorQueueView(machineNumber.toString());
+}
+
+// --- FEEDER MANAGEMENT ---
+function addFeeder() {
+    if (feederCount >= 12) {
+        alert('Maximum 12 feeders allowed');
+        return;
+    }
+    
+    feederCount++;
+    const feederConfig = document.getElementById('feederConfig');
+    const newFeeder = document.createElement('div');
+    newFeeder.className = 'feeder-item';
+    newFeeder.innerHTML = `
+        <div class="row g-2 align-items-center">
+            <div class="col-8 col-md-9">
+                <label class="form-label small fw-semibold">Feeder ${feederCount}</label>
+                <div class="feeder-input-group">
+                    <input type="text" class="feeder-input feeder-yarn" placeholder="Enter yarn type" required>
+                </div>
+            </div>
+            <div class="col-4 col-md-3 d-flex align-items-end">
+                <button type="button" class="btn btn-danger btn-sm w-100 remove-feeder" onclick="removeFeeder(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    feederConfig.appendChild(newFeeder);
+    
+    // Show remove buttons on all feeders
+    document.querySelectorAll('.remove-feeder').forEach(btn => {
+        btn.style.display = 'block';
+    });
+    
+    // Hide add button if max reached
+    if (feederCount >= 12) {
+        document.querySelector('.add-feeder-btn').style.display = 'none';
+    }
+}
+
+function removeFeeder(button) {
+    if (feederCount <= 1) {
+        alert('At least one feeder is required');
+        return;
+    }
+    
+    const feederItem = button.closest('.feeder-item');
+    feederItem.remove();
+    feederCount--;
+    
+    // Renumber remaining feeders
+    document.querySelectorAll('.feeder-item').forEach((item, index) => {
+        const label = item.querySelector('label');
+        const input = item.querySelector('.feeder-input');
+        label.textContent = `Feeder ${index + 1}`;
+    });
+    
+    // Show add button
+    document.querySelector('.add-feeder-btn').style.display = 'inline-block';
+    
+    // Hide remove button if only one feeder left
+    if (feederCount === 1) {
+        document.querySelector('.remove-feeder').style.display = 'none';
+    }
+}
+
+function resetFeederInputs() {
+    const feederConfig = document.getElementById('feederConfig');
+    feederConfig.innerHTML = `
+        <div class="feeder-item">
+            <div class="row g-2 align-items-center">
+                <div class="col-8 col-md-9">
+                    <label class="form-label small fw-semibold">Feeder 1</label>
+                    <div class="feeder-input-group">
+                        <input type="text" class="feeder-input feeder-yarn" placeholder="Enter yarn type" required>
+                    </div>
+                </div>
+                <div class="col-4 col-md-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-sm w-100 remove-feeder" style="display:none;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    feederCount = 1;
+    document.querySelector('.add-feeder-btn').style.display = 'inline-block';
+}
+
+// --- IMAGE HANDLING FUNCTIONS ---
+function convertImageToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+        reader.readAsDataURL(file);
+    });
+}
+
+function compressBase64Image(base64String, maxWidth = 800, quality = 0.7) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > maxWidth) {
+                height = (height * maxWidth) / width;
+                width = maxWidth;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = base64String;
+    });
+}
+
+function showImageInModal(base64Data) {
+    document.getElementById('imageModalImg').src = base64Data;
+    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    modal.show();
+}
+
+// --- PROGRAM MANAGEMENT ---
+function requestCreateProgram() {
+    currentAction = 'create';
+    document.getElementById('passwordModalText').textContent = 'Enter 4-digit password to create program';
+    document.getElementById('passwordInput').value = '';
+    const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+    modal.show();
+}
+
+async function saveProgram() {
+    const machineNumber = parseInt(document.getElementById('machineNumber').value);
+    const designName = document.getElementById('designName').value.trim();
+    const rounds = parseInt(document.getElementById('rounds').value);
+    const priority = document.getElementById('priority').value;
+    
+    // Validation
+    if (!machineNumber || !designName || !rounds) {
+        alert('Please fill all required fields');
+        return false;
+    }
+    
+    // Get feeder configurations
+    const feeders = {};
+    const feederInputs = document.querySelectorAll('.feeder-input');
+    let hasEmptyFeeder = false;
+    
+    feederInputs.forEach((input, index) => {
+        if (!input.value.trim()) {
+            hasEmptyFeeder = true;
+            input.closest('.feeder-input-group').style.borderColor = '#dc3545';
+        } else {
+            feeders[`feeder${index + 1}`] = input.value.trim();
+            input.closest('.feeder-input-group').style.borderColor = '#dee2e6';
+        }
+    });
+    
+    if (hasEmptyFeeder) {
+        alert('Please enter yarn type for all feeders');
+        return false;
+    }
+
+    // Fill remaining feeders with empty values (they will be hidden)
+    for (let i = feederInputs.length + 1; i <= 12; i++) {
+        feeders[`feeder${i}`] = '';
+    }
+
+    const fileInput = document.getElementById('designImage');
+    let photoData = null;
+
+    try {
+        showLoading(true);
+        
+        if (fileInput.files[0]) {
+            photoData = await convertImageToBase64(fileInput.files[0]);
+            
+            if (photoData.length > 500000) {
+                photoData = await compressBase64Image(photoData, 600, 0.6);
+            }
+        }
+
+        const programData = {
+            machineNumber: machineNumber,
+            designName: designName,
+            rounds: rounds,
+            priority: priority,
+            feeders: feeders,
+            status: 'pending',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            photoData: photoData
+        };
+
+        await db.collection("programs").add(programData);
+        
+        alert('Program saved successfully!');
+        document.getElementById('programForm').reset();
+        document.getElementById('designPreviewWrap').innerHTML = '';
+        resetFeederInputs();
+        
+        return true;
+        
+    } catch (error) {
+        console.error('Error saving program:', error);
+        alert('Error saving program: ' + error.message);
+        return false;
+    } finally {
+        showLoading(false);
+    }
+}
+
+function assignProgram(machineNumber) {
+    const createProgramTab = document.querySelector('[data-bs-target="#admPrograms"]');
+    if (createProgramTab) {
+        createProgramTab.click();
+    }
+    document.getElementById('machineNumber').value = machineNumber;
+}
+
+// --- LOADING MANAGEMENT ---
+function showLoading(show) {
+    const overlay = document.getElementById('loadingOverlay');
+    const form = document.getElementById('programForm');
+    const inputs = form.querySelectorAll('input, select, button');
+    
+    if (show) {
+        overlay.style.display = 'block';
+        inputs.forEach(input => {
+            input.disabled = true;
+        });
+    } else {
+        overlay.style.display = 'none';
+        inputs.forEach(input => {
+            input.disabled = false;
+        });
+    }
+}
+
+// --- PASSWORD PROTECTED ACTIONS ---
+function requestStartProgram(machineNumber, programId) {
+    currentAction = 'start';
+    currentMachineNumber = machineNumber;
+    currentProgramId = programId;
+    document.getElementById('passwordModalText').textContent = 'Enter 4-digit password to start program';
+    document.getElementById('passwordInput').value = '';
+    const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+    modal.show();
+}
+
+function requestCompleteProgram(machineNumber, programId) {
+    currentAction = 'complete';
+    currentMachineNumber = machineNumber;
+    currentProgramId = programId;
+    document.getElementById('passwordModalText').textContent = 'Enter 4-digit password to complete program';
+    document.getElementById('passwordInput').value = '';
+    const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+    modal.show();
+}
+
+function requestDeleteProgram(programId) {
+    const program = programs.find(p => p.id === programId);
+    if (!program) {
+        alert('Program not found!');
+        return;
+    }
+
+    if (program.status === 'running' || program.status === 'completed') {
+        alert('Cannot delete running or completed programs!');
+        return;
+    }
+
+    currentAction = 'delete';
+    currentProgramId = programId;
+    document.getElementById('passwordModalText').textContent = 'Enter 4-digit password to delete program';
+    document.getElementById('passwordInput').value = '';
+    const modal = new bootstrap.Modal(document.getElementById('passwordModal'));
+    modal.show();
+}
+
+async function verifyPassword() {
+    const enteredPassword = document.getElementById('passwordInput').value;
+    
+    if (enteredPassword === PASSWORD) {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('passwordModal'));
+        modal.hide();
+        
+        if (currentAction === 'create') {
+            await saveProgram();
+        } else if (currentAction === 'start') {
+            await startProgram(currentMachineNumber, currentProgramId);
+        } else if (currentAction === 'complete') {
+            await completeProgram(currentMachineNumber, currentProgramId);
+        } else if (currentAction === 'delete') {
+            await deleteProgram(currentProgramId);
+        }
+    } else {
+        alert('Incorrect password! Please try again.');
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('passwordInput').focus();
+    }
+}
+
+async function startProgram(machineNumber, programId) {
+    try {
+        await db.collection("programs").doc(programId).update({
+            status: 'running',
+            startedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (error) {
+        console.error('Error starting program:', error);
+        alert('Error starting program');
+    }
+}
+
+async function completeProgram(machineNumber, programId) {
+    try {
+        await db.collection("programs").doc(programId).update({
+            status: 'completed',
+            completedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (error) {
+        console.error('Error completing program:', error);
+        alert('Error completing program');
+    }
+}
+
+async function deleteProgram(programId) {
+    const program = programs.find(p => p.id === programId);
+    if (!program) {
+        alert('Program not found!');
+        return;
+    }
+
+    if (program.status === 'running' || program.status === 'completed') {
+        alert('Cannot delete running or completed programs!');
+        return;
+    }
+
+    try {
+        await db.collection("programs").doc(programId).delete();
+        alert('Program deleted successfully!');
+    } catch (error) {
+        console.error('Error deleting program:', error);
+        alert('Error deleting program');
+    }
+}
+
+// --- PROGRAM DETAILS MODAL ---
+function showProgramDetails(programId) {
+    const program = programs.find(p => p.id === programId);
+    if (!program) return;
+    
+    const content = document.getElementById('programDetailsContent');
+    content.innerHTML = `
+        <div class="program-details">
+            <h6 class="fw-semibold mb-3">Program Details</h6>
+            <div class="row g-2 mb-2">
+                <div class="col-6"><strong>Machine:</strong></div>
+                <div class="col-6">${program.machineNumber}</div>
+            </div>
+            <div class="row g-2 mb-2">
+                <div class="col-6"><strong>Design:</strong></div>
+                <div class="col-6">${program.designName}</div>
+            </div>
+            <div class="row g-2 mb-2">
+                <div class="col-6"><strong>Rounds:</strong></div>
+                <div class="col-6">${program.rounds}</div>
+            </div>
+            <div class="row g-2 mb-2">
+                <div class="col-6"><strong>Priority:</strong></div>
+                <div class="col-6"><span class="badge ${program.priority === 'urgent' ? 'bg-danger' : 'bg-primary'}">${program.priority.toUpperCase()}</span></div>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6"><strong>Status:</strong></div>
+                <div class="col-6"><span class="status-badge status-${program.status}">${program.status}</span></div>
+            </div>
+            <div class="row g-2 mb-2">
+                <div class="col-6"><strong>Created:</strong></div>
+                <div class="col-6">${program.createdAt.toLocaleString()}</div>
+            </div>
+            ${program.startedAt ? `
+                <div class="row g-2 mb-2">
+                    <div class="col-6"><strong>Started:</strong></div>
+                    <div class="col-6">${program.startedAt.toLocaleString()}</div>
+                </div>
+            ` : ''}
+            ${program.completedAt ? `
+                <div class="row g-2 mb-3">
+                    <div class="col-6"><strong>Completed:</strong></div>
+                    <div class="col-6">${program.completedAt.toLocaleString()}</div>
+                </div>
+            ` : ''}
+            
+            <h6 class="fw-semibold mt-3 mb-2">Feeder Configuration</h6>
+            <div class="feeder-grid mb-3">
+                ${Array.from({length: 12}, (_, i) => {
+                    const feederKey = `feeder${i + 1}`;
+                    const yarnValue = program.feeders[feederKey];
+                    // Check if yarnValue exists and is not empty, null, or placeholder text
+                    if (yarnValue && 
+                        yarnValue.trim() !== '' && 
+                        yarnValue.trim() !== 'Not Configured' && 
+                        yarnValue.trim() !== '-' &&
+                        yarnValue.trim() !== 'null') {
+                        return `
+                            <div class="feeder-grid-item">
+                                <div class="feeder-number">F${i + 1}</div>
+                                <div class="feeder-value">${yarnValue}</div>
+                            </div>
+                        `;
+                    }
+                    return '';
+                }).join('')}
+                ${Array.from({length: 12}, (_, i) => {
+                    const feederKey = `feeder${i + 1}`;
+                    const yarnValue = program.feeders[feederKey];
+                    return yarnValue && yarnValue.trim() !== '' && yarnValue.trim() !== 'Not Configured' && yarnValue.trim() !== '-' && yarnValue.trim() !== 'null';
+                }).filter(Boolean).length === 0 ? `
+                    <div class="feeder-grid-item text-muted">
+                        <div class="feeder-number">-</div>
+                        <div class="feeder-value">No feeders configured</div>
+                    </div>
+                ` : ''}
+            </div>
+            
+            ${program.photoData ? `
+                <h6 class="fw-semibold mt-3 mb-2">Design Image</h6>
+                <div class="text-center">
+                    <img src="${program.photoData}" class="thumbnail" onclick="event.stopPropagation(); showImageInModal('${program.photoData}')"/>
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('programDetailsModal')).show();
+}
+
+// --- EDIT PROGRAM FUNCTIONALITY ---
+function editProgram(programId) {
+    const program = programs.find(p => p.id === programId);
+    if (!program) return;
+    
+    const content = document.getElementById('editProgramContent');
+    content.innerHTML = `
+        <form id="editProgramForm">
+            <div class="row g-2 mb-3">
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Design Name</label>
+                    <input type="text" class="form-control" id="editDesignName" value="${program.designName}" required>
+                </div>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold">Rounds</label>
+                    <input type="number" class="form-control" id="editRounds" value="${program.rounds}" min="1" required>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label fw-semibold">Priority</label>
+                    <select class="form-select" id="editPriority" required>
+                        <option value="normal" ${program.priority === 'normal' ? 'selected' : ''}>Normal</option>
+                        <option value="urgent" ${program.priority === 'urgent' ? 'selected' : ''}>Urgent</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <h6 class="fw-semibold mb-3">Feeder Configuration</h6>
+                <div id="editFeederConfig">
+                    ${Object.entries(program.feeders).map(([feeder, yarn], index) => `
+                        <div class="feeder-item">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-8 col-md-9">
+                                    <label class="form-label small fw-semibold">${feeder.replace('feeder', 'Feeder ')}</label>
+                                    <div class="feeder-input-group">
+                                        <input type="text" class="feeder-input edit-feeder-yarn" value="${yarn}" placeholder="Enter yarn type" required>
+                                    </div>
+                                </div>
+                                ${index > 0 ? `
+                                    <div class="col-4 col-md-3 d-flex align-items-end">
+                                        <button type="button" class="btn btn-danger btn-sm w-100 remove-edit-feeder" onclick="removeEditFeeder(this)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                ` : `
+                                    <div class="col-4 col-md-3 d-flex align-items-end">
+                                        <button type="button" class="btn btn-danger btn-sm w-100 remove-edit-feeder" style="display:none;">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm add-feeder-btn mt-2" onclick="addEditFeeder()">
+                    <i class="fas fa-plus me-1"></i>Add Feeder
+                </button>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-success flex-fill" onclick="updateProgram('${programId}')">
+                    <i class="fas fa-save me-1"></i>Update Program
+                </button>
+                <button type="button" class="btn btn-secondary flex-fill" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>Cancel
+                </button>
+            </div>
+        </form>
+    `;
+    
+    currentProgramId = programId;
+    const modal = new bootstrap.Modal(document.getElementById('editProgramModal'));
+    modal.show();
+}
+
+function addEditFeeder() {
+    const editFeederConfig = document.getElementById('editFeederConfig');
+    const feederCount = editFeederConfig.querySelectorAll('.feeder-item').length;
+    
+    if (feederCount >= 12) {
+        alert('Maximum 12 feeders allowed');
+        return;
+    }
+    
+    const newFeeder = document.createElement('div');
+    newFeeder.className = 'feeder-item';
+    newFeeder.innerHTML = `
+        <div class="row g-2 align-items-center">
+            <div class="col-8 col-md-9">
+                <label class="form-label small fw-semibold">Feeder ${feederCount + 1}</label>
+                <div class="feeder-input-group">
+                    <input type="text" class="feeder-input edit-feeder-yarn" placeholder="Enter yarn type" required>
+                </div>
+            </div>
+            <div class="col-4 col-md-3 d-flex align-items-end">
+                <button type="button" class="btn btn-danger btn-sm w-100 remove-edit-feeder" onclick="removeEditFeeder(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    editFeederConfig.appendChild(newFeeder);
+    
+    // Show all remove buttons
+    document.querySelectorAll('.remove-edit-feeder').forEach(btn => {
+        btn.style.display = 'block';
+    });
+}
+
+function removeEditFeeder(button) {
+    const editFeederConfig = document.getElementById('editFeederConfig');
+    const feederItems = editFeederConfig.querySelectorAll('.feeder-item');
+    
+    if (feederItems.length <= 1) {
+        alert('At least one feeder is required');
+        return;
+    }
+    
+    const feederItem = button.closest('.feeder-item');
+    feederItem.remove();
+    
+    // Renumber remaining feeders
+    editFeederConfig.querySelectorAll('.feeder-item').forEach((item, index) => {
+        const label = item.querySelector('label');
+        label.textContent = `Feeder ${index + 1}`;
+    });
+}
+
+async function updateProgram(programId) {
+    const designName = document.getElementById('editDesignName').value.trim();
+    const rounds = parseInt(document.getElementById('editRounds').value);
+    const priority = document.getElementById('editPriority').value;
+    
+    if (!designName || !rounds) {
+        alert('Please fill all required fields');
+        return;
+    }
+    
+    // Get feeder configurations
+    const feeders = {};
+    const feederInputs = document.querySelectorAll('.edit-feeder-yarn');
+    let hasEmptyFeeder = false;
+    
+    feederInputs.forEach((input, index) => {
+        if (!input.value.trim()) {
+            hasEmptyFeeder = true;
+            input.closest('.feeder-input-group').style.borderColor = '#dc3545';
+        } else {
+            feeders[`feeder${index + 1}`] = input.value.trim();
+            input.closest('.feeder-input-group').style.borderColor = '#dee2e6';
+        }
+    });
+    
+    if (hasEmptyFeeder) {
+        alert('Please enter yarn type for all feeders');
+        return;
+    }
+
+    // Fill remaining feeders with empty values
+    for (let i = feederInputs.length + 1; i <= 12; i++) {
+        feeders[`feeder${i}`] = '';
+    }
+
+    try {
+        showLoading(true);
+        
+        await db.collection("programs").doc(programId).update({
+            designName: designName,
+            rounds: rounds,
+            priority: priority,
+            feeders: feeders
+        });
+        
+        alert('Program updated successfully!');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editProgramModal'));
+        modal.hide();
+        
+    } catch (error) {
+        console.error('Error updating program:', error);
+        alert('Error updating program: ' + error.message);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// --- PROGRAM HISTORY ---
+let adminHistoryPage = 1;
+let operatorHistoryPage = 1;
+
+function renderProgramHistory() {
+    const filterValue = document.getElementById('historyMachineFilter').value;
+    let filteredHistory = programHistory;
+    
+    if (filterValue !== 'all') {
+        filteredHistory = programHistory.filter(p => p.machineNumber == filterValue);
+    }
+    
+    filteredHistory.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    const startIndex = (adminHistoryPage - 1) * HISTORY_PAGE_SIZE;
+    const paginatedHistory = filteredHistory.slice(startIndex, startIndex + HISTORY_PAGE_SIZE);
+    
+    const tbody = document.getElementById('programHistory');
+    tbody.innerHTML = '';
+    
+    // Show loading for large datasets
+    if (filteredHistory.length > 50) {
+        showTableLoading(tbody, 'Loading history data...');
+        setTimeout(() => renderTableData(tbody, paginatedHistory), 100);
+    } else {
+        renderTableData(tbody, paginatedHistory);
+    }
+    
+    renderPagination(filteredHistory.length, 'historyPagination', adminHistoryPage);
+}
+
+function renderTableData(tbody, data) {
+    tbody.innerHTML = '';
+    
+    data.forEach(program => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${program.machineNumber}</td>
+            <td>${program.designName}</td>
+            <td>${program.rounds}</td>
+            <td><span class="status-badge status-${program.status}">${program.status}</span></td>
+            <td>${program.createdAt.toLocaleString()}</td>
+            <td>${program.startedAt ? program.startedAt.toLocaleString() : '-'}</td>
+            <td>${program.completedAt ? program.completedAt.toLocaleString() : '-'}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function showTableLoading(tbody, message) {
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="7" class="text-center py-3">
+                <div class="spinner-border spinner-border-sm me-2"></div>
+                ${message}
+            </td>
+        </tr>
+    `;
+}
+
+function renderOperatorProgramHistory() {
+    const filterValue = document.getElementById('operatorHistoryMachineFilter').value;
+    let filteredHistory = programHistory;
+    
+    if (filterValue !== 'all') {
+        filteredHistory = programHistory.filter(p => p.machineNumber == filterValue);
+    }
+    
+    filteredHistory.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    const startIndex = (operatorHistoryPage - 1) * HISTORY_PAGE_SIZE;
+    const paginatedHistory = filteredHistory.slice(startIndex, startIndex + HISTORY_PAGE_SIZE);
+    
+    const tbody = document.getElementById('operatorProgramHistory');
+    tbody.innerHTML = '';
+    
+    paginatedHistory.forEach(program => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${program.machineNumber}</td>
+            <td>${program.designName}</td>
+            <td>${program.rounds}</td>
+            <td><span class="status-badge status-${program.status}">${program.status}</span></td>
+            <td>${program.createdAt.toLocaleString()}</td>
+            <td>${program.startedAt ? program.startedAt.toLocaleString() : '-'}</td>
+            <td>${program.completedAt ? program.completedAt.toLocaleString() : '-'}</td>
+        `;
+        tbody.appendChild(row);
+    });
+    
+    renderPagination(filteredHistory.length, 'operatorHistoryPagination', operatorHistoryPage);
+}
+
+function renderPagination(totalItems, paginationId, currentPage) {
+    const totalPages = Math.ceil(totalItems / HISTORY_PAGE_SIZE);
+    const pagination = document.getElementById(paginationId);
+    pagination.innerHTML = '';
+    
+    for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<button class="page-link" onclick="changeHistoryPage(${i}, '${paginationId === 'operatorHistoryPagination' ? 'operator' : 'admin'}')">${i}</button>`;
+        pagination.appendChild(li);
+    }
+}
+
+function changeHistoryPage(page, userType) {
+    if (userType === 'operator') {
+        operatorHistoryPage = page;
+        renderOperatorProgramHistory();
+    } else {
+        adminHistoryPage = page;
+        renderProgramHistory();
+    }
+}
+
+// --- EXPORT TO EXCEL ---
+function exportHistoryToExcel() {
+    const filterValue = document.getElementById('historyMachineFilter').value;
+    const startDate = document.getElementById('excelStartDate').value;
+    const endDate = document.getElementById('excelEndDate').value;
+    
+    let filteredHistory = programHistory;
+    
+    if (filterValue !== 'all') {
+        filteredHistory = programHistory.filter(p => p.machineNumber == filterValue);
+    }
+    
+    if (startDate) {
+        filteredHistory = filteredHistory.filter(p => new Date(p.createdAt) >= new Date(startDate));
+    }
+    
+    if (endDate) {
+        filteredHistory = filteredHistory.filter(p => new Date(p.createdAt) <= new Date(endDate + 'T23:59:59'));
+    }
+    
+    const excelData = [
+        ['Machine', 'Design', 'Rounds', 'Status', 'Created', 'Started', 'Completed', 'Feeders']
+    ];
+    
+    filteredHistory.forEach(program => {
+        const feeders = Object.entries(program.feeders)
+    .filter(([_, yarn]) => yarn && yarn.trim() !== '' && yarn.trim() !== 'Not Configured' && yarn.trim() !== '-')
+    .map(([feeder, yarn]) => `${feeder}: ${yarn}`)
+    .join(', ');
+            
+        excelData.push([
+            program.machineNumber,
+            program.designName,
+            program.rounds,
+            program.status,
+            program.createdAt.toLocaleString(),
+            program.startedAt ? program.startedAt.toLocaleString() : '-',
+            program.completedAt ? program.completedAt.toLocaleString() : '-',
+            feeders
+        ]);
+    });
+    
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Program History');
+    
+    const fileName = `ProgramHistory_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+}
+
+// --- IMAGE PREVIEW ---
+document.getElementById('designImage').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const previewWrap = document.getElementById('designPreviewWrap');
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewWrap.innerHTML = `<img src="${e.target.result}" class="thumbnail" onclick="showImageInModal('${e.target.result}')"/>`;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        previewWrap.innerHTML = '';
+    }
+});
+
+// Make functions available globally
+window.loginAsAdmin = loginAsAdmin;
+window.loginAsOperator = loginAsOperator;
+window.logout = logout;
+window.confirmLogout = confirmLogout;
+window.requestDeleteProgram = requestDeleteProgram;
+window.deleteProgram = deleteProgram;
+window.showImageInModal = showImageInModal;
+window.exportHistoryToExcel = exportHistoryToExcel;
+window.changeHistoryPage = changeHistoryPage;
+window.addFeeder = addFeeder;
+window.removeFeeder = removeFeeder;
+window.showProgramDetails = showProgramDetails;
+window.editProgram = editProgram;
+window.addEditFeeder = addEditFeeder;
+window.removeEditFeeder = removeEditFeeder;
+window.updateProgram = updateProgram;
+window.requestStartProgram = requestStartProgram;
+window.requestCompleteProgram = requestCompleteProgram;
+window.verifyPassword = verifyPassword;
+window.viewMachineQueue = viewMachineQueue;
+window.viewOperatorMachineQueue = viewOperatorMachineQueue;
+window.renderQueueView = renderQueueView;
+window.renderOperatorQueueView = renderOperatorQueueView;
+</script>
+</body>
+</html>
