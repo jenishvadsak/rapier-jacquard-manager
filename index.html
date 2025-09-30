@@ -558,6 +558,32 @@
             left: 10px;
             max-width: none;
         }
+        
+        /* Login form optimization */
+        .login-form .form-control {
+            font-size: 16px; /* Prevent zoom on iOS */
+            padding: 12px 15px;
+        }
+        
+        .login-form .btn {
+            padding: 12px;
+            font-size: 1rem;
+        }
+        
+        /* Logout button optimization */
+        .btn-outline-danger.btn-sm {
+            font-size: 0.8rem;
+            padding: 6px 10px;
+        }
+        
+        /* Queue labels optimization */
+        .queue-card .card-header h5 {
+            font-size: 0.9rem;
+        }
+        
+        .queue-card .card-body h6 {
+            font-size: 0.85rem;
+        }
     }
 
     @media (max-width: 576px) {
@@ -672,6 +698,29 @@
         
         .d-flex.flex-column.flex-md-row.gap-2.mb-3.date-filters .btn {
             font-size: 0.75rem;
+        }
+        
+        /* Login form optimization */
+        .login-card h3 {
+            font-size: 1.3rem;
+        }
+        
+        .login-card p {
+            font-size: 0.9rem;
+        }
+        
+        /* Form font size optimization */
+        .form-control, .form-select {
+            font-size: 16px; /* Prevent zoom on iOS */
+        }
+        
+        /* Queue card optimization */
+        .queue-card .card-header {
+            padding: 10px;
+        }
+        
+        .queue-card .card-body {
+            padding: 10px;
         }
     }
 
@@ -1134,6 +1183,37 @@
         width: 1rem;
         height: 1rem;
         margin-right: 8px;
+    }
+    
+    /* Compact feeder info in machine card */
+    .compact-feeders {
+        margin-top: 8px;
+    }
+    
+    .compact-feeders .badge {
+        font-size: 0.6rem;
+        margin: 1px;
+        padding: 2px 4px;
+    }
+    
+    /* Notification badge */
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: var(--danger);
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .notification-indicator {
+        position: relative;
     }
     </style>
 </head>
@@ -1624,7 +1704,7 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 
 // --- SETTINGS ---
-const PASSWORD = "1234";
+const PASSWORD = "5678"; // Changed password
 const TOTAL_MACHINES = 24;
 const HISTORY_PAGE_SIZE = 10;
 
@@ -1645,6 +1725,7 @@ let currentProgramId = null;
 let uploading = false;
 let feederCount = 1;
 let filteredMachines = [];
+let newProgramNotifications = {};
 
 // PWA variables
 let deferredPrompt = null;
@@ -1662,6 +1743,7 @@ function initializeApp() {
     setupAuthStateListener();
     addViewToggleButton();
     setupPWA();
+    setupNotifications();
     
     // Check if user was previously logged in
     checkPreviousLogin();
@@ -1878,6 +1960,9 @@ function loginAsOperator() {
     showDashboard('operator');
     loadPrograms();
     showNotification('Welcome back, Operator!', 'success');
+    
+    // Check for new program notifications
+    checkForNewPrograms();
 }
 
 function confirmLogout() {
@@ -1998,7 +2083,8 @@ function loadPrograms() {
                 photoData: data.photoData || null,
                 createdAt: data.createdAt ? data.createdAt.toDate() : new Date(),
                 startedAt: data.startedAt ? data.startedAt.toDate() : null,
-                completedAt: data.completedAt ? data.completedAt.toDate() : null
+                completedAt: data.completedAt ? data.completedAt.toDate() : null,
+                lastModified: data.lastModified ? data.lastModified.toDate() : data.createdAt ? data.createdAt.toDate() : new Date()
             };
             
             programs.push(program);
@@ -2078,10 +2164,10 @@ function renderMachinesGrid() {
                             <p class="mb-1 small"><strong>Design:</strong> ${currentProgram.designName}</p>
                             <p class="mb-2 small"><strong>Rounds:</strong> ${currentProgram.rounds}</p>
                             
-                            <div class="feeders-info mb-3">
-                                <small class="text-muted">Feeders Configuration:</small>
-                                <div class="feeder-grid">
-                                    ${createFeederGrid(currentProgram)}
+                            <div class="compact-feeders mb-3">
+                                <small class="text-muted">Feeders:</small>
+                                <div>
+                                    ${createCompactFeederBadges(currentProgram)}
                                 </div>
                             </div>
                             
@@ -2144,6 +2230,58 @@ function renderMachinesGrid() {
         
         grid.appendChild(card);
     });
+}
+
+function createCompactFeederBadges(program) {
+    let badgesHtml = '';
+    let feederCount = 0;
+    
+    // Show only first 3 feeders with values
+    for (let i = 1; i <= 12; i++) {
+        const feederKey = `feeder${i}`;
+        const yarnValue = program.feeders[feederKey];
+        
+        // Check if yarnValue exists and is not empty, null, or placeholder text
+        if (yarnValue && 
+            yarnValue.trim() !== '' && 
+            yarnValue.trim() !== 'Not Configured' && 
+            yarnValue.trim() !== '-' &&
+            yarnValue.trim() !== 'null') {
+            
+            if (feederCount < 3) {
+                badgesHtml += `<span class="badge bg-secondary feeder-badge">F${i}: ${yarnValue}</span>`;
+                feederCount++;
+            }
+        }
+    }
+    
+    // If more than 3 feeders, add a "more" badge
+    if (feederCount >= 3) {
+        badgesHtml += `<span class="badge bg-light text-dark feeder-badge">+${countConfiguredFeeders(program) - 3} more</span>`;
+    }
+    
+    // If no feeders have values, show a message
+    if (badgesHtml === '') {
+        badgesHtml = `<span class="badge bg-light text-dark feeder-badge">No feeders</span>`;
+    }
+    
+    return badgesHtml;
+}
+
+function countConfiguredFeeders(program) {
+    let count = 0;
+    for (let i = 1; i <= 12; i++) {
+        const feederKey = `feeder${i}`;
+        const yarnValue = program.feeders[feederKey];
+        if (yarnValue && 
+            yarnValue.trim() !== '' && 
+            yarnValue.trim() !== 'Not Configured' && 
+            yarnValue.trim() !== '-' &&
+            yarnValue.trim() !== 'null') {
+            count++;
+        }
+    }
+    return count;
 }
 
 function createFeederGrid(program) {
@@ -2237,10 +2375,10 @@ function renderOperatorMachinesGrid() {
                         <p class="mb-1 small"><strong>Design:</strong> ${currentProgram.designName}</p>
                         <p class="mb-2 small"><strong>Rounds:</strong> ${currentProgram.rounds}</p>
                         
-                        <div class="feeders-info mb-3">
-                            <small class="text-muted">Feeders Configuration:</small>
-                            <div class="feeder-grid">
-                                ${createFeederGrid(currentProgram)}
+                        <div class="compact-feeders mb-3">
+                            <small class="text-muted">Feeders:</small>
+                            <div>
+                                ${createCompactFeederBadges(currentProgram)}
                             </div>
                         </div>
                         
@@ -2795,10 +2933,14 @@ async function saveProgram() {
             feeders: feeders,
             status: 'pending',
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastModified: firebase.firestore.FieldValue.serverTimestamp(),
             photoData: photoData
         };
 
         await db.collection("programs").add(programData);
+        
+        // Send notification for new program
+        sendProgramNotification(machineNumber, 'created', designName);
         
         alert('Program saved successfully!');
         document.getElementById('programForm').reset();
@@ -2911,7 +3053,8 @@ async function startProgram(machineNumber, programId) {
     try {
         await db.collection("programs").doc(programId).update({
             status: 'running',
-            startedAt: firebase.firestore.FieldValue.serverTimestamp()
+            startedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastModified: firebase.firestore.FieldValue.serverTimestamp()
         });
     } catch (error) {
         console.error('Error starting program:', error);
@@ -2925,6 +3068,7 @@ async function completeProgram(machineNumber, programId) {
         await db.collection("programs").doc(programId).update({
             status: 'completed',
             completedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastModified: firebase.firestore.FieldValue.serverTimestamp(),
             photoData: null  // Remove image data to save space
         });
     } catch (error) {
@@ -3215,8 +3359,15 @@ async function updateProgram(programId) {
             designName: designName,
             rounds: rounds,
             priority: priority,
-            feeders: feeders
+            feeders: feeders,
+            lastModified: firebase.firestore.FieldValue.serverTimestamp()
         });
+        
+        // Send notification for updated program
+        const program = programs.find(p => p.id === programId);
+        if (program) {
+            sendProgramNotification(program.machineNumber, 'updated', designName);
+        }
         
         alert('Program updated successfully!');
         const modal = bootstrap.Modal.getInstance(document.getElementById('editProgramModal'));
@@ -3566,6 +3717,19 @@ function installPwa() {
 }
 
 // --- NOTIFICATION SYSTEM ---
+function setupNotifications() {
+    // Check if browser supports notifications
+    if (!("Notification" in window)) {
+        console.log("This browser does not support notifications");
+        return;
+    }
+    
+    // Request permission for notifications
+    if (Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+}
+
 function showNotification(message, type = 'info') {
     // Create notification element
     const notification = document.createElement('div');
@@ -3593,6 +3757,102 @@ function showNotification(message, type = 'info') {
             notification.remove();
         }
     }, 5000);
+    
+    // Also show browser notification if permitted
+    if (Notification.permission === "granted") {
+        new Notification("Rapier Jacquard Manager", {
+            body: message,
+            icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c3e50'%3E%3Cpath d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z'/%3E%3C/svg%3E"
+        });
+    }
+}
+
+// Send notification for program changes
+function sendProgramNotification(machineNumber, action, designName) {
+    // Store notification in database for operators
+    const notificationData = {
+        machineNumber: machineNumber,
+        action: action,
+        designName: designName,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        readBy: []
+    };
+    
+    db.collection("notifications").add(notificationData)
+        .then(() => {
+            console.log("Notification sent for program", action);
+        })
+        .catch((error) => {
+            console.error("Error sending notification:", error);
+        });
+}
+
+// Check for new programs when operator logs in
+function checkForNewPrograms() {
+    if (currentUser !== 'operator') return;
+    
+    // Get notifications from the last 24 hours
+    const last24Hours = new Date();
+    last24Hours.setHours(last24Hours.getHours() - 24);
+    
+    db.collection("notifications")
+        .where("timestamp", ">", last24Hours)
+        .orderBy("timestamp", "desc")
+        .limit(10)
+        .get()
+        .then((snapshot) => {
+            const newNotifications = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                // Check if operator has already seen this notification
+                if (!data.readBy || !data.readBy.includes(currentUser)) {
+                    newNotifications.push(data);
+                }
+            });
+            
+            if (newNotifications.length > 0) {
+                showNewProgramsNotification(newNotifications);
+            }
+        })
+        .catch((error) => {
+            console.error("Error checking for new programs:", error);
+        });
+}
+
+function showNewProgramsNotification(notifications) {
+    let message = "";
+    
+    if (notifications.length === 1) {
+        const notif = notifications[0];
+        message = `Machine ${notif.machineNumber} has a ${notif.action} program: ${notif.designName}`;
+    } else {
+        message = `${notifications.length} machines have new or updated programs`;
+    }
+    
+    showNotification(message, 'info');
+    
+    // Mark notifications as read
+    const last24Hours = new Date();
+    last24Hours.setHours(last24Hours.getHours() - 24);
+    
+    db.collection("notifications")
+        .where("timestamp", ">", last24Hours)
+        .get()
+        .then((snapshot) => {
+            const batch = db.batch();
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                if (!data.readBy || !data.readBy.includes(currentUser)) {
+                    const readBy = data.readBy || [];
+                    readBy.push(currentUser);
+                    batch.update(doc.ref, { readBy: readBy });
+                }
+            });
+            return batch.commit();
+        })
+        .catch((error) => {
+            console.error("Error marking notifications as read:", error);
+        });
 }
 
 // Make functions available globally
