@@ -143,25 +143,39 @@
         border-radius: 8px;
     }
 
-    /* PWA Install Prompt */
-    .pwa-install-prompt {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: white;
-        border-radius: 12px;
-        padding: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        z-index: 10000;
-        max-width: 300px;
-        border: 1px solid #e9ecef;
-        display: none;
-    }
+    /* PWA Install Prompt - ensure it's visible */
+.pwa-install-prompt {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 10000;
+    max-width: 300px;
+    border: 1px solid #e9ecef;
+    display: none; /* Start hidden */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
 
-    .pwa-install-prompt.show {
-        display: block;
-        animation: slideInUp 0.3s ease;
+.pwa-install-prompt.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .pwa-install-prompt {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
     }
+}
 
     @keyframes slideInUp {
         from {
@@ -1786,7 +1800,7 @@ function initializeApp() {
     setupPWA();
     registerServiceWorker();
     
-    // Request notification permission for browser notifications
+    // Request notification permission
     setTimeout(() => {
         requestNotificationPermission();
     }, 2000);
@@ -3899,7 +3913,6 @@ document.getElementById('designImage').addEventListener('change', function(e) {
     }
 });
 
-// --- PWA FUNCTIONALITY ---
 function setupPWA() {
     console.log('Setting up PWA...');
     
@@ -3907,33 +3920,47 @@ function setupPWA() {
     if (window.matchMedia('(display-mode: standalone)').matches) {
         isAppInstalled = true;
         console.log('App is running in standalone mode');
+        document.body.classList.add('pwa-installed');
     }
     
     // Check for iOS standalone mode
     if (window.navigator.standalone === true) {
         isAppInstalled = true;
         console.log('App is running in iOS standalone mode');
+        document.body.classList.add('pwa-installed');
     }
     
     // Listen for beforeinstallprompt event
     window.addEventListener('beforeinstallprompt', (e) => {
         console.log('beforeinstallprompt event fired');
+        
         // Prevent the mini-infobar from appearing on mobile
         e.preventDefault();
+        
         // Stash the event so it can be triggered later
         deferredPrompt = e;
+        
+        console.log('Deferred prompt stored:', !!deferredPrompt);
         
         // Check if prompt was recently dismissed
         const promptDismissed = localStorage.getItem('pwaPromptDismissed');
         const dismissTime = promptDismissed ? parseInt(promptDismissed) : 0;
         const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
         
+        console.log('Prompt check:', {
+            isAppInstalled,
+            dismissTime,
+            oneWeekAgo,
+            shouldShow: !isAppInstalled && dismissTime < oneWeekAgo
+        });
+        
         // Show install prompt if app is not installed and not recently dismissed
         if (!isAppInstalled && dismissTime < oneWeekAgo) {
             console.log('Showing PWA install prompt');
+            // Show after a short delay
             setTimeout(() => {
                 showPwaPrompt();
-            }, 5000); // Show after 5 seconds
+            }, 3000);
         }
     });
     
@@ -3943,8 +3970,21 @@ function setupPWA() {
         isAppInstalled = true;
         deferredPrompt = null;
         hidePwaPrompt();
+        document.body.classList.add('pwa-installed');
         showNotification('App installed successfully!', 'success');
     });
+    
+    // Check if we should show the prompt on load
+    setTimeout(() => {
+        const promptDismissed = localStorage.getItem('pwaPromptDismissed');
+        const dismissTime = promptDismissed ? parseInt(promptDismissed) : 0;
+        const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        
+        if (!isAppInstalled && deferredPrompt && dismissTime < oneWeekAgo) {
+            console.log('Showing PWA prompt on load');
+            showPwaPrompt();
+        }
+    }, 2000);
 }
 
 function showPwaPrompt() {
@@ -3956,10 +3996,27 @@ function showPwaPrompt() {
     });
     
     if (prompt && deferredPrompt && !isAppInstalled) {
-        prompt.classList.add('show');
+        prompt.style.display = 'block';
+        setTimeout(() => {
+            prompt.classList.add('show');
+        }, 100);
         console.log('PWA prompt shown successfully');
     } else {
-        console.log('Cannot show PWA prompt - conditions not met');
+        console.log('Cannot show PWA prompt:', {
+            noPrompt: !prompt,
+            noDeferredPrompt: !deferredPrompt,
+            alreadyInstalled: isAppInstalled
+        });
+    }
+}
+
+function hidePwaPrompt() {
+    const prompt = document.getElementById('pwaInstallPrompt');
+    if (prompt) {
+        prompt.classList.remove('show');
+        setTimeout(() => {
+            prompt.style.display = 'none';
+        }, 300);
     }
 }
 
@@ -4102,94 +4159,92 @@ function registerServiceWorker() {
 
 
 function setupOperatorNotifications() {
-    if (currentUser !== 'operator') return;
+    if (currentUser !== 'operator') {
+        console.log('Not setting up operator notifications - user is not operator');
+        return;
+    }
     
     console.log('Setting up browser notifications for operator...');
     
-    // Listen for new programs
-    db.collection("programs")
+    // Check permission first
+    if (Notification.permission !== 'granted') {
+        console.log('Notification permission not granted, requesting...');
+        requestNotificationPermission();
+        return;
+    }
+    
+    console.log('Setting up Firebase listeners for notifications...');
+    
+    // Listen for new programs with a more specific query
+    const newProgramsQuery = db.collection("programs")
+        .where("status", "==", "pending")
         .orderBy("createdAt", "desc")
-        .limit(10)
-        .onSnapshot((snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === "added") {
-                    const program = {
-                        id: change.doc.id,
-                        ...change.doc.data(),
-                        createdAt: change.doc.data().createdAt ? change.doc.data().createdAt.toDate() : new Date()
-                    };
+        .limit(5);
+    
+    let initialLoad = true;
+    
+    newProgramsQuery.onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            // Skip initial load to avoid old notifications
+            if (initialLoad && change.type === "added") {
+                return;
+            }
+            
+            if (change.type === "added") {
+                const program = {
+                    id: change.doc.id,
+                    ...change.doc.data(),
+                    createdAt: change.doc.data().createdAt ? change.doc.data().createdAt.toDate() : new Date()
+                };
+                
+                console.log('New program for notification:', program.designName);
+                
+                // Show notification for new programs
+                showBrowserNotification(
+                    '📋 New Program Assigned',
+                    `Machine ${program.machineNumber}: ${program.designName} (${program.rounds} rounds) ${program.priority === 'urgent' ? '🚨 URGENT' : ''}`,
+                    program.priority === 'urgent' ? 'high' : 'normal'
+                );
+            }
+        });
+        
+        initialLoad = false;
+    }, (error) => {
+        console.error('Error in new programs listener:', error);
+    });
+
+    // Listen for program status changes
+    const statusChangesQuery = db.collection("programs")
+        .where("status", "in", ["running", "completed"]);
+    
+    statusChangesQuery.onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            if (change.type === "modified") {
+                const program = {
+                    id: change.doc.id,
+                    ...change.doc.data()
+                };
+                
+                const oldData = change.doc._previousData;
+                
+                if (oldData && oldData.status !== program.status) {
+                    console.log('Status change detected:', oldData.status, '->', program.status);
                     
-                    // Only show notifications for recent programs
-                    const timeDiff = (new Date() - program.createdAt) / 1000;
-                    
-                    console.log('New program detected for notification:', {
-                        programId: program.id,
-                        designName: program.designName,
-                        timeDiff: timeDiff
-                    });
-                    
-                    if (timeDiff < 30) {
+                    if (program.status === 'running') {
                         showBrowserNotification(
-                            '📋 New Program Created',
-                            `Machine ${program.machineNumber}: ${program.designName} (${program.rounds} rounds) ${program.priority === 'urgent' ? '🚨 URGENT' : ''}`,
-                            program.priority === 'urgent' ? 'high' : 'normal'
+                            '▶️ Program Started',
+                            `Machine ${program.machineNumber}: ${program.designName} is now running`
+                        );
+                    } else if (program.status === 'completed') {
+                        showBrowserNotification(
+                            '✅ Program Completed',
+                            `Machine ${program.machineNumber}: ${program.designName} has been completed`
                         );
                     }
                 }
-            });
+            }
         });
-
-    // Listen for program updates
-    db.collection("programs")
-        .where("status", "in", ["pending", "running"])
-        .onSnapshot((snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === "modified") {
-                    const program = {
-                        id: change.doc.id,
-                        ...change.doc.data(),
-                        createdAt: change.doc.data().createdAt ? change.doc.data().createdAt.toDate() : new Date()
-                    };
-                    
-                    const oldData = change.doc._previousData;
-                    
-                    console.log('Program update detected:', {
-                        programId: program.id,
-                        oldStatus: oldData?.status,
-                        newStatus: program.status
-                    });
-                    
-                    if (oldData) {
-                        // Check if status changed to running
-                        if (oldData.status === 'pending' && program.status === 'running') {
-                            showBrowserNotification(
-                                '▶️ Program Started',
-                                `Machine ${program.machineNumber}: ${program.designName} is now running`
-                            );
-                        }
-                        
-                        // Check if program was updated
-                        if ((oldData.designName !== program.designName || 
-                             oldData.rounds !== program.rounds) && 
-                            program.status === 'pending') {
-                            
-                            const changes = [];
-                            if (oldData.designName !== program.designName) {
-                                changes.push(`Design: ${oldData.designName} → ${program.designName}`);
-                            }
-                            if (oldData.rounds !== program.rounds) {
-                                changes.push(`Rounds: ${oldData.rounds} → ${program.rounds}`);
-                            }
-                            
-                            showBrowserNotification(
-                                '✏️ Program Updated',
-                                `Machine ${program.machineNumber}: ${changes.join(', ')}`
-                            );
-                        }
-                    }
-                }
-            });
-        });
+    });
 }
 
 function showBrowserNotification(title, message, priority = 'normal') {
@@ -4423,6 +4478,41 @@ function toggleSearchVisibility(tab) {
                 operatorDashboard.classList.remove('machines-tab-active');
             }
         }
+    }
+}
+
+function requestNotificationPermission() {
+    if ('Notification' in window) {
+        console.log('Notification API is supported');
+        
+        if (Notification.permission === 'default') {
+            console.log('Requesting notification permission...');
+            
+            // Show a custom prompt first
+            setTimeout(() => {
+                if (confirm('Would you like to receive notifications for new programs and updates?')) {
+                    Notification.requestPermission().then(permission => {
+                        console.log('Notification permission:', permission);
+                        if (permission === 'granted') {
+                            console.log('Notification permission granted!');
+                            showNotification('Notifications enabled! You will now receive alerts for program updates.', 'success');
+                            
+                            // Setup notifications for operators
+                            if (currentUser === 'operator') {
+                                setupOperatorNotifications();
+                            }
+                        }
+                    });
+                }
+            }, 3000); // Ask after 3 seconds
+        } else if (Notification.permission === 'granted') {
+            console.log('Notification permission already granted');
+            if (currentUser === 'operator') {
+                setupOperatorNotifications();
+            }
+        }
+    } else {
+        console.log('Notification API is not supported in this browser');
     }
 }
 
