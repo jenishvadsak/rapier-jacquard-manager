@@ -315,6 +315,109 @@
             padding: 8px 10px;
             text-align: center;
         }
+        /* Notification Styles */
+.notification-item {
+    background: white;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-left: 4px solid var(--primary);
+    max-width: 350px;
+    animation: slideInRight 0.3s ease;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.notification-item:hover {
+    transform: translateX(-5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.notification-item.success {
+    border-left-color: var(--success);
+}
+
+.notification-item.warning {
+    border-left-color: var(--warning);
+}
+
+.notification-item.info {
+    border-left-color: var(--secondary);
+}
+
+.notification-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.notification-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin: 0;
+    color: var(--primary);
+}
+
+.notification-time {
+    font-size: 0.7rem;
+    color: #6c757d;
+}
+
+.notification-message {
+    font-size: 0.85rem;
+    color: #495057;
+    margin: 0;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification-fade-out {
+    animation: fadeOut 0.5s ease forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+/* Mobile notification styles */
+@media (max-width: 768px) {
+    #notificationContainer {
+        padding: 10px;
+        max-width: 90vw;
+    }
+    
+    .notification-item {
+        max-width: none;
+        width: 100%;
+        padding: 10px 12px;
+    }
+    
+    .notification-title {
+        font-size: 0.85rem;
+    }
+    
+    .notification-message {
+        font-size: 0.8rem;
+    }
+}
         
         /* Machine grid layout */
         /* Machine grid layout */
@@ -1631,6 +1734,9 @@
     </div>
 </div>
 
+<!-- Notification System -->
+<div id="notificationContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 11000;"></div>
+
 <!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-spinner text-center">
@@ -1868,6 +1974,11 @@ function setupAuthStateListener() {
             // Show logout button in header
             document.getElementById('headerLogoutBtn').classList.remove('d-none');
             
+            // Request notification permission for operators
+            if (userRole === 'operator') {
+                requestNotificationPermission();
+            }
+            
             if (userRole === 'admin') {
                 loginAsAdmin();
             } else {
@@ -1881,6 +1992,12 @@ function setupAuthStateListener() {
             document.getElementById('adminDashboard').classList.add('d-none');
             document.getElementById('operatorDashboard').classList.add('d-none');
             document.getElementById('headerLogoutBtn').classList.add('d-none');
+            
+            // Clear notifications on logout
+            const notificationContainer = document.getElementById('notificationContainer');
+            if (notificationContainer) {
+                notificationContainer.innerHTML = '';
+            }
         }
     });
 }
@@ -2895,7 +3012,16 @@ async function saveProgram() {
             photoData: photoData
         };
 
-        await db.collection("programs").add(programData);
+        const result = await db.collection("programs").add(programData);
+        
+        // Broadcast notification to operators
+        const newProgram = {
+            id: result.id,
+            ...programData,
+            createdAt: new Date() // Use client time for immediate notification
+        };
+        
+        broadcastNotification('new_program', newProgram);
         
         alert('Program saved successfully!');
         document.getElementById('programForm').reset();
@@ -2908,6 +3034,85 @@ async function saveProgram() {
         console.error('Error saving program:', error);
         alert('Error saving program: ' + error.message);
         return false;
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function updateProgram(programId) {
+    const designName = document.getElementById('editDesignName').value.trim();
+    const rounds = parseInt(document.getElementById('editRounds').value);
+    const priority = document.getElementById('editPriority').value;
+    
+    if (!designName || !rounds) {
+        alert('Please fill all required fields');
+        return;
+    }
+    
+    // Get the current program data for comparison
+    const currentProgram = programs.find(p => p.id === programId);
+    if (!currentProgram) return;
+    
+    // Store old values for notification
+    const oldProgram = {
+        designName: currentProgram.designName,
+        rounds: currentProgram.rounds,
+        machineNumber: currentProgram.machineNumber
+    };
+    
+    // Get feeder configurations
+    const feeders = {};
+    const feederInputs = document.querySelectorAll('.edit-feeder-yarn');
+    let hasEmptyFeeder = false;
+    
+    feederInputs.forEach((input, index) => {
+        if (!input.value.trim()) {
+            hasEmptyFeeder = true;
+            input.closest('.feeder-input-group').style.borderColor = '#dc3545';
+        } else {
+            feeders[`feeder${index + 1}`] = input.value.trim();
+            input.closest('.feeder-input-group').style.borderColor = '#dee2e6';
+        }
+    });
+    
+    if (hasEmptyFeeder) {
+        alert('Please enter yarn type for all feeders');
+        return;
+    }
+
+    // Fill remaining feeders with empty values
+    for (let i = feederInputs.length + 1; i <= 12; i++) {
+        feeders[`feeder${i}`] = '';
+    }
+
+    try {
+        showLoading(true);
+        
+        await db.collection("programs").doc(programId).update({
+            designName: designName,
+            rounds: rounds,
+            priority: priority,
+            feeders: feeders
+        });
+        
+        // Broadcast notification to operators
+        const updatedProgram = {
+            id: programId,
+            designName: designName,
+            rounds: rounds,
+            priority: priority,
+            machineNumber: currentProgram.machineNumber
+        };
+        
+        broadcastNotification('updated_program', updatedProgram, oldProgram);
+        
+        alert('Program updated successfully!');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editProgramModal'));
+        modal.hide();
+        
+    } catch (error) {
+        console.error('Error updating program:', error);
+        alert('Error updating program: ' + error.message);
     } finally {
         showLoading(false);
     }
@@ -4043,6 +4248,276 @@ function checkPwaStatus() {
         document.body.appendChild(debugBtn);
     }
 }
+// --- NOTIFICATION SYSTEM ---
+let notificationCounter = 0;
+const MAX_NOTIFICATIONS = 5;
+const NOTIFICATION_TIMEOUT = 8000; // 8 seconds
+
+// Initialize notification system
+function initializeNotificationSystem() {
+    console.log('Initializing notification system...');
+    
+    // Listen for program changes
+    setupProgramNotifications();
+    
+    // Listen for notification messages from other tabs
+    setupCrossTabNotifications();
+}
+
+// Setup real-time program notifications
+function setupProgramNotifications() {
+    // Listen for new programs
+    db.collection("programs")
+        .where("status", "==", "pending")
+        .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    const program = {
+                        id: change.doc.id,
+                        ...change.doc.data()
+                    };
+                    
+                    // Only show notifications for programs created in the last 10 seconds
+                    const programTime = program.createdAt ? program.createdAt.toDate() : new Date();
+                    const timeDiff = (new Date() - programTime) / 1000;
+                    
+                    if (timeDiff < 10 && currentUser === 'operator') {
+                        showNewProgramNotification(program);
+                    }
+                }
+            });
+        });
+
+    // Listen for program updates
+    db.collection("programs").onSnapshot((snapshot) => {
+        snapshot.docChanges().forEach((change) => {
+            if (change.type === "modified") {
+                const program = {
+                    id: change.doc.id,
+                    ...change.doc.data()
+                };
+                
+                // Get the previous data to detect specific changes
+                const oldProgram = change.doc._previousData;
+                
+                if (oldProgram && currentUser === 'operator') {
+                    // Check if design name or rounds were updated
+                    if (oldProgram.designName !== program.designName || 
+                        oldProgram.rounds !== program.rounds) {
+                        showProgramUpdatedNotification(program, oldProgram);
+                    }
+                }
+            }
+        });
+    });
+}
+
+// Setup cross-tab notification communication
+function setupCrossTabNotifications() {
+    // Listen for storage events (other tabs)
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'programNotification' && e.newValue) {
+            try {
+                const notification = JSON.parse(e.newValue);
+                if (notification.type === 'new_program' && currentUser === 'operator') {
+                    showNewProgramNotification(notification.program);
+                } else if (notification.type === 'updated_program' && currentUser === 'operator') {
+                    showProgramUpdatedNotification(notification.program, notification.oldProgram);
+                }
+            } catch (error) {
+                console.error('Error parsing notification:', error);
+            }
+        }
+    });
+
+    // Also use BroadcastChannel for modern browsers
+    if ('BroadcastChannel' in window) {
+        const channel = new BroadcastChannel('program_notifications');
+        channel.addEventListener('message', (event) => {
+            if (event.data.type === 'new_program' && currentUser === 'operator') {
+                showNewProgramNotification(event.data.program);
+            } else if (event.data.type === 'updated_program' && currentUser === 'operator') {
+                showProgramUpdatedNotification(event.data.program, event.data.oldProgram);
+            }
+        });
+    }
+}
+
+// Show notification for new program
+function showNewProgramNotification(program) {
+    const notification = {
+        id: `notification-${Date.now()}-${notificationCounter++}`,
+        type: 'new_program',
+        title: 'New Program Created',
+        message: `Machine ${program.machineNumber}: ${program.designName} (${program.rounds} rounds)`,
+        programId: program.id,
+        timestamp: new Date(),
+        priority: program.priority === 'urgent' ? 'high' : 'normal'
+    };
+    
+    displayNotification(notification);
+    
+    // Also show browser notification if supported
+    if ('Notification' in window && Notification.permission === 'granted') {
+        showBrowserNotification(notification);
+    }
+}
+
+// Show notification for updated program
+function showProgramUpdatedNotification(program, oldProgram) {
+    const changes = [];
+    
+    if (oldProgram.designName !== program.designName) {
+        changes.push(`Design: ${oldProgram.designName} → ${program.designName}`);
+    }
+    
+    if (oldProgram.rounds !== program.rounds) {
+        changes.push(`Rounds: ${oldProgram.rounds} → ${program.rounds}`);
+    }
+    
+    if (changes.length > 0) {
+        const notification = {
+            id: `notification-${Date.now()}-${notificationCounter++}`,
+            type: 'updated_program',
+            title: 'Program Updated',
+            message: `Machine ${program.machineNumber}: ${changes.join(', ')}`,
+            programId: program.id,
+            timestamp: new Date(),
+            priority: 'normal'
+        };
+        
+        displayNotification(notification);
+        
+        // Also show browser notification if supported
+        if ('Notification' in window && Notification.permission === 'granted') {
+            showBrowserNotification(notification);
+        }
+    }
+}
+
+// Display notification in UI
+function displayNotification(notification) {
+    const container = document.getElementById('notificationContainer');
+    if (!container) return;
+    
+    // Remove oldest notification if we have too many
+    const notifications = container.querySelectorAll('.notification-item');
+    if (notifications.length >= MAX_NOTIFICATIONS) {
+        notifications[0].remove();
+    }
+    
+    const notificationEl = document.createElement('div');
+    notificationEl.className = `notification-item ${notification.priority === 'high' ? 'warning' : 'info'}`;
+    notificationEl.id = notification.id;
+    
+    const timeString = notification.timestamp.toLocaleTimeString([], { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+    });
+    
+    notificationEl.innerHTML = `
+        <div class="notification-header">
+            <h6 class="notification-title">${notification.title}</h6>
+            <span class="notification-time">${timeString}</span>
+        </div>
+        <p class="notification-message">${notification.message}</p>
+    `;
+    
+    // Add click handler to view program details
+    notificationEl.addEventListener('click', () => {
+        if (notification.programId) {
+            showProgramDetails(notification.programId);
+            removeNotification(notification.id);
+        }
+    });
+    
+    container.appendChild(notificationEl);
+    
+    // Auto-remove after timeout
+    setTimeout(() => {
+        removeNotification(notification.id);
+    }, NOTIFICATION_TIMEOUT);
+}
+
+// Remove notification
+function removeNotification(notificationId) {
+    const notificationEl = document.getElementById(notificationId);
+    if (notificationEl) {
+        notificationEl.classList.add('notification-fade-out');
+        setTimeout(() => {
+            if (notificationEl.parentNode) {
+                notificationEl.remove();
+            }
+        }, 500);
+    }
+}
+
+// Show browser notification
+function showBrowserNotification(notification) {
+    if ('Notification' in window) {
+        new Notification(notification.title, {
+            body: notification.message,
+            icon: '/icon-192.png',
+            tag: notification.id,
+            requireInteraction: notification.priority === 'high'
+        });
+    }
+}
+
+// Request notification permission
+function requestNotificationPermission() {
+    if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                console.log('Notification permission granted');
+            }
+        });
+    }
+}
+
+// Send notification to other tabs (for when admin creates/updates programs)
+function broadcastNotification(type, program, oldProgram = null) {
+    const notificationData = {
+        type: type,
+        program: program,
+        oldProgram: oldProgram,
+        timestamp: new Date()
+    };
+    
+    // Method 1: localStorage (works across tabs)
+    try {
+        localStorage.setItem('programNotification', JSON.stringify(notificationData));
+        // Remove it immediately so it doesn't persist
+        setTimeout(() => {
+            localStorage.removeItem('programNotification');
+        }, 100);
+    } catch (error) {
+        console.error('Error using localStorage for notifications:', error);
+    }
+    
+    // Method 2: BroadcastChannel (modern browsers)
+    if ('BroadcastChannel' in window) {
+        const channel = new BroadcastChannel('program_notifications');
+        channel.postMessage(notificationData);
+    }
+}
+function initializeApp() {
+    loadMachines();
+    setupEventListeners();
+    setupSearchFunctionality();
+    setupAuthStateListener();
+    addViewToggleButton();
+    setupPWA();
+    registerServiceWorker();
+    initializeNotificationSystem(); // Add this line
+    requestNotificationPermission(); // Add this line
+    
+    // Check PWA status after a delay
+    setTimeout(checkPwaStatus, 3000);
+    
+    // Check if user was previously logged in
+    checkPreviousLogin();
+}
 
 // Make functions available globally
 window.loginAsAdmin = loginAsAdmin;
@@ -4078,6 +4553,7 @@ window.exportOperatorHistoryToExcel = exportOperatorHistoryToExcel;
 window.showDateFilterModal = showDateFilterModal;
 window.exportWithDateRange = exportWithDateRange;
 window.exportQueueToExcel = exportQueueToExcel;
+
 </script>
 </body>
 </html>
