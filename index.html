@@ -1328,21 +1328,6 @@
     </div>
 
     <!-- Admin Dashboard -->
-    <!-- Add this temporarily to admin dashboard -->
-<div class="container mt-3">
-    <div class="alert alert-warning">
-        <h6>Notification Debug</h6>
-        <button class="btn btn-sm btn-success me-2" onclick="sendTestNotification()">
-            <i class="fas fa-bell me-1"></i>Send Test Notification
-        </button>
-        <button class="btn btn-sm btn-info me-2" onclick="checkNotificationStatus()">
-            <i class="fas fa-bug me-1"></i>Debug Status
-        </button>
-        <button class="btn btn-sm btn-danger" onclick="clearAllNotifications()">
-            <i class="fas fa-trash me-1"></i>Clear All
-        </button>
-    </div>
-</div>
     <div id="adminDashboard" class="d-none py-3">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -1815,17 +1800,8 @@ function initializeApp() {
     setupPWA();
     registerServiceWorker();
     
-    // Request notification permission with a delay
-    setTimeout(() => {
-        console.log('Initializing notification system...');
-        requestNotificationPermission();
-    }, 3000);
-    
     // Check if user was previously logged in
     checkPreviousLogin();
-    
-    // Add debug info to console
-    console.log('App initialized. Use checkNotificationStatus() to debug notifications.');
 }
 function setupEventListeners() {
     document.getElementById('programForm').addEventListener('submit', function(e) {
@@ -1899,14 +1875,6 @@ function setupAuthStateListener() {
             
             // Show logout button in header
             document.getElementById('headerLogoutBtn').classList.remove('d-none');
-            
-            // Request notification permission for operators
-            if (userRole === 'operator') {
-                setTimeout(() => {
-                    requestNotificationPermission();
-                    setupOperatorNotifications();
-                }, 1000);
-            }
             
             if (userRole === 'admin') {
                 loginAsAdmin();
@@ -2037,7 +2005,6 @@ function loginAsAdmin() {
     setUserLabel();
     showDashboard('admin');
     loadPrograms();
-    // Welcome message removed
 }
 
 function loginAsOperator() {
@@ -2045,7 +2012,6 @@ function loginAsOperator() {
     setUserLabel();
     showDashboard('operator');
     loadPrograms();
-    // Welcome message removed
 }
 
 function confirmLogout() {
@@ -2078,8 +2044,6 @@ function logout() {
         
         // Hide header logout button
         document.getElementById('headerLogoutBtn').classList.add('d-none');
-        
-        // Logout message removed
     }).catch((error) => {
         console.error('Logout error:', error);
     });
@@ -2237,11 +2201,7 @@ function renderMachinesGrid() {
                                 
                             </div>
                             
-                            ${currentProgram.photoData ? `
-                                <div class="text-center mb-2">
-                                    <img src="${currentProgram.photoData}" class="thumbnail" onclick="showImageInModal('${currentProgram.photoData}')"/>
-                                </div>
-                            ` : ''}
+                            <!-- Photo removed from machine card -->
                         </div>
                         
                         <div class="action-buttons">
@@ -2357,11 +2317,7 @@ function renderOperatorMachinesGrid() {
                             
                         </div>
                         
-                        ${currentProgram.photoData ? `
-                            <div class="text-center mb-2">
-                                <img src="${currentProgram.photoData}" class="thumbnail" onclick="showImageInModal('${currentProgram.photoData}')"/>
-                            </div>
-                        ` : ''}
+                        <!-- Photo removed from operator machine card -->
                     </div>
                     
                     <div class="action-buttons">
@@ -2939,18 +2895,6 @@ async function saveProgram() {
         
         console.log('Program saved with ID:', result.id);
         
-        // Broadcast notification to operators - use a timeout to ensure data is saved
-        setTimeout(() => {
-            const newProgram = {
-                id: result.id,
-                ...programData,
-                createdAt: new Date() // Use client time for immediate notification
-            };
-            
-            console.log('Broadcasting new program notification:', newProgram);
-            broadcastNotification('new_program', newProgram);
-        }, 1000);
-        
         alert('Program saved successfully!');
         document.getElementById('programForm').reset();
         document.getElementById('designPreviewWrap').innerHTML = '';
@@ -3022,17 +2966,6 @@ async function updateProgram(programId) {
             priority: priority,
             feeders: feeders
         });
-        
-        // Broadcast notification to operators
-        const updatedProgram = {
-            id: programId,
-            designName: designName,
-            rounds: rounds,
-            priority: priority,
-            machineNumber: currentProgram.machineNumber
-        };
-        
-        broadcastNotification('updated_program', updatedProgram, oldProgram);
         
         alert('Program updated successfully!');
         const modal = bootstrap.Modal.getInstance(document.getElementById('editProgramModal'));
@@ -3995,7 +3928,6 @@ function setupPWA() {
         deferredPrompt = null;
         hidePwaPrompt();
         document.body.classList.add('pwa-installed');
-        showNotification('App installed successfully!', 'success');
     });
     
     // Check if we should show the prompt on load
@@ -4026,11 +3958,7 @@ function showPwaPrompt() {
         }, 100);
         console.log('PWA prompt shown successfully');
     } else {
-        console.log('Cannot show PWA prompt:', {
-            noPrompt: !prompt,
-            noDeferredPrompt: !deferredPrompt,
-            alreadyInstalled: isAppInstalled
-        });
+        console.log('Cannot show PWA prompt - conditions not met');
     }
 }
 
@@ -4074,36 +4002,6 @@ function installPwa() {
         });
     }
     hidePwaPrompt();
-}
-
-// --- NOTIFICATION SYSTEM ---
-function showNotification(message, type = 'info') {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type} alert-dismissible fade show`;
-    notification.style.cssText = `
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        z-index: 1060;
-        min-width: 300px;
-        max-width: 500px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    `;
-    notification.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    // Add to page
-    document.body.appendChild(notification);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.remove();
-        }
-    }, 5000);
 }
 
 // --- SEARCH VISIBILITY TOGGLE ---
@@ -4178,267 +4076,6 @@ function registerServiceWorker() {
         console.log('Service Worker is not supported in this browser');
     }
 }
-
-
-
-
-function setupOperatorNotifications() {
-    if (currentUser !== 'operator') {
-        console.log('Not setting up operator notifications - user is not operator');
-        return;
-    }
-    
-    console.log('Setting up operator notifications...');
-    
-    // Clear any existing listeners first
-    if (window.notificationListener) {
-        window.notificationListener();
-    }
-    
-    // SIMPLIFIED: Listen to all notifications without complex queries
-    const notificationsQuery = db.collection("notifications")
-        .orderBy("createdAt", "desc")
-        .limit(20);
-    
-    window.notificationListener = notificationsQuery.onSnapshot((snapshot) => {
-        console.log('🔥 Notifications snapshot received:', snapshot.size, 'notifications');
-        
-        let unreadCount = 0;
-        
-        snapshot.docChanges().forEach((change) => {
-            const notification = change.doc.data();
-            console.log('📢 Notification change:', change.type, notification);
-            
-            if (change.type === "added" && !notification.read) {
-                unreadCount++;
-                
-                // Show browser notification for new unread notifications
-                if (notification.userId === 'operator' || !notification.userId) {
-                    console.log('🎯 Showing browser notification for operator');
-                    showBrowserNotificationForOperator(notification);
-                }
-            }
-        });
-        
-        console.log('🔔 Unread count:', unreadCount);
-        updateNotificationBadge(unreadCount);
-        
-    }, (error) => {
-        console.error('❌ Error in notification listener:', error);
-    });
-}
-function notifyOperators(type, program, oldProgram = null) {
-    if (currentUser !== 'admin') {
-        console.log('Only admin can send notifications');
-        return;
-    }
-    
-    console.log('🚀 Sending notification to operators:', type);
-    
-    const notificationData = {
-        type: type,
-        program: program,
-        timestamp: new Date(),
-        read: false,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    
-    // SIMPLE: Just add to notifications collection
-    db.collection("notifications").add(notificationData)
-    .then((docRef) => {
-        console.log('✅ Notification sent with ID:', docRef.id);
-    })
-    .catch(error => {
-        console.error('❌ Error sending notification:', error);
-    });
-}
-function showBrowserNotificationForOperator(notification) {
-    if (!('Notification' in window)) {
-        console.log('Browser notifications not supported');
-        return;
-    }
-    
-    if (Notification.permission !== 'granted') {
-        console.log('Notification permission not granted');
-        return;
-    }
-    
-    let title, body;
-    
-    switch (notification.type) {
-        case 'PROGRAM_CREATED':
-            title = '📋 New Program Assigned';
-            body = `Machine ${notification.program.machineNumber}: ${notification.program.designName} (${notification.program.rounds} rounds)`;
-            if (notification.program.priority === 'urgent') {
-                body += ' 🚨 URGENT';
-            }
-            break;
-        case 'PROGRAM_UPDATED':
-            title = '✏️ Program Updated';
-            body = `Machine ${notification.program.machineNumber}: ${notification.program.designName}`;
-            break;
-        case 'PROGRAM_DELETED':
-            title = '🗑️ Program Removed';
-            body = `Machine ${notification.program.machineNumber}: ${notification.program.designName} was removed`;
-            break;
-        default:
-            console.log('Unknown notification type:', notification.type);
-            return;
-    }
-    
-    console.log('Creating browser notification:', title, body);
-    
-    const options = {
-        body: body,
-        icon: './icon-192.png',
-        badge: './icon-192.png',
-        tag: 'program-notification',
-        requireInteraction: true
-    };
-    
-    try {
-        const browserNotification = new Notification(title, options);
-        
-        // Add click handler to focus the app
-        browserNotification.onclick = function() {
-            window.focus();
-            this.close();
-        };
-        
-        // Auto close after 10 seconds
-        setTimeout(() => {
-            browserNotification.close();
-        }, 10000);
-        
-        console.log('Browser notification created successfully');
-        
-    } catch (error) {
-        console.error('Error creating browser notification:', error);
-    }
-}
-
-function showBrowserNotification(title, message, priority = 'normal') {
-    if ('Notification' in window && Notification.permission === 'granted') {
-        console.log('Showing browser notification:', {title, message, priority});
-        
-        const options = {
-            body: message,
-            icon: './icon-192.png',
-            badge: './icon-192.png',
-            tag: 'program-notification',
-            requireInteraction: priority === 'high'
-        };
-        
-        try {
-            new Notification(title, options);
-            console.log('Browser notification sent successfully');
-        } catch (error) {
-            console.error('Error showing browser notification:', error);
-        }
-    } else {
-        console.log('Cannot show notification - permission not granted or not supported');
-    }
-}
-
-function broadcastNotification(type, program, oldProgram = null) {
-    console.log('Broadcasting notification:', type, program);
-    
-    const notificationData = {
-        type: type,
-        program: program,
-        oldProgram: oldProgram,
-        timestamp: new Date().toISOString(),
-        source: 'admin'
-    };
-    
-    // Method 1: localStorage (works across tabs)
-    try {
-        const uniqueKey = `programNotification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem(uniqueKey, JSON.stringify(notificationData));
-        
-        // Remove it after a short time
-        setTimeout(() => {
-            localStorage.removeItem(uniqueKey);
-        }, 5000);
-        
-        console.log('Notification broadcast via localStorage:', uniqueKey);
-    } catch (error) {
-        console.error('Error using localStorage for notifications:', error);
-    }
-    
-    // Method 2: BroadcastChannel (modern browsers)
-    if ('BroadcastChannel' in window) {
-        try {
-            const channel = new BroadcastChannel('program_notifications');
-            channel.postMessage(notificationData);
-            console.log('Notification broadcast via BroadcastChannel');
-            
-            // Close channel after sending
-            setTimeout(() => {
-                channel.close();
-            }, 1000);
-        } catch (error) {
-            console.error('Error using BroadcastChannel:', error);
-        }
-    }
-}
-
-// Listen for cross-tab notifications
-window.addEventListener('storage', (e) => {
-    if (e.key === 'programNotification' && e.newValue && currentUser === 'operator') {
-        try {
-            const notification = JSON.parse(e.newValue);
-            console.log('Cross-tab notification received:', notification);
-            
-            if (notification.type === 'new_program') {
-                showBrowserNotification(
-                    '📋 New Program Created',
-                    `Machine ${notification.program.machineNumber}: ${notification.program.designName} (${notification.program.rounds} rounds) ${notification.program.priority === 'urgent' ? '🚨 URGENT' : ''}`,
-                    notification.program.priority === 'urgent' ? 'high' : 'normal'
-                );
-            } else if (notification.type === 'updated_program') {
-                const changes = [];
-                if (notification.oldProgram.designName !== notification.program.designName) {
-                    changes.push(`Design: ${notification.oldProgram.designName} → ${notification.program.designName}`);
-                }
-                if (notification.oldProgram.rounds !== notification.program.rounds) {
-                    changes.push(`Rounds: ${notification.oldProgram.rounds} → ${notification.program.rounds}`);
-                }
-                
-                if (changes.length > 0) {
-                    showBrowserNotification(
-                        '✏️ Program Updated',
-                        `Machine ${notification.program.machineNumber}: ${changes.join(', ')}`
-                    );
-                }
-            }
-        } catch (error) {
-            console.error('Error parsing cross-tab notification:', error);
-        }
-    }
-});
-
-// Also use BroadcastChannel for modern browsers
-if ('BroadcastChannel' in window) {
-    try {
-        const channel = new BroadcastChannel('program_notifications');
-        channel.addEventListener('message', (event) => {
-            console.log('BroadcastChannel notification received:', event.data);
-            
-            if (event.data.type === 'new_program' && currentUser === 'operator') {
-                showBrowserNotification(
-                    '📋 New Program Created',
-                    `Machine ${event.data.program.machineNumber}: ${event.data.program.designName} (${event.data.program.rounds} rounds) ${event.data.program.priority === 'urgent' ? '🚨 URGENT' : ''}`,
-                    event.data.program.priority === 'urgent' ? 'high' : 'normal'
-                );
-            }
-        });
-    } catch (error) {
-        console.error('Error setting up BroadcastChannel:', error);
-    }
-}
-
-
 
 function showPwaPrompt() {
     const prompt = document.getElementById('pwaInstallPrompt');
@@ -4561,81 +4198,6 @@ function toggleSearchVisibility(tab) {
     }
 }
 
-function requestNotificationPermission() {
-    if ('Notification' in window) {
-        console.log('Notification API is supported');
-        
-        if (Notification.permission === 'default') {
-            console.log('Requesting notification permission...');
-            
-            // Show a custom prompt first
-            setTimeout(() => {
-                if (confirm('Would you like to receive notifications for new programs and updates?')) {
-                    Notification.requestPermission().then(permission => {
-                        console.log('Notification permission:', permission);
-                        if (permission === 'granted') {
-                            console.log('Notification permission granted!');
-                            showNotification('Notifications enabled! You will now receive alerts for program updates.', 'success');
-                            
-                            // Setup notifications for operators
-                            if (currentUser === 'operator') {
-                                setupOperatorNotifications();
-                            }
-                        } else if (permission === 'denied') {
-                            console.log('Notification permission denied');
-                            showNotification('Notifications are disabled. You can enable them in your browser settings.', 'warning');
-                        }
-                    }).catch(error => {
-                        console.error('Error requesting notification permission:', error);
-                    });
-                }
-            }, 3000); // Ask after 3 seconds
-        } else if (Notification.permission === 'granted') {
-            console.log('Notification permission already granted');
-            if (currentUser === 'operator') {
-                setupOperatorNotifications();
-            }
-        } else if (Notification.permission === 'denied') {
-            console.log('Notification permission denied by user');
-            showNotification('Notifications are disabled. Enable them in browser settings to receive alerts.', 'warning');
-        }
-    } else {
-        console.log('Notification API is not supported in this browser');
-        showNotification('Your browser does not support notifications.', 'warning');
-    }
-}
-
-
-// TEST: Send immediate test notification
-function sendTestNotification() {
-    console.log('🧪 Sending test notification...');
-    
-    const testProgram = {
-        machineNumber: 1,
-        designName: 'TEST DESIGN ' + Date.now(),
-        rounds: 100,
-        priority: 'normal',
-        status: 'pending'
-    };
-    
-    // Create test notification directly
-    db.collection("notifications").add({
-        type: 'PROGRAM_CREATED',
-        program: testProgram,
-        timestamp: new Date(),
-        read: false,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(docRef => {
-        console.log('✅ Test notification sent! ID:', docRef.id);
-        alert('Test notification sent! Check operator console.');
-    }).catch(error => {
-        console.error('❌ Test failed:', error);
-        alert('Test failed: ' + error.message);
-    });
-}
-
-// Make it global
-window.sendTestNotification = sendTestNotification;
 // Make functions available globally
 window.loginAsAdmin = loginAsAdmin;
 window.loginAsOperator = loginAsOperator;
