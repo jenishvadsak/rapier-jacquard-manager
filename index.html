@@ -197,26 +197,42 @@
         gap: 8px;
         margin-top: 10px;
     }
+    @media (max-width: 768px) {
+    .queue-search-mobile::placeholder {
+        font-size: 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .queue-header .search-box {
+        max-width: none;
+    }
+}
 
     .pwa-install-buttons .btn {
         flex: 1;
     }
     @media (max-width: 768px) {
-    /* ... existing code ... */
-    
     /* Queue cards - 2 per row on mobile */
     #queueContent .row.g-3,
     #operatorQueueContent .row.g-3 {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        margin: 0 !important;
     }
     
-    #queueContent .col-12.col-sm-6.col-md-4.col-lg-3,
-    #operatorQueueContent .col-12.col-sm-6.col-md-4.col-lg-3 {
-        width: 100%;
-        max-width: none;
-        flex: none;
+    #queueContent .col-12.col-sm-6,
+    #operatorQueueContent .col-12.col-sm-6 {
+        width: 100% !important;
+        max-width: none !important;
+        flex: none !important;
+        padding: 0 !important;
+    }
+    
+    .queue-card {
+        margin-bottom: 0 !important;
     }
 }
 
@@ -1052,6 +1068,12 @@
     .notification-indicator {
         position: relative;
     }
+    @media (max-width: 768px) {
+    .assign-program-btn {
+        font-size: 0.7rem !important;
+        padding: 4px 8px !important;
+    }
+}
     
     /* Compact machine card */
     .machine-summary {
@@ -1152,6 +1174,92 @@
     
     .queue-header + .d-flex {
         margin-bottom: 15px;
+    }
+}
+/* Add to mobile CSS */
+@media (max-width: 576px) {
+    .header-logout {
+        padding: 4px 8px !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .header-logout i {
+        margin-right: 0 !important;
+    }
+}
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+    /* Assign program button */
+    .assign-program-btn {
+        font-size: 0.7rem !important;
+        padding: 4px 8px !important;
+        min-height: 32px;
+    }
+    
+    /* Queue search placeholder */
+    .queue-search-mobile::placeholder {
+        font-size: 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* Queue layout - 2 cards per row */
+    #queueContent .row.g-3,
+    #operatorQueueContent .row.g-3 {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        margin: 0 !important;
+    }
+    
+    #queueContent .col-12.col-sm-6,
+    #operatorQueueContent .col-12.col-sm-6 {
+        width: 100% !important;
+        max-width: none !important;
+        flex: none !important;
+        padding: 0 !important;
+    }
+    
+    .queue-card {
+        margin-bottom: 0 !important;
+        min-height: 140px;
+    }
+    
+    /* Header logout button */
+    .header-logout {
+        padding: 4px 8px !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .header-logout i {
+        margin-right: 0 !important;
+    }
+    
+    /* Hide user type label */
+    #currentUserType {
+        display: none !important;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Further mobile optimizations */
+    .queue-card .card-body {
+        padding: 10px !important;
+    }
+    
+    .queue-card h5 {
+        font-size: 0.9rem !important;
+    }
+    
+    .queue-card p {
+        font-size: 0.75rem !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .status-badge {
+        font-size: 0.6rem !important;
+        padding: 2px 6px !important;
     }
 }
 
@@ -1382,7 +1490,7 @@
                     <div class="queue-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="search-box w-100">
-                                <input type="text" class="form-control" id="queueSearch" placeholder="Search programs by design name or machine number...">
+                                <input type="text" class="form-control queue-search-mobile" id="queueSearch" placeholder="Search design or machine...">
                             </div>
                         </div>
                     </div>
@@ -2129,10 +2237,10 @@ function renderMachinesGrid() {
                     ` : `
                         <p class="text-muted small mb-3">No program assigned</p>
                         ${currentUser === 'admin' ? `
-                            <button class="btn btn-primary btn-sm w-100" onclick="assignProgram(${machine.machineNumber})">
-                                <i class="fas fa-plus me-1"></i>Assign Program
-                            </button>
-                        ` : ''}
+    <button class="btn btn-primary btn-sm w-100 assign-program-btn" onclick="assignProgram(${machine.machineNumber})">
+        <i class="fas fa-plus me-1"></i>Assign Program
+    </button>
+` : ''}
                     `}
                     
                     ${queuePrograms.length > 0 ? `
