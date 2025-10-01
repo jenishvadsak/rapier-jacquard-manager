@@ -722,8 +722,8 @@
     /* Feeder input styling */
     .feeder-input-group {
         background: white;
-        border-radius: 8px;
-        padding: 8px;
+        border-radius: 6px;
+        padding: 4px;
         border: 1px solid #dee2e6;
     }
 
@@ -731,7 +731,8 @@
         border: none;
         background: transparent;
         width: 100%;
-        padding: 4px 8px;
+        padding: 2px 6px;
+        font-size: 0.85rem;
     }
 
     .feeder-input:focus {
@@ -1262,8 +1263,8 @@
                             </div>
                         </div>
 
-                        <div class="excel-export">
-                            <button class="btn btn-primary w-100" onclick="exportHistoryToExcel()">
+                        <div class="excel-export mb-3">
+                            <button class="btn btn-primary w-100" onclick="showDateFilterModal('admin')">
                                 <i class="fas fa-file-excel me-1"></i>Export to Excel
                             </button>
                         </div>
@@ -1298,14 +1299,8 @@
                 <div id="admQueue" class="tab-pane fade">
                     <div class="queue-header">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="mb-1">
-                                    <i class="fas fa-list me-2"></i>Program Queue
-                                </h3>
-                                <p class="mb-0">View all queued programs across all machines</p>
-                            </div>
-                            <div class="search-box">
-                                <input type="text" class="form-control" id="queueSearch" placeholder="Search programs...">
+                            <div class="search-box w-100">
+                                <input type="text" class="form-control" id="queueSearch" placeholder="Search programs by design name or machine number...">
                             </div>
                         </div>
                     </div>
@@ -1368,14 +1363,8 @@
                 <div id="opQueue" class="tab-pane fade">
                     <div class="queue-header">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h3 class="mb-1">
-                                    <i class="fas fa-list me-2"></i>Program Queue
-                                </h3>
-                                <p class="mb-0">View all queued programs across all machines</p>
-                            </div>
-                            <div class="search-box">
-                                <input type="text" class="form-control" id="operatorQueueSearch" placeholder="Search programs...">
+                            <div class="search-box w-100">
+                                <input type="text" class="form-control" id="operatorQueueSearch" placeholder="Search programs by design name or machine number...">
                             </div>
                         </div>
                     </div>
@@ -1397,6 +1386,12 @@
                                     <option value="all">All Machines</option>
                                 </select>
                             </div>
+                        </div>
+
+                        <div class="excel-export mb-3">
+                            <button class="btn btn-primary w-100" onclick="showDateFilterModal('operator')">
+                                <i class="fas fa-file-excel me-1"></i>Export to Excel
+                            </button>
                         </div>
 
                         <div class="table-responsive">
@@ -1598,6 +1593,10 @@ function initializeApp() {
     setupAuthStateListener();
     addViewToggleButton();
     setupPWA();
+    registerServiceWorker();
+    
+    // Check PWA status after a delay
+    setTimeout(checkPwaStatus, 3000);
     
     // Check if user was previously logged in
     checkPreviousLogin();
@@ -1801,7 +1800,7 @@ function loginAsAdmin() {
     setUserLabel();
     showDashboard('admin');
     loadPrograms();
-    showNotification('Welcome back, Admin!', 'success');
+    // Welcome message removed
 }
 
 function loginAsOperator() {
@@ -1809,7 +1808,7 @@ function loginAsOperator() {
     setUserLabel();
     showDashboard('operator');
     loadPrograms();
-    showNotification('Welcome back, Operator!', 'success');
+    // Welcome message removed
 }
 
 function confirmLogout() {
@@ -1840,7 +1839,7 @@ function logout() {
         localStorage.removeItem('userLoggedIn');
         localStorage.removeItem('userEmail');
         
-        showNotification('You have been logged out successfully.', 'info');
+        // Logout message removed
     }).catch((error) => {
         console.error('Logout error:', error);
     });
@@ -2159,33 +2158,194 @@ function renderOperatorMachinesGrid() {
 }
 
 // --- QUEUE VIEW FUNCTIONALITY ---
-const QUEUE_CHUNK_SIZE = 10;
-let currentQueueChunk = 1;
-
-function renderMachineQueueCard(machineNumber, currentProgram, queuePrograms) {
-    return `
-        <div class="card queue-card ${currentProgram.priority === 'urgent' ? 'urgent' : ''}">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-cog me-2"></i>Machine ${machineNumber}
-                </h5>
-                <span class="badge bg-primary">${1 + queuePrograms.length} program${1 + queuePrograms.length > 1 ? 's' : ''}</span>
+function renderQueueView(searchTerm = '') {
+    const queueContent = document.getElementById('queueContent');
+    
+    let queueHtml = '';
+    
+    // Create machine cards for all 24 machines
+    for (let machineNumber = 1; machineNumber <= TOTAL_MACHINES; machineNumber++) {
+        const machinePrograms = programs.filter(p => 
+            p.machineNumber === machineNumber && p.status !== 'completed'
+        );
+        
+        // Filter by search term if provided
+        let filteredPrograms = machinePrograms;
+        if (searchTerm) {
+            filteredPrograms = machinePrograms.filter(program => 
+                program.designName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                program.machineNumber.toString().includes(searchTerm)
+            );
+        }
+        
+        // Only show machines that have programs or match search
+        if (filteredPrograms.length === 0 && searchTerm) {
+            continue;
+        }
+        
+        const currentProgram = filteredPrograms.length > 0 ? filteredPrograms[0] : null;
+        const queueCount = Math.max(0, filteredPrograms.length - 1);
+        
+        queueHtml += `
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="card machine-card h-100" onclick="viewMachinePrograms(${machineNumber})" style="cursor: pointer;">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-cog fa-2x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Machine ${machineNumber}</h5>
+                        ${currentProgram ? `
+                            <p class="mb-1 small"><strong>Current:</strong> ${currentProgram.designName}</p>
+                            <p class="mb-1 small text-muted">Rounds: ${currentProgram.rounds}</p>
+                            <span class="status-badge status-${currentProgram.status} ${currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
+                                ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status}
+                            </span>
+                        ` : `
+                            <p class="text-muted small">No program assigned</p>
+                        `}
+                        ${queueCount > 0 ? `
+                            <div class="mt-2">
+                                <span class="badge bg-warning">+${queueCount} in queue</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="mb-4">
-                    <h6 class="fw-semibold mb-3">Current Program</h6>
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="mb-1"><span class="queue-number">1</span>${currentProgram.designName}</h6>
-                                    <p class="mb-1 small">Rounds: ${currentProgram.rounds}</p>
-                                    <p class="mb-0 small">Status: <span class="status-badge status-${currentProgram.status}">${currentProgram.status}</span></p>
-                                    ${currentProgram.priority === 'urgent' ? '<span class="badge bg-danger mt-1">URGENT</span>' : ''}
+        `;
+    }
+    
+    if (queueHtml === '') {
+        queueHtml = `
+            <div class="col-12">
+                <div class="empty-queue">
+                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                    <h4>No programs found</h4>
+                    <p class="mb-0">No machines match your search criteria</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    queueContent.innerHTML = `
+        <div class="row g-3">
+            ${queueHtml}
+        </div>
+    `;
+}
+
+function renderOperatorQueueView(searchTerm = '') {
+    const queueContent = document.getElementById('operatorQueueContent');
+    
+    let queueHtml = '';
+    
+    // Create machine cards for machines with active programs
+    const machinesWithPrograms = [];
+    
+    for (let machineNumber = 1; machineNumber <= TOTAL_MACHINES; machineNumber++) {
+        const machinePrograms = programs.filter(p => 
+            p.machineNumber === machineNumber && p.status !== 'completed'
+        );
+        
+        if (machinePrograms.length === 0) continue;
+        
+        // Filter by search term if provided
+        let filteredPrograms = machinePrograms;
+        if (searchTerm) {
+            filteredPrograms = machinePrograms.filter(program => 
+                program.designName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                program.machineNumber.toString().includes(searchTerm)
+            );
+        }
+        
+        if (filteredPrograms.length === 0) continue;
+        
+        machinesWithPrograms.push({ machineNumber, programs: filteredPrograms });
+    }
+    
+    if (machinesWithPrograms.length === 0) {
+        queueHtml = `
+            <div class="col-12">
+                <div class="empty-queue">
+                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                    <h4>No active programs</h4>
+                    <p class="mb-0">${searchTerm ? 'No machines match your search' : 'All machines are idle'}</p>
+                </div>
+            </div>
+        `;
+    } else {
+        machinesWithPrograms.forEach(({ machineNumber, programs: machinePrograms }) => {
+            const currentProgram = machinePrograms[0];
+            const queueCount = Math.max(0, machinePrograms.length - 1);
+            
+            queueHtml += `
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <div class="card machine-card h-100" onclick="viewOperatorMachinePrograms(${machineNumber})" style="cursor: pointer;">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-cog fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="card-title">Machine ${machineNumber}</h5>
+                            <p class="mb-1 small"><strong>Current:</strong> ${currentProgram.designName}</p>
+                            <p class="mb-1 small text-muted">Rounds: ${currentProgram.rounds}</p>
+                            <span class="status-badge status-${currentProgram.status} ${currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
+                                ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status}
+                            </span>
+                            ${queueCount > 0 ? `
+                                <div class="mt-2">
+                                    <span class="badge bg-warning">+${queueCount} in queue</span>
                                 </div>
-                                <div class="text-end">
-                                    <div class="mt-2">
-                                        <button class="btn btn-sm btn-info" onclick="showProgramDetails('${currentProgram.id}')">
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    queueContent.innerHTML = `
+        <div class="row g-3">
+            ${queueHtml}
+        </div>
+    `;
+}
+
+function viewMachinePrograms(machineNumber) {
+    const machinePrograms = programs.filter(p => 
+        p.machineNumber === machineNumber && p.status !== 'completed'
+    ).sort((a, b) => {
+        if (a.priority === 'urgent' && b.priority !== 'urgent') return -1;
+        if (a.priority !== 'urgent' && b.priority === 'urgent') return 1;
+        return new Date(a.createdAt) - new Date(b.createdAt);
+    });
+    
+    if (machinePrograms.length === 0) {
+        alert(`Machine ${machineNumber} has no active programs.`);
+        return;
+    }
+    
+    const modalContent = `
+        <div class="modal-header">
+            <h5 class="modal-title">Machine ${machineNumber} - Program Queue</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="row g-3">
+                ${machinePrograms.map((program, index) => `
+                    <div class="col-12">
+                        <div class="card ${program.priority === 'urgent' ? 'border-danger' : ''}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <span class="queue-number">${index + 1}</span>
+                                            ${program.designName}
+                                            ${program.priority === 'urgent' ? '<span class="badge bg-danger ms-2">URGENT</span>' : ''}
+                                        </h6>
+                                        <p class="mb-1 small">Rounds: ${program.rounds}</p>
+                                        <p class="mb-0 small">Status: <span class="status-badge status-${program.status}">${program.status}</span></p>
+                                    </div>
+                                    <div class="text-end">
+                                        <button class="btn btn-sm btn-info" onclick="showProgramDetails('${program.id}')">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -2193,259 +2353,101 @@ function renderMachineQueueCard(machineNumber, currentProgram, queuePrograms) {
                             </div>
                         </div>
                     </div>
-                </div>
-                
-                ${queuePrograms.length > 0 ? `
-                    <div>
-                        <h6 class="fw-semibold mb-3">Queued Programs (${queuePrograms.length})</h6>
-                        <div class="row g-2">
-                            ${queuePrograms.map((program, index) => `
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="card ${program.priority === 'urgent' ? 'border-danger' : ''}">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                    <h6 class="mb-1"><span class="queue-number">${index + 2}</span>${program.designName}</h6>
-                                                    <p class="mb-1 small">Rounds: ${program.rounds}</p>
-                                                    <p class="mb-0 small">Status: <span class="status-badge status-${program.status}">${program.status}</span></p>
-                                                    ${program.priority === 'urgent' ? '<span class="badge bg-danger mt-1">URGENT</span>' : ''}
-                                                </div>
-                                                <div class="text-end">
-                                                    <div class="mt-2">
-                                                        <button class="btn btn-sm btn-info" onclick="showProgramDetails('${program.id}')">
-                                                            <i class="fas fa-eye"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                ` : `
-                    <div class="empty-queue">
-                        <i class="fas fa-check-circle"></i>
-                        <p class="mb-0">No programs in queue</p>
-                    </div>
-                `}
+                `).join('')}
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+    `;
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'machineProgramsModal';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                ${modalContent}
             </div>
         </div>
     `;
+    
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Remove modal from DOM after hide
+    modal.addEventListener('hidden.bs.modal', function () {
+        document.body.removeChild(modal);
+    });
 }
 
-function renderQueueView(searchTerm = '', resetChunk = true) {
-    if (resetChunk) {
-        currentQueueChunk = 1;
-    }
-    
-    const queueContent = document.getElementById('queueContent');
-    
-    // Group programs by machine
-    const machineQueues = {};
-    
-    programs.forEach(program => {
-        if (program.status !== 'completed') {
-            if (!machineQueues[program.machineNumber]) {
-                machineQueues[program.machineNumber] = [];
-            }
-            machineQueues[program.machineNumber].push(program);
-        }
+function viewOperatorMachinePrograms(machineNumber) {
+    const machinePrograms = programs.filter(p => 
+        p.machineNumber === machineNumber && p.status !== 'completed'
+    ).sort((a, b) => {
+        if (a.priority === 'urgent' && b.priority !== 'urgent') return -1;
+        if (a.priority !== 'urgent' && b.priority === 'urgent') return 1;
+        return new Date(a.createdAt) - new Date(b.createdAt);
     });
     
-    // Sort programs in each machine queue
-    Object.keys(machineQueues).forEach(machineNumber => {
-        machineQueues[machineNumber].sort((a, b) => {
-            if (a.priority === 'urgent' && b.priority !== 'urgent') return -1;
-            if (a.priority !== 'urgent' && b.priority === 'urgent') return 1;
-            return new Date(a.createdAt) - new Date(b.createdAt);
-        });
-    });
-    
-    // Calculate how many machines to show
-    const machineNumbers = Object.keys(machineQueues).sort();
-    const machinesToShow = machineNumbers.slice(0, currentQueueChunk * QUEUE_CHUNK_SIZE);
-    
-    let queueHtml = '';
-    
-    machinesToShow.forEach(machineNumber => {
-        const machinePrograms = machineQueues[machineNumber];
-        
-        // Filter by search term if provided
-        let filteredPrograms = machinePrograms;
-        if (searchTerm) {
-            filteredPrograms = machinePrograms.filter(program => 
-                program.designName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                program.machineNumber.toString().includes(searchTerm)
-            );
-        }
-        
-        if (filteredPrograms.length === 0) return;
-        
-        const currentProgram = filteredPrograms[0];
-        const queuePrograms = filteredPrograms.slice(1);
-        
-        queueHtml += renderMachineQueueCard(machineNumber, currentProgram, queuePrograms);
-    });
-    
-    // Add Load More button if there are more machines
-    if (machinesToShow.length < machineNumbers.length) {
-        queueHtml += `
-            <div class="text-center mt-4">
-                <button class="btn btn-outline-primary" onclick="loadMoreQueues()">
-                    <i class="fas fa-chevron-down me-2"></i>
-                    Load More (${machineNumbers.length - machinesToShow.length} remaining)
-                </button>
-            </div>
-        `;
-    }
-    
-    if (queueHtml === '') {
-        queueHtml = `
-            <div class="empty-queue">
-                <i class="fas fa-inbox"></i>
-                <h4>No programs in queue</h4>
-                <p class="mb-0">All machines are idle or no programs match your search</p>
-            </div>
-        `;
-    }
-    
-    queueContent.innerHTML = queueHtml;
-}
-
-function loadMoreQueues() {
-    currentQueueChunk++;
-    renderQueueView(document.getElementById('queueSearch').value, false);
-}
-
-function renderOperatorQueueView(searchTerm = '') {
-    const queueContent = document.getElementById('operatorQueueContent');
-    
-    // Group programs by machine
-    const machineQueues = {};
-    
-    programs.forEach(program => {
-        if (program.status !== 'completed') {
-            if (!machineQueues[program.machineNumber]) {
-                machineQueues[program.machineNumber] = [];
-            }
-            machineQueues[program.machineNumber].push(program);
-        }
-    });
-    
-    // Sort programs in each machine queue
-    Object.keys(machineQueues).forEach(machineNumber => {
-        machineQueues[machineNumber].sort((a, b) => {
-            if (a.priority === 'urgent' && b.priority !== 'urgent') return -1;
-            if (a.priority !== 'urgent' && b.priority === 'urgent') return 1;
-            return new Date(a.createdAt) - new Date(b.createdAt);
-        });
-    });
-    
-    let queueHtml = '';
-    
-    // Create queue cards for each machine
-    Object.keys(machineQueues).sort().forEach(machineNumber => {
-        const machinePrograms = machineQueues[machineNumber];
-        
-        // Filter by search term if provided
-        let filteredPrograms = machinePrograms;
-        if (searchTerm) {
-            filteredPrograms = machinePrograms.filter(program => 
-                program.designName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                program.machineNumber.toString().includes(searchTerm)
-            );
-        }
-        
-        if (filteredPrograms.length === 0) return;
-        
-        const currentProgram = filteredPrograms[0];
-        const queuePrograms = filteredPrograms.slice(1);
-        
-        queueHtml += `
-            <div class="card operator-queue-card mb-4 ${currentProgram.priority === 'urgent' ? 'urgent' : ''}">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="fas fa-cog me-2"></i>Machine ${machineNumber}
-                    </h5>
-                    <span class="badge bg-primary">${filteredPrograms.length} program${filteredPrograms.length > 1 ? 's' : ''}</span>
-                </div>
-                <div class="card-body">
-                    <div class="mb-4">
-                        <h6 class="fw-semibold mb-3">Current Program</h6>
-                        <div class="card bg-light">
+    const modalContent = `
+        <div class="modal-header">
+            <h5 class="modal-title">Machine ${machineNumber} - Program Queue</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="row g-3">
+                ${machinePrograms.map((program, index) => `
+                    <div class="col-12">
+                        <div class="card ${program.priority === 'urgent' ? 'border-danger' : ''}">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <h6 class="mb-1"><span class="queue-number">1</span>${currentProgram.designName}</h6>
-                                        <p class="mb-1 small">Rounds: ${currentProgram.rounds}</p>
-                                        <p class="mb-0 small">Status: <span class="status-badge status-${currentProgram.status}">${currentProgram.status}</span></p>
-                                        ${currentProgram.priority === 'urgent' ? '<span class="badge bg-danger mt-1">URGENT</span>' : ''}
+                                        <h6 class="mb-1">
+                                            <span class="queue-number">${index + 1}</span>
+                                            ${program.designName}
+                                            ${program.priority === 'urgent' ? '<span class="badge bg-danger ms-2">URGENT</span>' : ''}
+                                        </h6>
+                                        <p class="mb-1 small">Rounds: ${program.rounds}</p>
+                                        <p class="mb-0 small">Status: <span class="status-badge status-${program.status}">${program.status}</span></p>
                                     </div>
                                     <div class="text-end">
-                                        <div class="mt-2">
-                                            <button class="btn btn-sm btn-info" onclick="showProgramDetails('${currentProgram.id}')">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
-                                        </div>
+                                        <button class="btn btn-sm btn-info" onclick="showProgramDetails('${program.id}')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    ${queuePrograms.length > 0 ? `
-                        <div>
-                            <h6 class="fw-semibold mb-3">Queued Programs (${queuePrograms.length})</h6>
-                            <div class="row g-2">
-                                ${queuePrograms.map((program, index) => `
-                                    <div class="col-12 col-md-6 col-lg-4">
-                                        <div class="card ${program.priority === 'urgent' ? 'border-danger' : ''}">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between align-items-start">
-                                                    <div>
-                                                        <h6 class="mb-1"><span class="queue-number">${index + 2}</span>${program.designName}</h6>
-                                                        <p class="mb-1 small">Rounds: ${program.rounds}</p>
-                                                        <p class="mb-0 small">Status: <span class="status-badge status-${program.status}">${program.status}</span></p>
-                                                        ${program.priority === 'urgent' ? '<span class="badge bg-danger mt-1">URGENT</span>' : ''}
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <div class="mt-2">
-                                                            <button class="btn btn-sm btn-info" onclick="showProgramDetails('${program.id}')">
-                                                                <i class="fas fa-eye"></i>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : `
-                        <div class="empty-queue">
-                            <i class="fas fa-check-circle"></i>
-                            <p class="mb-0">No programs in queue</p>
-                        </div>
-                    `}
-                </div>
+                `).join('')}
             </div>
-        `;
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+    `;
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'operatorMachineProgramsModal';
+    modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                ${modalContent}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Remove modal from DOM after hide
+    modal.addEventListener('hidden.bs.modal', function () {
+        document.body.removeChild(modal);
     });
-    
-    if (queueHtml === '') {
-        queueHtml = `
-            <div class="empty-queue">
-                <i class="fas fa-inbox"></i>
-                <h4>No programs in queue</h4>
-                <p class="mb-0">All machines are idle or no programs match your search</p>
-            </div>
-        `;
-    }
-    
-    queueContent.innerHTML = queueHtml;
 }
 
 function viewMachineQueue(machineNumber) {
@@ -2959,7 +2961,9 @@ function editProgram(programId) {
             <div class="mb-3">
                 <h6 class="fw-semibold mb-3">Feeder Configuration</h6>
                 <div id="editFeederConfig">
-                    ${Object.entries(program.feeders).map(([feeder, yarn], index) => `
+                    ${Object.entries(program.feeders)
+                        .filter(([_, yarn]) => yarn && yarn.trim() !== '' && yarn.trim() !== 'Not Configured' && yarn.trim() !== '-')
+                        .map(([feeder, yarn], index) => `
                         <div class="feeder-item">
                             <div class="row g-2 align-items-center">
                                 <div class="col-8 col-md-9">
@@ -3320,8 +3324,77 @@ function changeHistoryPage(page, userType) {
     }
 }
 
+// --- DATE FILTER FOR EXPORTS ---
+function showDateFilterModal(userType) {
+    const modalContent = `
+        <div class="modal-header">
+            <h5 class="modal-title">Export History with Date Range</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label fw-semibold">From Date</label>
+                    <input type="date" class="form-control" id="exportFromDate">
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">To Date</label>
+                    <input type="date" class="form-control" id="exportToDate">
+                </div>
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="exportAllDates" checked>
+                        <label class="form-check-label" for="exportAllDates">
+                            Export all dates (ignore date range)
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="exportWithDateRange('${userType}')">Export</button>
+        </div>
+    `;
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.id = 'dateFilterModal';
+    modal.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                ${modalContent}
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+    
+    // Remove modal from DOM after hide
+    modal.addEventListener('hidden.bs.modal', function () {
+        document.body.removeChild(modal);
+    });
+}
+
+function exportWithDateRange(userType) {
+    const fromDate = document.getElementById('exportFromDate').value;
+    const toDate = document.getElementById('exportToDate').value;
+    const exportAll = document.getElementById('exportAllDates').checked;
+    
+    if (userType === 'admin') {
+        exportHistoryToExcel(fromDate, toDate, exportAll);
+    } else {
+        exportOperatorHistoryToExcel(fromDate, toDate, exportAll);
+    }
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('dateFilterModal'));
+    modal.hide();
+}
+
 // --- EXPORT TO EXCEL ---
-function exportHistoryToExcel() {
+function exportHistoryToExcel(fromDate = '', toDate = '', exportAll = true) {
     const filterValue = document.getElementById('historyMachineFilter').value;
     
     let filteredHistory = programHistory;
@@ -3330,16 +3403,99 @@ function exportHistoryToExcel() {
         filteredHistory = programHistory.filter(p => p.machineNumber == filterValue);
     }
     
+    // Apply date filter if not exporting all dates
+    if (!exportAll && (fromDate || toDate)) {
+        filteredHistory = filteredHistory.filter(program => {
+            const programDate = new Date(program.createdAt);
+            let fromValid = true;
+            let toValid = true;
+            
+            if (fromDate) {
+                const from = new Date(fromDate);
+                fromValid = programDate >= from;
+            }
+            
+            if (toDate) {
+                const to = new Date(toDate);
+                to.setHours(23, 59, 59, 999); // Include entire end date
+                toValid = programDate <= to;
+            }
+            
+            return fromValid && toValid;
+        });
+    }
+    
     const excelData = [
         ['Machine', 'Design', 'Rounds', 'Status', 'Created', 'Started', 'Completed', 'Feeders']
     ];
     
     filteredHistory.forEach(program => {
         const feeders = Object.entries(program.feeders)
-    .filter(([_, yarn]) => yarn && yarn.trim() !== '' && yarn.trim() !== 'Not Configured' && yarn.trim() !== '-')
-    .map(([feeder, yarn]) => `${feeder}: ${yarn}`)
-    .join(', ');
+            .filter(([_, yarn]) => yarn && yarn.trim() !== '' && yarn.trim() !== 'Not Configured' && yarn.trim() !== '-')
+            .map(([feeder, yarn]) => `${feeder}: ${yarn}`)
+            .join(', ');
+                
+        excelData.push([
+            program.machineNumber,
+            program.designName,
+            program.rounds,
+            program.status,
+            program.createdAt.toLocaleString(),
+            program.startedAt ? program.startedAt.toLocaleString() : '-',
+            program.completedAt ? program.completedAt.toLocaleString() : '-',
+            feeders
+        ]);
+    });
+    
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Program History');
+    
+    const fileName = `ProgramHistory_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+}
+
+function exportOperatorHistoryToExcel(fromDate = '', toDate = '', exportAll = true) {
+    const filterValue = document.getElementById('operatorHistoryMachineFilter').value;
+    
+    let filteredHistory = programHistory;
+    
+    if (filterValue !== 'all') {
+        filteredHistory = programHistory.filter(p => p.machineNumber == filterValue);
+    }
+    
+    // Apply date filter if not exporting all dates
+    if (!exportAll && (fromDate || toDate)) {
+        filteredHistory = filteredHistory.filter(program => {
+            const programDate = new Date(program.createdAt);
+            let fromValid = true;
+            let toValid = true;
             
+            if (fromDate) {
+                const from = new Date(fromDate);
+                fromValid = programDate >= from;
+            }
+            
+            if (toDate) {
+                const to = new Date(toDate);
+                to.setHours(23, 59, 59, 999); // Include entire end date
+                toValid = programDate <= to;
+            }
+            
+            return fromValid && toValid;
+        });
+    }
+    
+    const excelData = [
+        ['Machine', 'Design', 'Rounds', 'Status', 'Created', 'Started', 'Completed', 'Feeders']
+    ];
+    
+    filteredHistory.forEach(program => {
+        const feeders = Object.entries(program.feeders)
+            .filter(([_, yarn]) => yarn && yarn.trim() !== '' && yarn.trim() !== 'Not Configured' && yarn.trim() !== '-')
+            .map(([feeder, yarn]) => `${feeder}: ${yarn}`)
+            .join(', ');
+                
         excelData.push([
             program.machineNumber,
             program.designName,
@@ -3534,7 +3690,7 @@ function toggleSearchVisibility(tab) {
     }
 }
 
-    // --- SERVICE WORKER REGISTRATION ---
+// --- SERVICE WORKER REGISTRATION ---
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
         console.log('Service Worker is supported');
@@ -3573,23 +3729,6 @@ function registerServiceWorker() {
     } else {
         console.log('Service Worker is not supported in this browser');
     }
-}
-
-// Call this in your initializeApp function
-function initializeApp() {
-    loadMachines();
-    setupEventListeners();
-    setupSearchFunctionality();
-    setupAuthStateListener();
-    addViewToggleButton();
-    setupPWA();
-    registerServiceWorker();
-    
-    // Check PWA status after a delay
-    setTimeout(checkPwaStatus, 3000);
-    
-    // Check if user was previously logged in
-    checkPreviousLogin();
 }
 
 // Add this new function to check PWA status
@@ -3632,6 +3771,7 @@ function checkPwaStatus() {
         document.body.appendChild(debugBtn);
     }
 }
+
 // Make functions available globally
 window.loginAsAdmin = loginAsAdmin;
 window.loginAsOperator = loginAsOperator;
@@ -3660,11 +3800,11 @@ window.toggleHistoryView = toggleHistoryView;
 window.installPwa = installPwa;
 window.dismissPwaPrompt = dismissPwaPrompt;
 window.requestEditProgram = requestEditProgram;
+window.viewMachinePrograms = viewMachinePrograms;
+window.viewOperatorMachinePrograms = viewOperatorMachinePrograms;
+window.exportOperatorHistoryToExcel = exportOperatorHistoryToExcel;
+window.showDateFilterModal = showDateFilterModal;
+window.exportWithDateRange = exportWithDateRange;
 </script>
 </body>
 </html>
-
-
-
-
-
