@@ -1328,6 +1328,21 @@
     </div>
 
     <!-- Admin Dashboard -->
+    <!-- Add this temporarily to admin dashboard -->
+<div class="container mt-3">
+    <div class="alert alert-warning">
+        <h6>Notification Debug</h6>
+        <button class="btn btn-sm btn-success me-2" onclick="sendTestNotification()">
+            <i class="fas fa-bell me-1"></i>Send Test Notification
+        </button>
+        <button class="btn btn-sm btn-info me-2" onclick="checkNotificationStatus()">
+            <i class="fas fa-bug me-1"></i>Debug Status
+        </button>
+        <button class="btn btn-sm btn-danger" onclick="clearAllNotifications()">
+            <i class="fas fa-trash me-1"></i>Clear All
+        </button>
+    </div>
+</div>
     <div id="adminDashboard" class="d-none py-3">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -4180,51 +4195,36 @@ function setupOperatorNotifications() {
         window.notificationListener();
     }
     
-    // Listen for notifications
+    // SIMPLIFIED: Listen to all notifications without complex queries
     const notificationsQuery = db.collection("notifications")
-        .where("userId", "==", "operator")
         .orderBy("createdAt", "desc")
-        .limit(50);
+        .limit(20);
     
     window.notificationListener = notificationsQuery.onSnapshot((snapshot) => {
-        console.log('Notifications snapshot received:', snapshot.size, 'notifications');
+        console.log('🔥 Notifications snapshot received:', snapshot.size, 'notifications');
         
         let unreadCount = 0;
-        const newNotifications = [];
         
         snapshot.docChanges().forEach((change) => {
-            const notification = {
-                id: change.doc.id,
-                ...change.doc.data(),
-                createdAt: change.doc.data().createdAt ? change.doc.data().createdAt.toDate() : new Date()
-            };
+            const notification = change.doc.data();
+            console.log('📢 Notification change:', change.type, notification);
             
-            if (!notification.read) {
-                unreadCount++;
-            }
-            
-            // Track new notifications
             if (change.type === "added" && !notification.read) {
-                newNotifications.push(notification);
+                unreadCount++;
+                
+                // Show browser notification for new unread notifications
+                if (notification.userId === 'operator' || !notification.userId) {
+                    console.log('🎯 Showing browser notification for operator');
+                    showBrowserNotificationForOperator(notification);
+                }
             }
         });
         
-        console.log('Unread notifications:', unreadCount);
+        console.log('🔔 Unread count:', unreadCount);
         updateNotificationBadge(unreadCount);
         
-        // Show browser notifications for new ones
-        newNotifications.forEach(notification => {
-            console.log('Showing browser notification for:', notification);
-            showBrowserNotificationForOperator(notification);
-        });
-        
-        // Refresh notifications list if modal is open
-        if (document.getElementById('notificationsModal').classList.contains('show')) {
-            loadNotifications();
-        }
-        
     }, (error) => {
-        console.error('Error in notification listener:', error);
+        console.error('❌ Error in notification listener:', error);
     });
 }
 function notifyOperators(type, program, oldProgram = null) {
@@ -4233,38 +4233,23 @@ function notifyOperators(type, program, oldProgram = null) {
         return;
     }
     
-    console.log('Sending notification to operators:', type, program);
+    console.log('🚀 Sending notification to operators:', type);
     
     const notificationData = {
         type: type,
         program: program,
-        oldProgram: oldProgram,
-        timestamp: new Date().toISOString(),
-        source: 'admin',
-        userId: 'operator', // This notification is for operators
-        read: false
+        timestamp: new Date(),
+        read: false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
     
-    // Store notification in Firestore
-    db.collection("notifications").add({
-        ...notificationData,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then((docRef) => {
-        console.log('Notification sent to operators with ID:', docRef.id);
-    }).catch(error => {
-        console.error('Error sending notification:', error);
-        // Fallback: Try without userId field
-        db.collection("notifications").add({
-            type: type,
-            program: program,
-            timestamp: new Date().toISOString(),
-            read: false,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        }).then(() => {
-            console.log('Notification sent (fallback)');
-        }).catch(error2 => {
-            console.error('Error in fallback notification:', error2);
-        });
+    // SIMPLE: Just add to notifications collection
+    db.collection("notifications").add(notificationData)
+    .then((docRef) => {
+        console.log('✅ Notification sent with ID:', docRef.id);
+    })
+    .catch(error => {
+        console.error('❌ Error sending notification:', error);
     });
 }
 function showBrowserNotificationForOperator(notification) {
@@ -4620,6 +4605,37 @@ function requestNotificationPermission() {
     }
 }
 
+
+// TEST: Send immediate test notification
+function sendTestNotification() {
+    console.log('🧪 Sending test notification...');
+    
+    const testProgram = {
+        machineNumber: 1,
+        designName: 'TEST DESIGN ' + Date.now(),
+        rounds: 100,
+        priority: 'normal',
+        status: 'pending'
+    };
+    
+    // Create test notification directly
+    db.collection("notifications").add({
+        type: 'PROGRAM_CREATED',
+        program: testProgram,
+        timestamp: new Date(),
+        read: false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(docRef => {
+        console.log('✅ Test notification sent! ID:', docRef.id);
+        alert('Test notification sent! Check operator console.');
+    }).catch(error => {
+        console.error('❌ Test failed:', error);
+        alert('Test failed: ' + error.message);
+    });
+}
+
+// Make it global
+window.sendTestNotification = sendTestNotification;
 // Make functions available globally
 window.loginAsAdmin = loginAsAdmin;
 window.loginAsOperator = loginAsOperator;
