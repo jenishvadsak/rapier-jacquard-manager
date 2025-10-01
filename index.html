@@ -4099,23 +4099,7 @@ function registerServiceWorker() {
 }
 
 
-// Request notification permission
-// --- BROWSER NOTIFICATION SYSTEM ---
-function requestNotificationPermission() {
-    if ('Notification' in window && Notification.permission === 'default') {
-        console.log('Requesting notification permission...');
-        Notification.requestPermission().then(permission => {
-            console.log('Notification permission:', permission);
-            if (permission === 'granted') {
-                console.log('Browser notification permission granted');
-            }
-        }).catch(error => {
-            console.error('Error requesting notification permission:', error);
-        });
-    } else {
-        console.log('Notification permission already:', Notification.permission);
-    }
-}
+
 
 function setupOperatorNotifications() {
     if (currentUser !== 'operator') return;
@@ -4319,52 +4303,7 @@ if ('BroadcastChannel' in window) {
     }
 }
 
-// --- PWA FUNCTIONALITY ---
-function setupPWA() {
-    console.log('Setting up PWA...');
-    
-    // Check if app is already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-        isAppInstalled = true;
-        console.log('App is running in standalone mode');
-    }
-    
-    // Check for iOS standalone mode
-    if (window.navigator.standalone === true) {
-        isAppInstalled = true;
-        console.log('App is running in iOS standalone mode');
-    }
-    
-    // Listen for beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('beforeinstallprompt event fired');
-        // Prevent the mini-infobar from appearing on mobile
-        e.preventDefault();
-        // Stash the event so it can be triggered later
-        deferredPrompt = e;
-        
-        // Check if prompt was recently dismissed
-        const promptDismissed = localStorage.getItem('pwaPromptDismissed');
-        const dismissTime = promptDismissed ? parseInt(promptDismissed) : 0;
-        const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-        
-        // Show install prompt if app is not installed and not recently dismissed
-        if (!isAppInstalled && dismissTime < oneWeekAgo) {
-            console.log('Showing PWA install prompt');
-            setTimeout(() => {
-                showPwaPrompt();
-            }, 5000); // Show after 5 seconds
-        }
-    });
-    
-    // Listen for app installed event
-    window.addEventListener('appinstalled', (e) => {
-        console.log('App installed successfully');
-        isAppInstalled = true;
-        deferredPrompt = null;
-        hidePwaPrompt();
-    });
-}
+
 
 function showPwaPrompt() {
     const prompt = document.getElementById('pwaInstallPrompt');
