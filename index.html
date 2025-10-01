@@ -201,6 +201,24 @@
     .pwa-install-buttons .btn {
         flex: 1;
     }
+    @media (max-width: 768px) {
+    /* ... existing code ... */
+    
+    /* Queue cards - 2 per row on mobile */
+    #queueContent .row.g-3,
+    #operatorQueueContent .row.g-3 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    #queueContent .col-12.col-sm-6.col-md-4.col-lg-3,
+    #operatorQueueContent .col-12.col-sm-6.col-md-4.col-lg-3 {
+        width: 100%;
+        max-width: none;
+        flex: none;
+    }
+}
 
     /* Mobile-first responsive design improvements */
     @media (max-width: 768px) {
@@ -427,9 +445,16 @@
             margin: 10px;
         }
         
-        .modal-content {
-            border-radius: 8px;
-        }
+        /* Modal enhancements */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    z-index: 1060; /* Ensure modals appear above other content */
+}
+
+.modal {
+    z-index: 1055; /* Ensure modal backdrop appears correctly */
+}
         
         .modal-body {
             padding: 15px;
@@ -707,10 +732,33 @@
     }
 
     /* Modal enhancements */
-    .modal-content {
-        border-radius: 12px;
-        border: none;
-    }
+    /* Modal enhancements */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    z-index: 1060; /* Ensure modals appear above other content */
+}
+/* Ensure program details modal appears above queue modal */
+#programDetailsModal {
+    z-index: 1070 !important;
+}
+
+#programDetailsModal .modal-content {
+    z-index: 1071 !important;
+}
+
+/* Ensure image modal appears above all */
+#imageModal {
+    z-index: 1080 !important;
+}
+
+#imageModal .modal-content {
+    z-index: 1081 !important;
+}
+
+.modal {
+    z-index: 1055; /* Ensure modal backdrop appears correctly */
+}
 
     .modal-header {
         border-bottom: 1px solid #e9ecef;
@@ -1086,6 +1134,27 @@
         display: none !important;
     }
 }
+/* Ensure 2 cards per row in queue on mobile */
+@media (max-width: 768px) {
+    #queueContent .row.g-3,
+    #operatorQueueContent .row.g-3 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin: 0;
+    }
+    
+    #queueContent .col-12.col-sm-6,
+    #operatorQueueContent .col-12.col-sm-6 {
+        padding: 0;
+        width: 100%;
+    }
+    
+    .queue-header + .d-flex {
+        margin-bottom: 15px;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -2227,7 +2296,7 @@ function renderQueueView(searchTerm = '') {
             const queueCount = Math.max(0, machinePrograms.length - 1);
             
             queueHtml += `
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="col-12 col-sm-6">
                     <div class="card machine-card h-100" onclick="viewMachinePrograms(${machineNumber})" style="cursor: pointer;">
                         <div class="card-body text-center">
                             <div class="mb-3">
@@ -2307,7 +2376,7 @@ function renderOperatorQueueView(searchTerm = '') {
             const queueCount = Math.max(0, machinePrograms.length - 1);
             
             queueHtml += `
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="col-12 col-sm-6">
                     <div class="card machine-card h-100" onclick="viewOperatorMachinePrograms(${machineNumber})" style="cursor: pointer;">
                         <div class="card-body text-center">
                             <div class="mb-3">
