@@ -1276,6 +1276,239 @@
         padding: 2px 6px !important;
     }
 }
+/* Add these styles to fix card size consistency */
+
+/* Machine Cards - Fixed Height */
+.machine-card {
+    min-height: 280px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.machine-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.machine-card .program-info {
+    flex: 1;
+    min-height: 80px;
+}
+
+/* Queue Cards - Fixed Height */
+.queue-card {
+    min-height: 200px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.queue-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Text Truncation for Long Design Names */
+.machine-card .program-info p,
+.queue-card .card-body p {
+    margin-bottom: 0.5rem;
+    word-wrap: break-word;
+    overflow: hidden;
+}
+
+/* Design name truncation */
+.machine-card .program-info p:first-child,
+.queue-card .card-body p:first-child {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 2.8em;
+    line-height: 1.4em;
+}
+
+/* Ensure consistent spacing */
+.machine-summary {
+    min-height: 20px;
+}
+
+.action-buttons {
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+/* Mobile adjustments for consistent card sizing */
+@media (max-width: 768px) {
+    .machine-card {
+        min-height: 240px;
+    }
+    
+    .queue-card {
+        min-height: 180px;
+    }
+    
+    /* Ensure 2 cards per row in queue on mobile */
+    #queueContent .row.g-3,
+    #operatorQueueContent .row.g-3 {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+        margin: 0 !important;
+    }
+    
+    #queueContent .col-12.col-sm-6,
+    #operatorQueueContent .col-12.col-sm-6 {
+        padding: 0 !important;
+        width: 100% !important;
+        display: flex !important;
+    }
+    
+    .queue-card {
+        width: 100%;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Machine grid layout optimization */
+    #machinesGrid, #operatorMachinesGrid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+    
+    #machinesGrid .col-12.col-sm-6.col-lg-4.col-xl-3,
+    #operatorMachinesGrid .col-12.col-sm-6.col-lg-4 {
+        padding: 0 !important;
+        width: 100% !important;
+        display: flex !important;
+    }
+    
+    .machine-card {
+        width: 100%;
+        margin-bottom: 0 !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .machine-card {
+        min-height: 220px;
+    }
+    
+    .queue-card {
+        min-height: 160px;
+    }
+    
+    /* Further mobile optimization */
+    .machine-card .card-body {
+        padding: 12px !important;
+    }
+    
+    .queue-card .card-body {
+        padding: 15px !important;
+    }
+    
+    /* Text size adjustments for mobile */
+    .machine-card .card-title {
+        font-size: 0.9rem !important;
+    }
+    
+    .queue-card h5 {
+        font-size: 0.9rem !important;
+    }
+    
+    .machine-card p,
+    .queue-card p {
+        font-size: 0.75rem !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .status-badge {
+        font-size: 0.6rem !important;
+        padding: 2px 6px !important;
+    }
+}
+
+/* Ensure buttons don't overflow */
+.action-buttons .btn {
+    min-width: auto;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    white-space: nowrap;
+}
+
+/* Queue number styling adjustment */
+.queue-number {
+    flex-shrink: 0;
+}
+
+/* Program details modal - full text display */
+#programDetailsModal .program-details {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+#programDetailsModal .feeder-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+#programDetailsModal .feeder-grid-item {
+    text-align: center;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+#programDetailsModal .feeder-number {
+    font-weight: bold;
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+#programDetailsModal .feeder-value {
+    color: var(--secondary);
+    word-break: break-word;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+/* Fix for assign program button on mobile */
+@media (max-width: 768px) {
+    .assign-program-btn {
+        font-size: 0.7rem !important;
+        padding: 6px 8px !important;
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Ensure consistent card header heights */
+.machine-card .card-title,
+.queue-card .card-title {
+    min-height: 2.2em;
+    display: flex;
+    align-items: center;
+}
+
+/* Fix for empty states */
+.empty-queue {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+/* Loading state consistency */
+.loading-overlay {
+    z-index: 9999;
+}
 
     </style>
 </head>
@@ -2158,6 +2391,7 @@ function loadPrograms() {
     });
 }
 
+// Update the machine card rendering to handle long text
 function renderMachinesGrid() {
     const grid = document.getElementById('machinesGrid');
     grid.innerHTML = '';
@@ -2194,14 +2428,12 @@ function renderMachinesGrid() {
                     
                     ${currentProgram ? `
                         <div class="program-info">
-                            <p class="mb-1 small"><strong>Design:</strong> ${currentProgram.designName}</p>
+                            <p class="mb-1 small" title="${currentProgram.designName}"><strong>Design:</strong> ${currentProgram.designName}</p>
                             <p class="mb-2 small"><strong>Rounds:</strong> ${currentProgram.rounds}</p>
                             
                             <div class="machine-summary mb-3">
-                                
+                                <!-- Summary content if needed -->
                             </div>
-                            
-                            <!-- Photo removed from machine card -->
                         </div>
                         
                         <div class="action-buttons">
@@ -2235,12 +2467,16 @@ function renderMachinesGrid() {
                             `}
                         </div>
                     ` : `
-                        <p class="text-muted small mb-3">No program assigned</p>
+                        <div class="program-info">
+                            <p class="text-muted small mb-3">No program assigned</p>
+                        </div>
                         ${currentUser === 'admin' ? `
-    <button class="btn btn-primary btn-sm w-100 assign-program-btn" onclick="assignProgram(${machine.machineNumber})">
-        <i class="fas fa-plus me-1"></i>Assign Program
-    </button>
-` : ''}
+                            <div class="action-buttons">
+                                <button class="btn btn-primary btn-sm w-100 assign-program-btn" onclick="assignProgram(${machine.machineNumber})">
+                                    <i class="fas fa-plus me-1"></i>Assign Program
+                                </button>
+                            </div>
+                        ` : ''}
                     `}
                     
                     ${queuePrograms.length > 0 ? `
@@ -2258,6 +2494,87 @@ function renderMachinesGrid() {
     });
 }
 
+// Update queue card rendering for consistent sizing
+function renderQueueView(searchTerm = '') {
+    const queueContent = document.getElementById('queueContent');
+    
+    let queueHtml = '';
+    
+    // Create machine cards only for machines with programs
+    let machinesWithPrograms = [];
+    
+    for (let machineNumber = 1; machineNumber <= TOTAL_MACHINES; machineNumber++) {
+        const machinePrograms = programs.filter(p => 
+            p.machineNumber === machineNumber && p.status !== 'completed'
+        );
+        
+        // Filter by search term if provided
+        let filteredPrograms = machinePrograms;
+        if (searchTerm) {
+            filteredPrograms = machinePrograms.filter(program => 
+                program.designName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                program.machineNumber.toString().includes(searchTerm)
+            );
+        }
+        
+        // Only show machines that have programs or match search
+        if (filteredPrograms.length === 0) {
+            continue;
+        }
+        
+        machinesWithPrograms.push({ machineNumber, programs: filteredPrograms });
+    }
+    
+    if (machinesWithPrograms.length === 0) {
+        queueHtml = `
+            <div class="col-12">
+                <div class="empty-queue">
+                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                    <h4>No programs found</h4>
+                    <p class="mb-0">${searchTerm ? 'No machines match your search criteria' : 'No machines have active programs'}</p>
+                </div>
+            </div>
+        `;
+    } else {
+        machinesWithPrograms.forEach(({ machineNumber, programs: machinePrograms }) => {
+            const currentProgram = machinePrograms.length > 0 ? machinePrograms[0] : null;
+            const queueCount = Math.max(0, machinePrograms.length - 1);
+            
+            queueHtml += `
+                <div class="col-12 col-sm-6">
+                    <div class="card queue-card h-100" onclick="viewMachinePrograms(${machineNumber})" style="cursor: pointer;">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-cog fa-2x text-primary"></i>
+                            </div>
+                            <h5 class="card-title">Machine ${machineNumber}</h5>
+                            ${currentProgram ? `
+                                <p class="mb-1 small" title="${currentProgram.designName}"><strong>Current:</strong> ${currentProgram.designName}</p>
+                                <p class="mb-1 small text-muted">Rounds: ${currentProgram.rounds}</p>
+                                <span class="status-badge status-${currentProgram.status} ${currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
+                                    ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status}
+                                </span>
+                            ` : `
+                                <p class="text-muted small">No program assigned</p>
+                            `}
+                            ${queueCount > 0 ? `
+                                <div class="mt-2">
+                                    <span class="badge bg-warning">+${queueCount} in queue</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+    
+    queueContent.innerHTML = `
+        <div class="row g-3">
+            ${queueHtml}
+        </div>
+    `;
+}
 function renderOperatorMachinesGrid() {
     const grid = document.getElementById('operatorMachinesGrid');
     grid.innerHTML = '';
@@ -2353,87 +2670,7 @@ function renderOperatorMachinesGrid() {
     });
 }
 
-// --- QUEUE VIEW FUNCTIONALITY ---
-function renderQueueView(searchTerm = '') {
-    const queueContent = document.getElementById('queueContent');
-    
-    let queueHtml = '';
-    
-    // Create machine cards only for machines with programs
-    let machinesWithPrograms = [];
-    
-    for (let machineNumber = 1; machineNumber <= TOTAL_MACHINES; machineNumber++) {
-        const machinePrograms = programs.filter(p => 
-            p.machineNumber === machineNumber && p.status !== 'completed'
-        );
-        
-        // Filter by search term if provided
-        let filteredPrograms = machinePrograms;
-        if (searchTerm) {
-            filteredPrograms = machinePrograms.filter(program => 
-                program.designName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                program.machineNumber.toString().includes(searchTerm)
-            );
-        }
-        
-        // Only show machines that have programs or match search
-        if (filteredPrograms.length === 0) {
-            continue;
-        }
-        
-        machinesWithPrograms.push({ machineNumber, programs: filteredPrograms });
-    }
-    
-    if (machinesWithPrograms.length === 0) {
-        queueHtml = `
-            <div class="col-12">
-                <div class="empty-queue">
-                    <i class="fas fa-inbox fa-3x mb-3"></i>
-                    <h4>No programs found</h4>
-                    <p class="mb-0">${searchTerm ? 'No machines match your search criteria' : 'No machines have active programs'}</p>
-                </div>
-            </div>
-        `;
-    } else {
-        machinesWithPrograms.forEach(({ machineNumber, programs: machinePrograms }) => {
-            const currentProgram = machinePrograms.length > 0 ? machinePrograms[0] : null;
-            const queueCount = Math.max(0, machinePrograms.length - 1);
-            
-            queueHtml += `
-                <div class="col-12 col-sm-6">
-                    <div class="card machine-card h-100" onclick="viewMachinePrograms(${machineNumber})" style="cursor: pointer;">
-                        <div class="card-body text-center">
-                            <div class="mb-3">
-                                <i class="fas fa-cog fa-2x text-primary"></i>
-                            </div>
-                            <h5 class="card-title">Machine ${machineNumber}</h5>
-                            ${currentProgram ? `
-                                <p class="mb-1 small"><strong>Current:</strong> ${currentProgram.designName}</p>
-                                <p class="mb-1 small text-muted">Rounds: ${currentProgram.rounds}</p>
-                                <span class="status-badge status-${currentProgram.status} ${currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
-                                    ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status}
-                                </span>
-                            ` : `
-                                <p class="text-muted small">No program assigned</p>
-                            `}
-                            ${queueCount > 0 ? `
-                                <div class="mt-2">
-                                    <span class="badge bg-warning">+${queueCount} in queue</span>
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-    }
-    
-    queueContent.innerHTML = `
-        <div class="row g-3">
-            ${queueHtml}
-        </div>
-    `;
-}
+
 
 function renderOperatorQueueView(searchTerm = '') {
     const queueContent = document.getElementById('operatorQueueContent');
