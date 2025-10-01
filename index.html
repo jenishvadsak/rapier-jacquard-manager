@@ -1800,13 +1800,17 @@ function initializeApp() {
     setupPWA();
     registerServiceWorker();
     
-    // Request notification permission
+    // Request notification permission with a delay
     setTimeout(() => {
+        console.log('Initializing notification system...');
         requestNotificationPermission();
-    }, 2000);
+    }, 3000);
     
     // Check if user was previously logged in
     checkPreviousLogin();
+    
+    // Add debug info to console
+    console.log('App initialized. Use checkNotificationStatus() to debug notifications.');
 }
 function setupEventListeners() {
     document.getElementById('programForm').addEventListener('submit', function(e) {
@@ -2886,7 +2890,7 @@ async function saveProgram() {
         return false;
     }
 
-    // Fill remaining feeders with empty values (they will be hidden)
+    // Fill remaining feeders with empty values
     for (let i = feederInputs.length + 1; i <= 12; i++) {
         feeders[`feeder${i}`] = '';
     }
@@ -2918,14 +2922,19 @@ async function saveProgram() {
 
         const result = await db.collection("programs").add(programData);
         
-        // Broadcast notification to operators
-        const newProgram = {
-            id: result.id,
-            ...programData,
-            createdAt: new Date() // Use client time for immediate notification
-        };
+        console.log('Program saved with ID:', result.id);
         
-        broadcastNotification('new_program', newProgram);
+        // Broadcast notification to operators - use a timeout to ensure data is saved
+        setTimeout(() => {
+            const newProgram = {
+                id: result.id,
+                ...programData,
+                createdAt: new Date() // Use client time for immediate notification
+            };
+            
+            console.log('Broadcasting new program notification:', newProgram);
+            broadcastNotification('new_program', newProgram);
+        }, 1000);
         
         alert('Program saved successfully!');
         document.getElementById('programForm').reset();
@@ -4166,30 +4175,33 @@ function setupOperatorNotifications() {
     
     console.log('Setting up browser notifications for operator...');
     
-    // Check permission first
+    // Double-check permission
     if (Notification.permission !== 'granted') {
-        console.log('Notification permission not granted, requesting...');
-        requestNotificationPermission();
+        console.log('Notification permission not granted, cannot setup notifications');
         return;
     }
     
     console.log('Setting up Firebase listeners for notifications...');
     
-    // Listen for new programs with a more specific query
+    // Clear any existing listeners first
+    if (window.programListener) {
+        window.programListener();
+    }
+    if (window.statusListener) {
+        window.statusListener();
+    }
+    
+    // Listen for NEW programs (only pending status)
     const newProgramsQuery = db.collection("programs")
         .where("status", "==", "pending")
         .orderBy("createdAt", "desc")
-        .limit(5);
+        .limit(10);
     
-    let initialLoad = true;
+    let initialNewLoad = true;
+    let lastNewProgramTime = new Date();
     
-    newProgramsQuery.onSnapshot((snapshot) => {
+    window.programListener = newProgramsQuery.onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
-            // Skip initial load to avoid old notifications
-            if (initialLoad && change.type === "added") {
-                return;
-            }
-            
             if (change.type === "added") {
                 const program = {
                     id: change.doc.id,
@@ -4197,54 +4209,111 @@ function setupOperatorNotifications() {
                     createdAt: change.doc.data().createdAt ? change.doc.data().createdAt.toDate() : new Date()
                 };
                 
-                console.log('New program for notification:', program.designName);
+                // Skip initial load and very old programs
+                const programTime = program.createdAt;
+                const timeDiff = (new Date() - programTime) / 1000; // in seconds
                 
-                // Show notification for new programs
-                showBrowserNotification(
-                    '📋 New Program Assigned',
-                    `Machine ${program.machineNumber}: ${program.designName} (${program.rounds} rounds) ${program.priority === 'urgent' ? '🚨 URGENT' : ''}`,
-                    program.priority === 'urgent' ? 'high' : 'normal'
-                );
+                console.log('New program detected:', {
+                    id: program.id,
+                    designName: program.designName,
+                    timeDiff: timeDiff,
+                    initialLoad: initialNewLoad
+                });
+                
+                if (!initialNewLoad && timeDiff < 120) { // Only show notifications for programs created in last 2 minutes
+                    console.log('Showing notification for new program:', program.designName);
+                    
+                    showBrowserNotification(
+                        '📋 New Program Assigned',
+                        `Machine ${program.machineNumber}: ${program.designName} (${program.rounds} rounds) ${program.priority === 'urgent' ? '🚨 URGENT' : ''}`,
+                        program.priority === 'urgent' ? 'high' : 'normal'
+                    );
+                    
+                    // Also show in-app notification
+                    showNotification(`New program assigned to Machine ${program.machineNumber}: ${program.designName}`, 'info');
+                }
+                
+                if (programTime > lastNewProgramTime) {
+                    lastNewProgramTime = programTime;
+                }
             }
         });
         
-        initialLoad = false;
+        initialNewLoad = false;
     }, (error) => {
         console.error('Error in new programs listener:', error);
     });
 
-    // Listen for program status changes
+    // Listen for program STATUS CHANGES (running -> completed, pending -> running)
     const statusChangesQuery = db.collection("programs")
         .where("status", "in", ["running", "completed"]);
     
-    statusChangesQuery.onSnapshot((snapshot) => {
+    let initialStatusLoad = true;
+    let processedStatusChanges = new Set();
+    
+    window.statusListener = statusChangesQuery.onSnapshot((snapshot) => {
         snapshot.docChanges().forEach((change) => {
             if (change.type === "modified") {
                 const program = {
                     id: change.doc.id,
-                    ...change.doc.data()
+                    ...change.doc.data(),
+                    createdAt: change.doc.data().createdAt ? change.doc.data().createdAt.toDate() : new Date(),
+                    startedAt: change.doc.data().startedAt ? change.doc.data().startedAt.toDate() : null,
+                    completedAt: change.doc.data().completedAt ? change.doc.data().completedAt.toDate() : null
                 };
                 
                 const oldData = change.doc._previousData;
                 
-                if (oldData && oldData.status !== program.status) {
-                    console.log('Status change detected:', oldData.status, '->', program.status);
+                // Create a unique identifier for this status change to avoid duplicates
+                const statusChangeId = `${program.id}-${program.status}-${Date.now()}`;
+                
+                if (oldData && oldData.status !== program.status && !processedStatusChanges.has(statusChangeId)) {
+                    console.log('Status change detected:', {
+                        programId: program.id,
+                        oldStatus: oldData.status,
+                        newStatus: program.status,
+                        designName: program.designName
+                    });
                     
-                    if (program.status === 'running') {
+                    // Mark this change as processed
+                    processedStatusChanges.add(statusChangeId);
+                    
+                    // Clean up old processed changes (keep last 100)
+                    if (processedStatusChanges.size > 100) {
+                        const array = Array.from(processedStatusChanges);
+                        processedStatusChanges = new Set(array.slice(-50));
+                    }
+                    
+                    if (program.status === 'running' && oldData.status === 'pending') {
+                        console.log('Program started notification:', program.designName);
+                        
                         showBrowserNotification(
                             '▶️ Program Started',
                             `Machine ${program.machineNumber}: ${program.designName} is now running`
                         );
-                    } else if (program.status === 'completed') {
+                        
+                        showNotification(`Machine ${program.machineNumber}: ${program.designName} started running`, 'info');
+                    } 
+                    else if (program.status === 'completed' && oldData.status === 'running') {
+                        console.log('Program completed notification:', program.designName);
+                        
                         showBrowserNotification(
                             '✅ Program Completed',
                             `Machine ${program.machineNumber}: ${program.designName} has been completed`
                         );
+                        
+                        showNotification(`Machine ${program.machineNumber}: ${program.designName} completed`, 'success');
                     }
                 }
             }
         });
+        
+        initialStatusLoad = false;
+    }, (error) => {
+        console.error('Error in status changes listener:', error);
     });
+    
+    console.log('Firebase notification listeners setup completed');
 }
 
 function showBrowserNotification(title, message, priority = 'normal') {
@@ -4270,7 +4339,6 @@ function showBrowserNotification(title, message, priority = 'normal') {
     }
 }
 
-// Send notification to other tabs (for when admin creates/updates programs)
 function broadcastNotification(type, program, oldProgram = null) {
     console.log('Broadcasting notification:', type, program);
     
@@ -4278,16 +4346,21 @@ function broadcastNotification(type, program, oldProgram = null) {
         type: type,
         program: program,
         oldProgram: oldProgram,
-        timestamp: new Date()
+        timestamp: new Date().toISOString(),
+        source: 'admin'
     };
     
     // Method 1: localStorage (works across tabs)
     try {
-        localStorage.setItem('programNotification', JSON.stringify(notificationData));
-        // Remove it immediately so it doesn't persist
+        const uniqueKey = `programNotification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem(uniqueKey, JSON.stringify(notificationData));
+        
+        // Remove it after a short time
         setTimeout(() => {
-            localStorage.removeItem('programNotification');
-        }, 100);
+            localStorage.removeItem(uniqueKey);
+        }, 5000);
+        
+        console.log('Notification broadcast via localStorage:', uniqueKey);
     } catch (error) {
         console.error('Error using localStorage for notifications:', error);
     }
@@ -4297,6 +4370,12 @@ function broadcastNotification(type, program, oldProgram = null) {
         try {
             const channel = new BroadcastChannel('program_notifications');
             channel.postMessage(notificationData);
+            console.log('Notification broadcast via BroadcastChannel');
+            
+            // Close channel after sending
+            setTimeout(() => {
+                channel.close();
+            }, 1000);
         } catch (error) {
             console.error('Error using BroadcastChannel:', error);
         }
@@ -4501,7 +4580,12 @@ function requestNotificationPermission() {
                             if (currentUser === 'operator') {
                                 setupOperatorNotifications();
                             }
+                        } else if (permission === 'denied') {
+                            console.log('Notification permission denied');
+                            showNotification('Notifications are disabled. You can enable them in your browser settings.', 'warning');
                         }
+                    }).catch(error => {
+                        console.error('Error requesting notification permission:', error);
                     });
                 }
             }, 3000); // Ask after 3 seconds
@@ -4510,9 +4594,13 @@ function requestNotificationPermission() {
             if (currentUser === 'operator') {
                 setupOperatorNotifications();
             }
+        } else if (Notification.permission === 'denied') {
+            console.log('Notification permission denied by user');
+            showNotification('Notifications are disabled. Enable them in browser settings to receive alerts.', 'warning');
         }
     } else {
         console.log('Notification API is not supported in this browser');
+        showNotification('Your browser does not support notifications.', 'warning');
     }
 }
 
