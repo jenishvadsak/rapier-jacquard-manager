@@ -283,11 +283,12 @@
         }
         
         /* Machine grid layout */
-        #machinesGrid, #operatorMachinesGrid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
+        /* Machine grid layout */
+#machinesGrid, #operatorMachinesGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
         
         .machine-card {
             margin-bottom: 0;
@@ -521,10 +522,12 @@
         }
         
         /* Further optimization for very small screens */
-        #machinesGrid, #operatorMachinesGrid {
-            grid-template-columns: 1fr;
-            gap: 6px;
-        }
+        /* Machine grid layout */
+#machinesGrid, #operatorMachinesGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
         
         .nav-tabs.nav-justified .nav-item {
             min-width: 100px;
@@ -1077,6 +1080,12 @@
         padding: 4px 8px;
         margin-left: 10px;
     }
+    /* Hide dashboard titles on mobile */
+@media (max-width: 768px) {
+    .dashboard-title {
+        display: none !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -1086,12 +1095,12 @@
     <span class="navbar-brand">
         <i class="fas fa-industry me-2"></i>Rapier Jacquard Manager
     </span>
-    <div class="text-light d-flex align-items-center">
-        <small id="currentUserType">Not Logged In</small>
-        <button class="btn btn-outline-light btn-sm header-logout ms-2 d-none" onclick="confirmLogout()" id="headerLogoutBtn">
-            <i class="fas fa-sign-out-alt me-1"></i>Logout
-        </button>
-    </div>
+    <div class="text-light d-flex align-items-center ms-auto">
+    <small id="currentUserType">Not Logged In</small>
+    <button class="btn btn-outline-light btn-sm header-logout ms-2 d-none" onclick="confirmLogout()" id="headerLogoutBtn">
+        <i class="fas fa-sign-out-alt me-1"></i>Logout
+    </button>
+</div>
 </div>
 </nav>
 </header>
@@ -1131,9 +1140,6 @@
     <div id="adminDashboard" class="d-none py-3">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="mb-0">
-                    <i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
-                </h2>
                 <div class="d-flex gap-2 align-items-center">
                     <div class="search-container">
                         <div class="search-box">
@@ -1333,9 +1339,6 @@
     <div id="operatorDashboard" class="d-none py-3">
         <div class="container">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 class="mb-0">
-                    <i class="fas fa-tools me-2"></i>Operator Dashboard
-                </h2>
                 <div class="d-flex gap-2 align-items-center">
                     <div class="search-container">
                         <div class="search-box">
@@ -2409,8 +2412,10 @@ function viewMachinePrograms(machineNumber) {
     
     // Remove modal from DOM after hide
     modal.addEventListener('hidden.bs.modal', function () {
+    if (document.body.contains(modal)) {
         document.body.removeChild(modal);
-    });
+    }
+});
 }
 
 function viewOperatorMachinePrograms(machineNumber) {
@@ -2477,8 +2482,10 @@ function viewOperatorMachinePrograms(machineNumber) {
     
     // Remove modal from DOM after hide
     modal.addEventListener('hidden.bs.modal', function () {
+    if (document.body.contains(modal)) {
         document.body.removeChild(modal);
-    });
+    }
+});
 }
 
 function viewMachineQueue(machineNumber) {
@@ -3411,8 +3418,10 @@ function showDateFilterModal(userType) {
     
     // Remove modal from DOM after hide
     modal.addEventListener('hidden.bs.modal', function () {
+    if (document.body.contains(modal)) {
         document.body.removeChild(modal);
-    });
+    }
+});
 }
 
 function exportWithDateRange(userType) {
@@ -3420,14 +3429,20 @@ function exportWithDateRange(userType) {
     const toDate = document.getElementById('exportToDate').value;
     const exportAll = document.getElementById('exportAllDates').checked;
     
-    if (userType === 'admin') {
-        exportHistoryToExcel(fromDate, toDate, exportAll);
-    } else {
-        exportOperatorHistoryToExcel(fromDate, toDate, exportAll);
+    // Close modal first
+    const modal = bootstrap.Modal.getInstance(document.getElementById('dateFilterModal'));
+    if (modal) {
+        modal.hide();
     }
     
-    const modal = bootstrap.Modal.getInstance(document.getElementById('dateFilterModal'));
-    modal.hide();
+    // Use setTimeout to ensure modal is closed before export
+    setTimeout(() => {
+        if (userType === 'admin') {
+            exportHistoryToExcel(fromDate, toDate, exportAll);
+        } else {
+            exportOperatorHistoryToExcel(fromDate, toDate, exportAll);
+        }
+    }, 300);
 }
 
 // --- EXPORT TO EXCEL ---
@@ -3441,26 +3456,28 @@ function exportHistoryToExcel(fromDate = '', toDate = '', exportAll = true) {
     }
     
     // Apply date filter if not exporting all dates
-    if (!exportAll && (fromDate || toDate)) {
-        filteredHistory = filteredHistory.filter(program => {
-            const programDate = new Date(program.createdAt);
-            let fromValid = true;
-            let toValid = true;
-            
-            if (fromDate) {
-                const from = new Date(fromDate);
-                fromValid = programDate >= from;
-            }
-            
-            if (toDate) {
-                const to = new Date(toDate);
-                to.setHours(23, 59, 59, 999); // Include entire end date
-                toValid = programDate <= to;
-            }
-            
-            return fromValid && toValid;
-        });
-    }
+    // Apply date filter if not exporting all dates
+if (!exportAll) {
+    filteredHistory = filteredHistory.filter(program => {
+        const programDate = new Date(program.createdAt);
+        let fromValid = true;
+        let toValid = true;
+        
+        if (fromDate) {
+            const from = new Date(fromDate);
+            from.setHours(0, 0, 0, 0); // Start of the day
+            fromValid = programDate >= from;
+        }
+        
+        if (toDate) {
+            const to = new Date(toDate);
+            to.setHours(23, 59, 59, 999); // End of the day
+            toValid = programDate <= to;
+        }
+        
+        return fromValid && toValid;
+    });
+}
     
     const excelData = [
         ['Machine', 'Design', 'Rounds', 'Status', 'Created', 'Started', 'Completed', 'Feeders']
@@ -3502,26 +3519,28 @@ function exportOperatorHistoryToExcel(fromDate = '', toDate = '', exportAll = tr
     }
     
     // Apply date filter if not exporting all dates
-    if (!exportAll && (fromDate || toDate)) {
-        filteredHistory = filteredHistory.filter(program => {
-            const programDate = new Date(program.createdAt);
-            let fromValid = true;
-            let toValid = true;
-            
-            if (fromDate) {
-                const from = new Date(fromDate);
-                fromValid = programDate >= from;
-            }
-            
-            if (toDate) {
-                const to = new Date(toDate);
-                to.setHours(23, 59, 59, 999); // Include entire end date
-                toValid = programDate <= to;
-            }
-            
-            return fromValid && toValid;
-        });
-    }
+    // Apply date filter if not exporting all dates
+if (!exportAll) {
+    filteredHistory = filteredHistory.filter(program => {
+        const programDate = new Date(program.createdAt);
+        let fromValid = true;
+        let toValid = true;
+        
+        if (fromDate) {
+            const from = new Date(fromDate);
+            from.setHours(0, 0, 0, 0); // Start of the day
+            fromValid = programDate >= from;
+        }
+        
+        if (toDate) {
+            const to = new Date(toDate);
+            to.setHours(23, 59, 59, 999); // End of the day
+            toValid = programDate <= to;
+        }
+        
+        return fromValid && toValid;
+    });
+}
     
     const excelData = [
         ['Machine', 'Design', 'Rounds', 'Status', 'Created', 'Started', 'Completed', 'Feeders']
