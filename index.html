@@ -8,7 +8,7 @@
     <title>Rapier Jacquard Manager</title>
     
     <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="./manifest.json">
     
     <!-- iOS specific -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3378,45 +3378,65 @@ document.getElementById('designImage').addEventListener('change', function(e) {
 
 // --- PWA FUNCTIONALITY ---
 function setupPWA() {
+    console.log('Setting up PWA...');
+    
     // Check if app is already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
         isAppInstalled = true;
         console.log('App is running in standalone mode');
     }
     
+    // Check for iOS standalone mode
+    if (window.navigator.standalone === true) {
+        isAppInstalled = true;
+        console.log('App is running in iOS standalone mode');
+    }
+    
     // Listen for beforeinstallprompt event
     window.addEventListener('beforeinstallprompt', (e) => {
+        console.log('beforeinstallprompt event fired');
         // Prevent the mini-infobar from appearing on mobile
         e.preventDefault();
         // Stash the event so it can be triggered later
         deferredPrompt = e;
         
-        // Show install prompt if app is not installed
-        if (!isAppInstalled) {
+        // Check if prompt was recently dismissed
+        const promptDismissed = localStorage.getItem('pwaPromptDismissed');
+        const dismissTime = promptDismissed ? parseInt(promptDismissed) : 0;
+        const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        
+        // Show install prompt if app is not installed and not recently dismissed
+        if (!isAppInstalled && dismissTime < oneWeekAgo) {
+            console.log('Showing PWA install prompt');
             setTimeout(() => {
                 showPwaPrompt();
-            }, 3000); // Show after 3 seconds
+            }, 5000); // Show after 5 seconds
         }
     });
     
     // Listen for app installed event
     window.addEventListener('appinstalled', (e) => {
+        console.log('App installed successfully');
         isAppInstalled = true;
         deferredPrompt = null;
         hidePwaPrompt();
         showNotification('App installed successfully!', 'success');
     });
-    
-    // Check if app is already installed on page load
-    if (window.navigator.standalone === true) {
-        isAppInstalled = true;
-    }
 }
 
 function showPwaPrompt() {
     const prompt = document.getElementById('pwaInstallPrompt');
+    console.log('Attempting to show PWA prompt:', {
+        promptExists: !!prompt,
+        deferredPrompt: !!deferredPrompt,
+        isAppInstalled: isAppInstalled
+    });
+    
     if (prompt && deferredPrompt && !isAppInstalled) {
         prompt.classList.add('show');
+        console.log('PWA prompt shown successfully');
+    } else {
+        console.log('Cannot show PWA prompt - conditions not met');
     }
 }
 
@@ -3431,6 +3451,7 @@ function dismissPwaPrompt() {
     hidePwaPrompt();
     // Don't show again for 7 days
     localStorage.setItem('pwaPromptDismissed', Date.now().toString());
+    console.log('PWA prompt dismissed for 7 days');
 }
 
 function installPwa() {
@@ -3516,15 +3537,41 @@ function toggleSearchVisibility(tab) {
     // --- SERVICE WORKER REGISTRATION ---
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
+        console.log('Service Worker is supported');
+        
         window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/rapier-jacquard-manager/sw.js')
-                .then(function(registration) {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                })
-                .catch(function(error) {
-                    console.log('ServiceWorker registration failed: ', error);
-                });
+            // Try multiple paths for service worker
+            const swPaths = [
+                './sw.js',
+                '/sw.js',
+                '/rapier-jacquard-manager/sw.js'
+            ];
+            
+            let registrationAttempts = 0;
+            
+            function tryRegister(pathIndex) {
+                if (pathIndex >= swPaths.length) {
+                    console.log('All Service Worker registration attempts failed');
+                    return;
+                }
+                
+                const swPath = swPaths[pathIndex];
+                console.log(`Attempting to register Service Worker at: ${swPath}`);
+                
+                navigator.serviceWorker.register(swPath)
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log(`ServiceWorker registration failed for ${swPath}:`, error);
+                        tryRegister(pathIndex + 1);
+                    });
+            }
+            
+            tryRegister(0);
         });
+    } else {
+        console.log('Service Worker is not supported in this browser');
     }
 }
 
@@ -3536,12 +3583,55 @@ function initializeApp() {
     setupAuthStateListener();
     addViewToggleButton();
     setupPWA();
-    registerServiceWorker(); // Add this line
+    registerServiceWorker();
+    
+    // Check PWA status after a delay
+    setTimeout(checkPwaStatus, 3000);
     
     // Check if user was previously logged in
     checkPreviousLogin();
 }
 
+// Add this new function to check PWA status
+function checkPwaStatus() {
+    console.log('=== PWA Status Check ===');
+    console.log('deferredPrompt:', deferredPrompt);
+    console.log('isAppInstalled:', isAppInstalled);
+    console.log('standalone mode:', window.matchMedia('(display-mode: standalone)').matches);
+    console.log('iOS standalone:', window.navigator.standalone);
+    console.log('BeforeInstallPrompt supported:', 'BeforeInstallPromptEvent' in window);
+    
+    // Check manifest
+    const manifestLink = document.querySelector('link[rel="manifest"]');
+    console.log('Manifest link:', manifestLink ? manifestLink.href : 'Not found');
+    
+    // Check service worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistration().then(reg => {
+            console.log('Service Worker registered:', !!reg);
+            if (reg) {
+                console.log('Service Worker scope:', reg.scope);
+            }
+        });
+    }
+    
+    // Manual install button for testing
+    if (!document.getElementById('debugInstallBtn')) {
+        const debugBtn = document.createElement('button');
+        debugBtn.id = 'debugInstallBtn';
+        debugBtn.innerHTML = '🧩 Debug PWA Install';
+        debugBtn.style.cssText = 'position:fixed; bottom:10px; left:10px; z-index:10000; padding:8px 12px; background:#007bff; color:white; border:none; border-radius:4px; font-size:12px; cursor:pointer;';
+        debugBtn.onclick = function() {
+            checkPwaStatus();
+            if (deferredPrompt) {
+                showPwaPrompt();
+            } else {
+                alert('Install prompt not available yet. Check console for details.');
+            }
+        };
+        document.body.appendChild(debugBtn);
+    }
+}
 // Make functions available globally
 window.loginAsAdmin = loginAsAdmin;
 window.loginAsOperator = loginAsOperator;
@@ -3573,6 +3663,7 @@ window.requestEditProgram = requestEditProgram;
 </script>
 </body>
 </html>
+
 
 
 
