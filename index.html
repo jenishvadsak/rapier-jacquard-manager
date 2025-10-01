@@ -315,109 +315,6 @@
             padding: 8px 10px;
             text-align: center;
         }
-        /* Notification Styles */
-.notification-item {
-    background: white;
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-bottom: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    border-left: 4px solid var(--primary);
-    max-width: 350px;
-    animation: slideInRight 0.3s ease;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.notification-item:hover {
-    transform: translateX(-5px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-}
-
-.notification-item.success {
-    border-left-color: var(--success);
-}
-
-.notification-item.warning {
-    border-left-color: var(--warning);
-}
-
-.notification-item.info {
-    border-left-color: var(--secondary);
-}
-
-.notification-header {
-    display: flex;
-    justify-content: between;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.notification-title {
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin: 0;
-    color: var(--primary);
-}
-
-.notification-time {
-    font-size: 0.7rem;
-    color: #6c757d;
-}
-
-.notification-message {
-    font-size: 0.85rem;
-    color: #495057;
-    margin: 0;
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-.notification-fade-out {
-    animation: fadeOut 0.5s ease forwards;
-}
-
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateX(100%);
-    }
-}
-
-/* Mobile notification styles */
-@media (max-width: 768px) {
-    #notificationContainer {
-        padding: 10px;
-        max-width: 90vw;
-    }
-    
-    .notification-item {
-        max-width: none;
-        width: 100%;
-        padding: 10px 12px;
-    }
-    
-    .notification-title {
-        font-size: 0.85rem;
-    }
-    
-    .notification-message {
-        font-size: 0.8rem;
-    }
-}
         
         /* Machine grid layout */
         /* Machine grid layout */
@@ -1648,10 +1545,6 @@
 
             <div class="tab-content">
                 <div id="opMachines" class="tab-pane fade show active">
-                    <div class="alert alert-info mb-3">
-                        <i class="fas fa-info-circle me-2"></i>
-                        View assigned programs and update machine status
-                    </div>
                     
                     <div class="row g-2" id="operatorMachinesGrid"></div>
                 </div>
@@ -1734,8 +1627,7 @@
     </div>
 </div>
 
-<!-- Notification System -->
-<div id="notificationContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 11000;"></div>
+
 
 <!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
@@ -1894,14 +1786,10 @@ function initializeApp() {
     setupPWA();
     registerServiceWorker();
     
-    // Initialize notification system after a short delay to ensure Firebase is ready
+    // Request notification permission for browser notifications
     setTimeout(() => {
-        initializeNotificationSystem();
         requestNotificationPermission();
     }, 2000);
-    
-    // Check PWA status after a delay
-    setTimeout(checkPwaStatus, 3000);
     
     // Check if user was previously logged in
     checkPreviousLogin();
@@ -1979,11 +1867,11 @@ function setupAuthStateListener() {
             // Show logout button in header
             document.getElementById('headerLogoutBtn').classList.remove('d-none');
             
-            // Initialize notification system for operators
+            // Request notification permission for operators
             if (userRole === 'operator') {
                 setTimeout(() => {
-                    initializeNotificationSystem();
                     requestNotificationPermission();
+                    setupOperatorNotifications();
                 }, 1000);
             }
             
@@ -2000,12 +1888,6 @@ function setupAuthStateListener() {
             document.getElementById('adminDashboard').classList.add('d-none');
             document.getElementById('operatorDashboard').classList.add('d-none');
             document.getElementById('headerLogoutBtn').classList.add('d-none');
-            
-            // Clear notifications on logout
-            const notificationContainer = document.getElementById('notificationContainer');
-            if (notificationContainer) {
-                notificationContainer.innerHTML = '';
-            }
         }
     });
 }
@@ -2319,7 +2201,7 @@ function renderMachinesGrid() {
                             <p class="mb-2 small"><strong>Rounds:</strong> ${currentProgram.rounds}</p>
                             
                             <div class="machine-summary mb-3">
-                                <small class="text-muted">Click <i class="fas fa-eye"></i> for full details</small>
+                                
                             </div>
                             
                             ${currentProgram.photoData ? `
@@ -2439,7 +2321,7 @@ function renderOperatorMachinesGrid() {
                         <p class="mb-2 small"><strong>Rounds:</strong> ${currentProgram.rounds}</p>
                         
                         <div class="machine-summary mb-3">
-                            <small class="text-muted">Click <i class="fas fa-eye"></i> for full details</small>
+                            
                         </div>
                         
                         ${currentProgram.photoData ? `
@@ -4216,344 +4098,6 @@ function registerServiceWorker() {
     }
 }
 
-// Add this new function to check PWA status
-function checkPwaStatus() {
-    console.log('=== PWA Status Check ===');
-    console.log('deferredPrompt:', deferredPrompt);
-    console.log('isAppInstalled:', isAppInstalled);
-    console.log('standalone mode:', window.matchMedia('(display-mode: standalone)').matches);
-    console.log('iOS standalone:', window.navigator.standalone);
-    console.log('BeforeInstallPrompt supported:', 'BeforeInstallPromptEvent' in window);
-    
-    // Check manifest
-    const manifestLink = document.querySelector('link[rel="manifest"]');
-    console.log('Manifest link:', manifestLink ? manifestLink.href : 'Not found');
-    
-    // Check service worker
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistration().then(reg => {
-            console.log('Service Worker registered:', !!reg);
-            if (reg) {
-                console.log('Service Worker scope:', reg.scope);
-            }
-        });
-    }
-    
-    // Manual install button for testing
-    if (!document.getElementById('debugInstallBtn')) {
-        const debugBtn = document.createElement('button');
-        debugBtn.id = 'debugInstallBtn';
-        debugBtn.innerHTML = '🧩 Debug PWA Install';
-        debugBtn.style.cssText = 'position:fixed; bottom:10px; left:10px; z-index:10000; padding:8px 12px; background:#007bff; color:white; border:none; border-radius:4px; font-size:12px; cursor:pointer;';
-        debugBtn.onclick = function() {
-            checkPwaStatus();
-            if (deferredPrompt) {
-                showPwaPrompt();
-            } else {
-                alert('Install prompt not available yet. Check console for details.');
-            }
-        };
-        document.body.appendChild(debugBtn);
-    }
-}
-// --- NOTIFICATION SYSTEM ---
-let notificationCounter = 0;
-const MAX_NOTIFICATIONS = 5;
-const NOTIFICATION_TIMEOUT = 8000; // 8 seconds
-
-// Initialize notification system
-function initializeNotificationSystem() {
-    console.log('Initializing notification system...');
-    
-    // Listen for program changes
-    setupProgramNotifications();
-    
-    // Listen for notification messages from other tabs
-    setupCrossTabNotifications();
-}
-
-// Setup real-time program notifications
-function setupProgramNotifications() {
-    console.log('Setting up program notifications...');
-    
-    // Listen for new programs
-    db.collection("programs")
-        .orderBy("createdAt", "desc")
-        .limit(10)
-        .onSnapshot((snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === "added") {
-                    const program = {
-                        id: change.doc.id,
-                        ...change.doc.data(),
-                        createdAt: change.doc.data().createdAt ? change.doc.data().createdAt.toDate() : new Date()
-                    };
-                    
-                    // Only show notifications for programs created in the last 10 seconds
-                    const timeDiff = (new Date() - program.createdAt) / 1000;
-                    
-                    console.log('New program detected:', {
-                        programId: program.id,
-                        designName: program.designName,
-                        timeDiff: timeDiff,
-                        currentUser: currentUser
-                    });
-                    
-                    if (timeDiff < 30 && currentUser === 'operator') { // Increased to 30 seconds for testing
-                        showNewProgramNotification(program);
-                    }
-                }
-            });
-        }, (error) => {
-            console.error('Error in program notifications:', error);
-        });
-
-    // Listen for program updates
-    db.collection("programs")
-        .where("status", "in", ["pending", "running"])
-        .onSnapshot((snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === "modified") {
-                    const program = {
-                        id: change.doc.id,
-                        ...change.doc.data(),
-                        createdAt: change.doc.data().createdAt ? change.doc.data().createdAt.toDate() : new Date()
-                    };
-                    
-                    // Get the previous data to detect specific changes
-                    const oldData = change.doc._previousData;
-                    
-                    console.log('Program updated:', {
-                        programId: program.id,
-                        oldStatus: oldData?.status,
-                        newStatus: program.status,
-                        currentUser: currentUser
-                    });
-                    
-                    if (oldData && currentUser === 'operator') {
-                        // Check if status changed to running
-                        if (oldData.status === 'pending' && program.status === 'running') {
-                            showProgramStartedNotification(program);
-                        }
-                        
-                        // Check if design name or rounds were updated
-                        if ((oldData.designName !== program.designName || 
-                             oldData.rounds !== program.rounds) && 
-                            program.status === 'pending') {
-                            showProgramUpdatedNotification(program, oldData);
-                        }
-                    }
-                }
-            });
-        }, (error) => {
-            console.error('Error in program update notifications:', error);
-        });
-}
-
-// Setup cross-tab notification communication
-function setupCrossTabNotifications() {
-    // Listen for storage events (other tabs)
-    window.addEventListener('storage', (e) => {
-        if (e.key === 'programNotification' && e.newValue) {
-            try {
-                const notification = JSON.parse(e.newValue);
-                console.log('Cross-tab notification received:', notification);
-                
-                if (notification.type === 'new_program' && currentUser === 'operator') {
-                    showNewProgramNotification(notification.program);
-                } else if (notification.type === 'updated_program' && currentUser === 'operator') {
-                    showProgramUpdatedNotification(notification.program, notification.oldProgram);
-                } else if (notification.type === 'program_started' && currentUser === 'operator') {
-                    showProgramStartedNotification(notification.program);
-                }
-            } catch (error) {
-                console.error('Error parsing cross-tab notification:', error);
-            }
-        }
-    });
-
-    // Also use BroadcastChannel for modern browsers
-    if ('BroadcastChannel' in window) {
-        try {
-            const channel = new BroadcastChannel('program_notifications');
-            channel.addEventListener('message', (event) => {
-                console.log('BroadcastChannel notification received:', event.data);
-                
-                if (event.data.type === 'new_program' && currentUser === 'operator') {
-                    showNewProgramNotification(event.data.program);
-                } else if (event.data.type === 'updated_program' && currentUser === 'operator') {
-                    showProgramUpdatedNotification(event.data.program, event.data.oldProgram);
-                } else if (event.data.type === 'program_started' && currentUser === 'operator') {
-                    showProgramStartedNotification(event.data.program);
-                }
-            });
-        } catch (error) {
-            console.error('Error setting up BroadcastChannel:', error);
-        }
-    }
-}
-
-// Show notification for new program
-function showNewProgramNotification(program) {
-    console.log('Showing new program notification:', program);
-    
-    const notification = {
-        id: `notification-${Date.now()}-${notificationCounter++}`,
-        type: 'new_program',
-        title: '📋 New Program Created',
-        message: `Machine ${program.machineNumber}: ${program.designName} (${program.rounds} rounds) ${program.priority === 'urgent' ? '🚨 URGENT' : ''}`,
-        programId: program.id,
-        timestamp: new Date(),
-        priority: program.priority === 'urgent' ? 'high' : 'normal'
-    };
-    
-    displayNotification(notification);
-    
-    // Also show browser notification if supported
-    if ('Notification' in window && Notification.permission === 'granted') {
-        showBrowserNotification(notification);
-    }
-}
-
-// Show notification for program started
-function showProgramStartedNotification(program) {
-    console.log('Showing program started notification:', program);
-    
-    const notification = {
-        id: `notification-${Date.now()}-${notificationCounter++}`,
-        type: 'program_started',
-        title: '▶️ Program Started',
-        message: `Machine ${program.machineNumber}: ${program.designName} is now running`,
-        programId: program.id,
-        timestamp: new Date(),
-        priority: 'normal'
-    };
-    
-    displayNotification(notification);
-    
-    // Also show browser notification if supported
-    if ('Notification' in window && Notification.permission === 'granted') {
-        showBrowserNotification(notification);
-    }
-}
-
-// Show notification for updated program
-function showProgramUpdatedNotification(program, oldProgram) {
-    console.log('Showing program updated notification:', program, oldProgram);
-    
-    const changes = [];
-    
-    if (oldProgram.designName !== program.designName) {
-        changes.push(`Design: ${oldProgram.designName} → ${program.designName}`);
-    }
-    
-    if (oldProgram.rounds !== program.rounds) {
-        changes.push(`Rounds: ${oldProgram.rounds} → ${program.rounds}`);
-    }
-    
-    if (oldProgram.priority !== program.priority) {
-        changes.push(`Priority: ${oldProgram.priority} → ${program.priority}`);
-    }
-    
-    if (changes.length > 0) {
-        const notification = {
-            id: `notification-${Date.now()}-${notificationCounter++}`,
-            type: 'updated_program',
-            title: '✏️ Program Updated',
-            message: `Machine ${program.machineNumber}: ${changes.join(', ')}`,
-            programId: program.id,
-            timestamp: new Date(),
-            priority: 'normal'
-        };
-        
-        displayNotification(notification);
-        
-        // Also show browser notification if supported
-        if ('Notification' in window && Notification.permission === 'granted') {
-            showBrowserNotification(notification);
-        }
-    }
-}
-
-// Display notification in UI
-function displayNotification(notification) {
-    const container = document.getElementById('notificationContainer');
-    if (!container) {
-        console.error('Notification container not found!');
-        return;
-    }
-    
-    console.log('Displaying notification:', notification);
-    
-    // Remove oldest notification if we have too many
-    const notifications = container.querySelectorAll('.notification-item');
-    if (notifications.length >= MAX_NOTIFICATIONS) {
-        notifications[0].remove();
-    }
-    
-    const notificationEl = document.createElement('div');
-    notificationEl.className = `notification-item ${notification.priority === 'high' ? 'warning' : 'info'}`;
-    notificationEl.id = notification.id;
-    notificationEl.style.cursor = 'pointer';
-    
-    const timeString = notification.timestamp.toLocaleTimeString([], { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-    });
-    
-    notificationEl.innerHTML = `
-        <div class="notification-header">
-            <h6 class="notification-title">${notification.title}</h6>
-            <span class="notification-time">${timeString}</span>
-        </div>
-        <p class="notification-message">${notification.message}</p>
-    `;
-    
-    // Add click handler to view program details
-    notificationEl.addEventListener('click', () => {
-        console.log('Notification clicked, showing program details:', notification.programId);
-        if (notification.programId) {
-            showProgramDetails(notification.programId);
-            removeNotification(notification.id);
-        }
-    });
-    
-    container.appendChild(notificationEl);
-    
-    // Auto-remove after timeout
-    setTimeout(() => {
-        removeNotification(notification.id);
-    }, NOTIFICATION_TIMEOUT);
-}
-
-// Remove notification
-function removeNotification(notificationId) {
-    const notificationEl = document.getElementById(notificationId);
-    if (notificationEl) {
-        notificationEl.classList.add('notification-fade-out');
-        setTimeout(() => {
-            if (notificationEl.parentNode) {
-                notificationEl.remove();
-            }
-        }, 500);
-    }
-}
-
-// Show browser notification
-function showBrowserNotification(notification) {
-    if ('Notification' in window && Notification.permission === 'granted') {
-        try {
-            new Notification(notification.title, {
-                body: notification.message,
-                icon: './icon-192.png',
-                tag: notification.id,
-                requireInteraction: notification.priority === 'high'
-            });
-        } catch (error) {
-            console.error('Error showing browser notification:', error);
-        }
-    }
-}
 
 // Request notification permission
 function requestNotificationPermission() {
@@ -4608,6 +4152,95 @@ function broadcastNotification(type, program, oldProgram = null) {
         } catch (error) {
             console.error('Error using BroadcastChannel:', error);
         }
+    }
+}
+
+// --- BROWSER NOTIFICATION SYSTEM ---
+function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        console.log('Requesting notification permission...');
+        Notification.requestPermission().then(permission => {
+            console.log('Notification permission:', permission);
+            if (permission === 'granted') {
+                console.log('Browser notification permission granted');
+            }
+        }).catch(error => {
+            console.error('Error requesting notification permission:', error);
+        });
+    }
+}
+
+function setupOperatorNotifications() {
+    if (currentUser !== 'operator') return;
+    
+    console.log('Setting up browser notifications for operator...');
+    
+    // Listen for new programs
+    db.collection("programs")
+        .orderBy("createdAt", "desc")
+        .limit(10)
+        .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    const program = {
+                        id: change.doc.id,
+                        ...change.doc.data(),
+                        createdAt: change.doc.data().createdAt ? change.doc.data().createdAt.toDate() : new Date()
+                    };
+                    
+                    // Only show notifications for recent programs
+                    const timeDiff = (new Date() - program.createdAt) / 1000;
+                    
+                    if (timeDiff < 30) {
+                        showBrowserNotification(
+                            '📋 New Program Created',
+                            `Machine ${program.machineNumber}: ${program.designName} (${program.rounds} rounds) ${program.priority === 'urgent' ? '🚨 URGENT' : ''}`,
+                            program.priority === 'urgent' ? 'high' : 'normal'
+                        );
+                    }
+                }
+            });
+        });
+
+    // Listen for program updates
+    db.collection("programs")
+        .where("status", "in", ["pending", "running"])
+        .onSnapshot((snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "modified") {
+                    const program = {
+                        id: change.doc.id,
+                        ...change.doc.data(),
+                        createdAt: change.doc.data().createdAt ? change.doc.data().createdAt.toDate() : new Date()
+                    };
+                    
+                    const oldData = change.doc._previousData;
+                    
+                    if (oldData) {
+                        // Check if status changed to running
+                        if (oldData.status === 'pending' && program.status === 'running') {
+                            showBrowserNotification(
+                                '▶️ Program Started',
+                                `Machine ${program.machineNumber}: ${program.designName} is now running`
+                            );
+                        }
+                    }
+                }
+            });
+        });
+}
+
+function showBrowserNotification(title, message, priority = 'normal') {
+    if ('Notification' in window && Notification.permission === 'granted') {
+        const options = {
+            body: message,
+            icon: './icon-192.png',
+            badge: './icon-192.png',
+            tag: 'program-notification',
+            requireInteraction: priority === 'high'
+        };
+        
+        new Notification(title, options);
     }
 }
 
