@@ -1,14 +1,16 @@
-// Simple Service Worker for caching
-const CACHE_NAME = 'jacquard-manager-v1';
+// sw.js - Service Worker
+const CACHE_NAME = 'jacquard-manager-v2.0';
 const urlsToCache = [
-  '/rapier-jacquard-manager/',
-  '/rapier-jacquard-manager/index.html',
-  '/rapier-jacquard-manager/manifest.json',
+  './',
+  './index.html', 
+  './manifest.json',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
+  'https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js'
 ];
 
 self.addEventListener('install', function(event) {
+  console.log('Service Worker installing');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
@@ -22,12 +24,12 @@ self.addEventListener('fetch', function(event) {
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      }
-    )
+        // Return cached version or fetch from network
+        return response || fetch(event.request);
+      })
   );
+});
+
+self.addEventListener('activate', function(event) {
+  console.log('Service Worker activated');
 });
