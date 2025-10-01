@@ -143,49 +143,28 @@
         border-radius: 8px;
     }
 
-    /* PWA Install Prompt - ensure it's visible */
-.pwa-install-prompt {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: white;
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-    z-index: 10000;
-    max-width: 300px;
-    border: 1px solid #e9ecef;
-    display: none; /* Start hidden */
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.3s ease;
-}
-
-.pwa-install-prompt.show {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-/* Mobile adjustments */
-@media (max-width: 768px) {
+    /* PWA Install Prompt */
     .pwa-install-prompt {
-        bottom: 10px;
-        right: 10px;
-        left: 10px;
-        max-width: none;
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        z-index: 10000;
+        max-width: 300px;
+        border: 1px solid #e9ecef;
+        display: none;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
     }
-}
 
-    @keyframes slideInUp {
-        from {
-            transform: translateY(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
+    .pwa-install-prompt.show {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
     }
 
     .pwa-install-header {
@@ -211,46 +190,28 @@
         gap: 8px;
         margin-top: 10px;
     }
-    @media (max-width: 768px) {
-    .queue-search-mobile::placeholder {
-        font-size: 0.8rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    .queue-header .search-box {
-        max-width: none;
-    }
-}
 
     .pwa-install-buttons .btn {
         flex: 1;
     }
-    @media (max-width: 768px) {
-    /* Queue cards - 2 per row on mobile */
-    #queueContent .row.g-3,
-    #operatorQueueContent .row.g-3 {
-        display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
-        margin: 0 !important;
-    }
-    
-    #queueContent .col-12.col-sm-6,
-    #operatorQueueContent .col-12.col-sm-6 {
-        width: 100% !important;
-        max-width: none !important;
-        flex: none !important;
-        padding: 0 !important;
-    }
-    
-    .queue-card {
-        margin-bottom: 0 !important;
-    }
-}
 
-    /* Mobile-first responsive design improvements */
+    /* Notification Styles */
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: #dc3545;
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        font-size: 0.7rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Mobile optimizations */
     @media (max-width: 768px) {
         .container {
             padding: 0 10px;
@@ -289,232 +250,10 @@
             padding: 8px 12px;
         }
         
-        /* Header optimizations */
         .app-header .navbar-brand {
             font-size: 1rem;
         }
         
-        .app-header .text-light small {
-            font-size: 0.75rem;
-        }
-        
-        /* Dashboard controls */
-        .d-flex.justify-content-between.align-items-center.mb-3 {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        
-        .d-flex.justify-content-between.align-items-center.mb-3 .search-box {
-            width: 100%;
-            max-width: none;
-        }
-        
-        /* Tab navigation */
-        .nav-tabs.nav-justified {
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            overflow-y: hidden;
-            -webkit-overflow-scrolling: touch;
-            white-space: nowrap;
-        }
-        
-        .nav-tabs.nav-justified .nav-item {
-            flex: 0 0 auto;
-            min-width: 120px;
-        }
-        
-        .nav-tabs.nav-justified .nav-link {
-            font-size: 0.8rem;
-            padding: 8px 10px;
-            text-align: center;
-        }
-        
-        /* Machine grid layout */
-        /* Machine grid layout */
-#machinesGrid, #operatorMachinesGrid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-}
-        
-        .machine-card {
-            margin-bottom: 0;
-        }
-        
-        .machine-card .card-body {
-            padding: 10px;
-        }
-        
-        .machine-card .card-title {
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
-        
-        .machine-card .program-info p {
-            font-size: 0.75rem;
-            margin-bottom: 3px;
-        }
-        
-        /* Action buttons optimization */
-        .action-buttons {
-            flex-direction: column;
-            gap: 4px;
-        }
-        
-        .action-buttons .btn {
-            min-width: auto;
-            font-size: 0.75rem;
-            padding: 4px 8px;
-        }
-        
-        /* History Table Optimizations */
-        .dashboard-card {
-            padding: 12px;
-        }
-        
-        .dashboard-card h5 {
-            font-size: 1rem;
-            margin-bottom: 12px;
-        }
-        
-        /* History filter controls */
-        .d-flex.flex-column.flex-md-row.align-items-start.align-items-md-center.justify-content-between.mb-3 {
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .d-flex.flex-column.flex-md-row.align-items-start.align-items-md-center.justify-content-between.mb-3 h5 {
-            margin-bottom: 0;
-        }
-        
-        .d-flex.gap-2.align-items-center.w-100.w-md-auto {
-            width: 100%;
-            justify-content: space-between;
-        }
-        
-        .d-flex.gap-2.align-items-center.w-100.w-md-auto label {
-            font-size: 0.8rem;
-            margin-bottom: 0;
-            white-space: nowrap;
-        }
-        
-        .machine-select-table {
-            min-width: auto;
-            flex: 1;
-            margin-left: 8px;
-        }
-        
-        /* Table optimizations */
-        .table-responsive {
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-        }
-        
-        .table-responsive table {
-            font-size: 0.7rem;
-            margin-bottom: 0;
-        }
-        
-        .table-responsive th,
-        .table-responsive td {
-            padding: 4px 6px;
-            vertical-align: middle;
-        }
-        
-        .table-responsive thead th {
-            font-size: 0.65rem;
-            font-weight: 600;
-            padding: 6px 4px;
-            background-color: #f8f9fa;
-        }
-        
-        /* Compact status badges */
-        .status-badge {
-            font-size: 0.6rem;
-            padding: 2px 5px;
-            border-radius: 10px;
-            white-space: nowrap;
-        }
-        
-        /* Reduce table row height */
-        .table-responsive tbody tr {
-            height: 35px;
-        }
-        
-        /* Pagination optimization */
-        .pagination {
-            margin-top: 12px;
-        }
-        
-        .pagination .page-link {
-            font-size: 0.75rem;
-            padding: 4px 8px;
-            margin: 0 1px;
-        }
-        
-        /* Queue view optimizations */
-        .queue-header {
-            padding: 15px;
-        }
-        
-        .queue-header h3 {
-            font-size: 1.3rem;
-        }
-        
-        .queue-card .card-header h5 {
-            font-size: 1rem;
-        }
-        
-        .queue-card .card-body {
-            padding: 12px;
-        }
-        
-        /* Modal optimizations */
-        .modal-dialog {
-            margin: 10px;
-        }
-        
-        /* Modal enhancements */
-.modal-content {
-    border-radius: 12px;
-    border: none;
-    z-index: 1060; /* Ensure modals appear above other content */
-}
-
-.modal {
-    z-index: 1055; /* Ensure modal backdrop appears correctly */
-}
-        
-        .modal-body {
-            padding: 15px;
-        }
-        
-        /* Login screen optimizations */
-        .login-card {
-            margin: 15px;
-            padding: 15px;
-        }
-        
-        /* Search box full width */
-        .search-box {
-            max-width: none;
-            width: 100%;
-        }
-        
-        /* Button group optimization */
-        .btn-group .btn {
-            margin-bottom: 4px;
-            font-size: 0.75rem;
-            padding: 5px 10px;
-        }
-        
-        /* Program details modal optimization */
-        .program-details .row {
-            margin-bottom: 8px;
-        }
-        
-        /* PWA Install Prompt mobile adjustments */
         .pwa-install-prompt {
             bottom: 10px;
             right: 10px;
@@ -522,39 +261,50 @@
             max-width: none;
         }
         
-        /* Login form optimization */
-        .login-form .form-control {
-            font-size: 16px; /* Prevent zoom on iOS */
-            padding: 12px 15px;
+        /* Machine grid layout */
+        #machinesGrid, #operatorMachinesGrid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
         }
         
-        .login-form .btn {
-            padding: 12px;
-            font-size: 1rem;
+        /* Queue layout */
+        #queueContent .row.g-3,
+        #operatorQueueContent .row.g-3 {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px !important;
+            margin: 0 !important;
         }
         
-        /* Logout button optimization */
-        .btn-outline-danger.btn-sm {
-            font-size: 0.8rem;
-            padding: 6px 10px;
+        #queueContent .col-12.col-sm-6,
+        #operatorQueueContent .col-12.col-sm-6 {
+            width: 100% !important;
+            max-width: none !important;
+            flex: none !important;
+            padding: 0 !important;
         }
         
-        /* Queue labels optimization */
-        .queue-card .card-header h5 {
-            font-size: 0.9rem;
+        .queue-card {
+            margin-bottom: 0 !important;
         }
         
-        .queue-card .card-body h6 {
-            font-size: 0.85rem;
+        .assign-program-btn {
+            font-size: 0.7rem !important;
+            padding: 4px 8px !important;
         }
         
-        /* Queue search label optimization */
-        .queue-header h3 {
-            font-size: 1.1rem;
+        .header-logout {
+            padding: 4px 8px !important;
+            font-size: 0.75rem !important;
         }
         
-        .queue-header p {
-            font-size: 0.8rem;
+        .header-logout i {
+            margin-right: 0 !important;
+        }
+        
+        #currentUserType {
+            display: none !important;
         }
     }
 
@@ -576,13 +326,12 @@
             font-size: 1.1rem;
         }
         
-        /* Further optimization for very small screens */
         /* Machine grid layout */
-#machinesGrid, #operatorMachinesGrid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-}
+        #machinesGrid, #operatorMachinesGrid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
         
         .nav-tabs.nav-justified .nav-item {
             min-width: 100px;
@@ -618,69 +367,6 @@
         
         .program-form {
             padding: 10px;
-        }
-        
-        .table-responsive table {
-            font-size: 0.65rem;
-        }
-        
-        .table-responsive th,
-        .table-responsive td {
-            padding: 2px 4px;
-        }
-        
-        /* Even more compact on very small screens */
-        .status-badge {
-            font-size: 0.55rem;
-            padding: 1px 4px;
-        }
-        
-        /* Machine filter optimization */
-        .d-flex.gap-2.align-items-center.w-100.w-md-auto {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 4px;
-        }
-        
-        .d-flex.gap-2.align-items-center.w-100.w-md-auto label {
-            font-size: 0.75rem;
-        }
-        
-        .machine-select-table {
-            width: 100%;
-            margin-left: 0;
-        }
-        
-        /* Login form optimization */
-        .login-card h3 {
-            font-size: 1.3rem;
-        }
-        
-        .login-card p {
-            font-size: 0.9rem;
-        }
-        
-        /* Form font size optimization */
-        .form-control, .form-select {
-            font-size: 16px; /* Prevent zoom on iOS */
-        }
-        
-        /* Queue card optimization */
-        .queue-card .card-header {
-            padding: 10px;
-        }
-        
-        .queue-card .card-body {
-            padding: 10px;
-        }
-        
-        /* Queue header optimization */
-        .queue-header h3 {
-            font-size: 1rem;
-        }
-        
-        .queue-header p {
-            font-size: 0.75rem;
         }
     }
 
@@ -762,33 +448,15 @@
     }
 
     /* Modal enhancements */
-    /* Modal enhancements */
-.modal-content {
-    border-radius: 12px;
-    border: none;
-    z-index: 1060; /* Ensure modals appear above other content */
-}
-/* Ensure program details modal appears above queue modal */
-#programDetailsModal {
-    z-index: 1070 !important;
-}
+    .modal-content {
+        border-radius: 12px;
+        border: none;
+        z-index: 1060;
+    }
 
-#programDetailsModal .modal-content {
-    z-index: 1071 !important;
-}
-
-/* Ensure image modal appears above all */
-#imageModal {
-    z-index: 1080 !important;
-}
-
-#imageModal .modal-content {
-    z-index: 1081 !important;
-}
-
-.modal {
-    z-index: 1055; /* Ensure modal backdrop appears correctly */
-}
+    .modal {
+        z-index: 1055;
+    }
 
     .modal-header {
         border-bottom: 1px solid #e9ecef;
@@ -1063,32 +731,6 @@
         margin-right: 8px;
     }
     
-    /* Notification badge */
-    .notification-badge {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        background-color: var(--danger);
-        color: white;
-        border-radius: 50%;
-        width: 18px;
-        height: 18px;
-        font-size: 0.7rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .notification-indicator {
-        position: relative;
-    }
-    @media (max-width: 768px) {
-    .assign-program-btn {
-        font-size: 0.7rem !important;
-        padding: 4px 8px !important;
-    }
-}
-    
     /* Compact machine card */
     .machine-summary {
         font-size: 0.8rem;
@@ -1165,117 +807,11 @@
         margin-left: 10px;
     }
     /* Hide dashboard titles on mobile */
-@media (max-width: 768px) {
-    .dashboard-title {
-        display: none !important;
+    @media (max-width: 768px) {
+        .dashboard-title {
+            display: none !important;
+        }
     }
-}
-/* Ensure 2 cards per row in queue on mobile */
-@media (max-width: 768px) {
-    #queueContent .row.g-3,
-    #operatorQueueContent .row.g-3 {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-        margin: 0;
-    }
-    
-    #queueContent .col-12.col-sm-6,
-    #operatorQueueContent .col-12.col-sm-6 {
-        padding: 0;
-        width: 100%;
-    }
-    
-    .queue-header + .d-flex {
-        margin-bottom: 15px;
-    }
-}
-/* Add to mobile CSS */
-@media (max-width: 576px) {
-    .header-logout {
-        padding: 4px 8px !important;
-        font-size: 0.75rem !important;
-    }
-    
-    .header-logout i {
-        margin-right: 0 !important;
-    }
-}
-/* Mobile-specific optimizations */
-@media (max-width: 768px) {
-    /* Assign program button */
-    .assign-program-btn {
-        font-size: 0.7rem !important;
-        padding: 4px 8px !important;
-        min-height: 32px;
-    }
-    
-    /* Queue search placeholder */
-    .queue-search-mobile::placeholder {
-        font-size: 0.8rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    /* Queue layout - 2 cards per row */
-    #queueContent .row.g-3,
-    #operatorQueueContent .row.g-3 {
-        display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
-        margin: 0 !important;
-    }
-    
-    #queueContent .col-12.col-sm-6,
-    #operatorQueueContent .col-12.col-sm-6 {
-        width: 100% !important;
-        max-width: none !important;
-        flex: none !important;
-        padding: 0 !important;
-    }
-    
-    .queue-card {
-        margin-bottom: 0 !important;
-        min-height: 140px;
-    }
-    
-    /* Header logout button */
-    .header-logout {
-        padding: 4px 8px !important;
-        font-size: 0.75rem !important;
-    }
-    
-    .header-logout i {
-        margin-right: 0 !important;
-    }
-    
-    /* Hide user type label */
-    #currentUserType {
-        display: none !important;
-    }
-}
-
-@media (max-width: 576px) {
-    /* Further mobile optimizations */
-    .queue-card .card-body {
-        padding: 10px !important;
-    }
-    
-    .queue-card h5 {
-        font-size: 0.9rem !important;
-    }
-    
-    .queue-card p {
-        font-size: 0.75rem !important;
-        margin-bottom: 4px !important;
-    }
-    
-    .status-badge {
-        font-size: 0.6rem !important;
-        padding: 2px 6px !important;
-    }
-}
 
     </style>
 </head>
@@ -1287,11 +823,20 @@
         <i class="fas fa-industry me-2"></i>Rapier Jacquard Manager
     </span>
     <div class="text-light d-flex align-items-center ms-auto">
-    <small id="currentUserType">Not Logged In</small>
-    <button class="btn btn-outline-light btn-sm header-logout ms-2 d-none" onclick="confirmLogout()" id="headerLogoutBtn">
-        <i class="fas fa-sign-out-alt me-1"></i>Logout
-    </button>
-</div>
+        <small id="currentUserType">Not Logged In</small>
+        
+        <!-- Notification Bell - Only show when logged in -->
+        <div class="position-relative me-2 d-none" id="notificationBellContainer">
+            <button class="btn btn-outline-light btn-sm position-relative" onclick="showNotifications()" id="notificationBell">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge d-none" id="headerNotificationBadge">0</span>
+            </button>
+        </div>
+        
+        <button class="btn btn-outline-light btn-sm header-logout ms-2 d-none" onclick="confirmLogout()" id="headerLogoutBtn">
+            <i class="fas fa-sign-out-alt me-1"></i>Logout
+        </button>
+    </div>
 </div>
 </nav>
 </header>
@@ -1641,7 +1186,37 @@
     </div>
 </div>
 
-
+<!-- Notifications Panel -->
+<div class="modal fade" id="notificationsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-bell me-2"></i>Notifications
+                    <span class="badge bg-danger ms-2" id="notificationCountBadge">0</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="notificationsList" class="list-group list-group-flush">
+                    <!-- Notifications will be loaded here -->
+                </div>
+                <div id="emptyNotifications" class="text-center py-4 d-none">
+                    <i class="fas fa-bell-slash fa-2x text-muted mb-2"></i>
+                    <p class="text-muted mb-0">No notifications</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" onclick="markAllAsRead()">
+                    <i class="fas fa-check-double me-1"></i>Mark All as Read
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="clearAllNotifications()">
+                    <i class="fas fa-trash me-1"></i>Clear All
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
@@ -1810,8 +1385,9 @@ function initializeApp() {
     checkPreviousLogin();
     
     // Add debug info to console
-    console.log('App initialized. Use checkNotificationStatus() to debug notifications.');
+    console.log('App initialized.');
 }
+
 function setupEventListeners() {
     document.getElementById('programForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -1885,8 +1461,9 @@ function setupAuthStateListener() {
             // Show logout button in header
             document.getElementById('headerLogoutBtn').classList.remove('d-none');
             
-            // Request notification permission for operators
+            // Show notification bell for operators
             if (userRole === 'operator') {
+                document.getElementById('notificationBellContainer').classList.remove('d-none');
                 setTimeout(() => {
                     requestNotificationPermission();
                     setupOperatorNotifications();
@@ -1906,6 +1483,7 @@ function setupAuthStateListener() {
             document.getElementById('adminDashboard').classList.add('d-none');
             document.getElementById('operatorDashboard').classList.add('d-none');
             document.getElementById('headerLogoutBtn').classList.add('d-none');
+            document.getElementById('notificationBellContainer').classList.add('d-none');
         }
     });
 }
@@ -2022,7 +1600,6 @@ function loginAsAdmin() {
     setUserLabel();
     showDashboard('admin');
     loadPrograms();
-    // Welcome message removed
 }
 
 function loginAsOperator() {
@@ -2030,7 +1607,6 @@ function loginAsOperator() {
     setUserLabel();
     showDashboard('operator');
     loadPrograms();
-    // Welcome message removed
 }
 
 function confirmLogout() {
@@ -2061,10 +1637,9 @@ function logout() {
         localStorage.removeItem('userLoggedIn');
         localStorage.removeItem('userEmail');
         
-        // Hide header logout button
+        // Hide header logout button and notification bell
         document.getElementById('headerLogoutBtn').classList.add('d-none');
-        
-        // Logout message removed
+        document.getElementById('notificationBellContainer').classList.add('d-none');
     }).catch((error) => {
         console.error('Logout error:', error);
     });
@@ -2924,17 +2499,14 @@ async function saveProgram() {
         
         console.log('Program saved with ID:', result.id);
         
-        // Broadcast notification to operators - use a timeout to ensure data is saved
-        setTimeout(() => {
-            const newProgram = {
+        // Notify operators about new program
+        if (currentUser === 'admin') {
+            notifyOperators('PROGRAM_CREATED', {
                 id: result.id,
                 ...programData,
-                createdAt: new Date() // Use client time for immediate notification
-            };
-            
-            console.log('Broadcasting new program notification:', newProgram);
-            broadcastNotification('new_program', newProgram);
-        }, 1000);
+                createdAt: new Date()
+            });
+        }
         
         alert('Program saved successfully!');
         document.getElementById('programForm').reset();
@@ -3008,16 +2580,16 @@ async function updateProgram(programId) {
             feeders: feeders
         });
         
-        // Broadcast notification to operators
-        const updatedProgram = {
-            id: programId,
-            designName: designName,
-            rounds: rounds,
-            priority: priority,
-            machineNumber: currentProgram.machineNumber
-        };
-        
-        broadcastNotification('updated_program', updatedProgram, oldProgram);
+        // Notify operators about program update
+        if (currentUser === 'admin') {
+            notifyOperators('PROGRAM_UPDATED', {
+                id: programId,
+                designName: designName,
+                rounds: rounds,
+                priority: priority,
+                machineNumber: currentProgram.machineNumber
+            }, oldProgram);
+        }
         
         alert('Program updated successfully!');
         const modal = bootstrap.Modal.getInstance(document.getElementById('editProgramModal'));
@@ -3173,6 +2745,12 @@ async function deleteProgram(programId) {
 
     try {
         await db.collection("programs").doc(programId).delete();
+        
+        // Notify operators about program deletion
+        if (currentUser === 'admin') {
+            notifyOperators('PROGRAM_DELETED', program);
+        }
+        
         alert('Program deleted successfully!');
     } catch (error) {
         console.error('Error deleting program:', error);
@@ -3401,60 +2979,359 @@ function removeEditFeeder(button) {
     });
 }
 
-async function updateProgram(programId) {
-    const designName = document.getElementById('editDesignName').value.trim();
-    const rounds = parseInt(document.getElementById('editRounds').value);
-    const priority = document.getElementById('editPriority').value;
+// --- NOTIFICATION SYSTEM ---
+
+// Notify operators about program changes
+function notifyOperators(type, program, oldProgram = null) {
+    if (currentUser !== 'admin') return;
     
-    if (!designName || !rounds) {
-        alert('Please fill all required fields');
-        return;
-    }
+    const notificationData = {
+        type: type,
+        program: program,
+        oldProgram: oldProgram,
+        timestamp: new Date().toISOString(),
+        source: 'admin'
+    };
     
-    // Get feeder configurations
-    const feeders = {};
-    const feederInputs = document.querySelectorAll('.edit-feeder-yarn');
-    let hasEmptyFeeder = false;
-    
-    feederInputs.forEach((input, index) => {
-        if (!input.value.trim()) {
-            hasEmptyFeeder = true;
-            input.closest('.feeder-input-group').style.borderColor = '#dc3545';
-        } else {
-            feeders[`feeder${index + 1}`] = input.value.trim();
-            input.closest('.feeder-input-group').style.borderColor = '#dee2e6';
-        }
+    // Store notification in Firestore
+    db.collection("notifications").add({
+        ...notificationData,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        read: false,
+        userId: 'operator' // This notification is for operators
+    }).then(() => {
+        console.log('Notification sent to operators:', type);
+    }).catch(error => {
+        console.error('Error sending notification:', error);
     });
+}
+
+// Setup operator notifications
+function setupOperatorNotifications() {
+    if (currentUser !== 'operator') return;
     
-    if (hasEmptyFeeder) {
-        alert('Please enter yarn type for all feeders');
-        return;
-    }
-
-    // Fill remaining feeders with empty values
-    for (let i = feederInputs.length + 1; i <= 12; i++) {
-        feeders[`feeder${i}`] = '';
-    }
-
-    try {
-        showLoading(true);
+    console.log('Setting up operator notifications...');
+    
+    // Listen for notifications
+    const notificationsQuery = db.collection("notifications")
+        .where("userId", "==", "operator")
+        .orderBy("createdAt", "desc")
+        .limit(50);
+    
+    window.notificationListener = notificationsQuery.onSnapshot((snapshot) => {
+        let unreadCount = 0;
         
-        await db.collection("programs").doc(programId).update({
-            designName: designName,
-            rounds: rounds,
-            priority: priority,
-            feeders: feeders
+        snapshot.forEach((doc) => {
+            if (!doc.data().read) {
+                unreadCount++;
+            }
         });
         
-        alert('Program updated successfully!');
-        const modal = bootstrap.Modal.getInstance(document.getElementById('editProgramModal'));
-        modal.hide();
+        updateNotificationBadge(unreadCount);
+        
+        // If notifications modal is open, refresh the list
+        if (document.getElementById('notificationsModal').classList.contains('show')) {
+            loadNotifications();
+        }
+        
+        // Show browser notification for new unread notifications
+        snapshot.docChanges().forEach((change) => {
+            if (change.type === "added" && !change.doc.data().read) {
+                const notification = change.doc.data();
+                showBrowserNotificationForOperator(notification);
+            }
+        });
+    }, (error) => {
+        console.error('Error in notification listener:', error);
+    });
+}
+
+// Show browser notification for operators
+function showBrowserNotificationForOperator(notification) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+        let title, body;
+        
+        switch (notification.type) {
+            case 'PROGRAM_CREATED':
+                title = '📋 New Program Assigned';
+                body = `Machine ${notification.program.machineNumber}: ${notification.program.designName} (${notification.program.rounds} rounds) ${notification.program.priority === 'urgent' ? '🚨 URGENT' : ''}`;
+                break;
+            case 'PROGRAM_UPDATED':
+                const changes = [];
+                if (notification.oldProgram && notification.oldProgram.designName !== notification.program.designName) {
+                    changes.push(`Design: ${notification.program.designName}`);
+                }
+                if (notification.oldProgram && notification.oldProgram.rounds !== notification.program.rounds) {
+                    changes.push(`Rounds: ${notification.program.rounds}`);
+                }
+                if (notification.oldProgram && notification.oldProgram.priority !== notification.program.priority) {
+                    changes.push(`Priority: ${notification.program.priority.toUpperCase()}`);
+                }
+                
+                title = '✏️ Program Updated';
+                body = `Machine ${notification.program.machineNumber}: ${notification.program.designName} - ${changes.join(', ')}`;
+                break;
+            case 'PROGRAM_DELETED':
+                title = '🗑️ Program Removed';
+                body = `Machine ${notification.program.machineNumber}: ${notification.program.designName} was removed`;
+                break;
+            default:
+                return;
+        }
+        
+        const options = {
+            body: body,
+            icon: './icon-192.png',
+            badge: './icon-192.png',
+            tag: 'program-notification',
+            requireInteraction: true
+        };
+        
+        try {
+            new Notification(title, options);
+        } catch (error) {
+            console.error('Error showing browser notification:', error);
+        }
+    }
+}
+
+// Update notification badge
+function updateNotificationBadge(count) {
+    const badge = document.getElementById('headerNotificationBadge');
+    
+    if (count > 0) {
+        badge.textContent = count > 99 ? '99+' : count;
+        badge.classList.remove('d-none');
+    } else {
+        badge.classList.add('d-none');
+    }
+}
+
+// Load notifications for the modal
+async function loadNotifications() {
+    if (currentUser !== 'operator') return;
+    
+    try {
+        const querySnapshot = await db.collection("notifications")
+            .where("userId", "==", "operator")
+            .orderBy("createdAt", "desc")
+            .limit(100)
+            .get();
+        
+        const notificationsList = document.getElementById('notificationsList');
+        const emptyNotifications = document.getElementById('emptyNotifications');
+        
+        notificationsList.innerHTML = '';
+        
+        if (querySnapshot.empty) {
+            emptyNotifications.classList.remove('d-none');
+            document.getElementById('notificationCountBadge').textContent = '0';
+            return;
+        }
+        
+        emptyNotifications.classList.add('d-none');
+        
+        querySnapshot.forEach((doc) => {
+            const notification = {
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt ? doc.data().createdAt.toDate() : new Date()
+            };
+            
+            const notificationElement = createNotificationElement(notification);
+            notificationsList.appendChild(notificationElement);
+        });
+        
+        // Update modal badge
+        const unreadCount = querySnapshot.docs.filter(doc => !doc.data().read).length;
+        document.getElementById('notificationCountBadge').textContent = unreadCount;
         
     } catch (error) {
-        console.error('Error updating program:', error);
-        alert('Error updating program: ' + error.message);
-    } finally {
-        showLoading(false);
+        console.error('Error loading notifications:', error);
+    }
+}
+
+// Create notification element for display
+function createNotificationElement(notification) {
+    const div = document.createElement('div');
+    div.className = `list-group-item list-group-item-action ${notification.read ? 'read' : 'unread'}`;
+    div.onclick = () => markAsRead(notification.id);
+    
+    const timeAgo = getTimeAgo(notification.createdAt);
+    let message = '';
+    
+    switch (notification.type) {
+        case 'PROGRAM_CREATED':
+            message = `New program assigned to Machine ${notification.program.machineNumber}: ${notification.program.designName} (${notification.program.rounds} rounds)`;
+            break;
+        case 'PROGRAM_UPDATED':
+            message = `Program updated on Machine ${notification.program.machineNumber}: ${notification.program.designName}`;
+            break;
+        case 'PROGRAM_DELETED':
+            message = `Program removed from Machine ${notification.program.machineNumber}: ${notification.program.designName}`;
+            break;
+        default:
+            message = 'New notification';
+    }
+    
+    div.innerHTML = `
+        <div class="d-flex w-100 justify-content-between">
+            <h6 class="mb-1">${getNotificationTitle(notification.type)}</h6>
+            <small class="text-muted">${timeAgo}</small>
+        </div>
+        <p class="mb-1">${message}</p>
+        ${!notification.read ? '<small class="text-primary">Click to mark as read</small>' : ''}
+    `;
+    
+    return div;
+}
+
+// Get notification title based on type
+function getNotificationTitle(type) {
+    const titles = {
+        'PROGRAM_CREATED': '📋 New Program',
+        'PROGRAM_UPDATED': '✏️ Program Updated',
+        'PROGRAM_DELETED': '🗑️ Program Removed'
+    };
+    
+    return titles[type] || 'Notification';
+}
+
+// Get time ago string
+function getTimeAgo(date) {
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min ago`;
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+}
+
+// Mark notification as read
+async function markAsRead(notificationId) {
+    try {
+        await db.collection("notifications").doc(notificationId).update({
+            read: true
+        });
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+    }
+}
+
+// Mark all notifications as read
+async function markAllAsRead() {
+    try {
+        const querySnapshot = await db.collection("notifications")
+            .where("userId", "==", "operator")
+            .where("read", "==", false)
+            .get();
+        
+        const batch = db.batch();
+        querySnapshot.forEach((doc) => {
+            batch.update(doc.ref, { read: true });
+        });
+        
+        await batch.commit();
+        console.log('All notifications marked as read');
+    } catch (error) {
+        console.error('Error marking all notifications as read:', error);
+    }
+}
+
+// Clear all notifications
+async function clearAllNotifications() {
+    try {
+        const querySnapshot = await db.collection("notifications")
+            .where("userId", "==", "operator")
+            .get();
+        
+        const batch = db.batch();
+        querySnapshot.forEach((doc) => {
+            batch.delete(doc.ref);
+        });
+        
+        await batch.commit();
+        console.log('All notifications cleared');
+    } catch (error) {
+        console.error('Error clearing notifications:', error);
+    }
+}
+
+// Show notifications modal
+function showNotifications() {
+    loadNotifications();
+    const modal = new bootstrap.Modal(document.getElementById('notificationsModal'));
+    modal.show();
+}
+
+// Show in-app notification
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 1060;
+        min-width: 300px;
+        max-width: 500px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Request notification permission
+function requestNotificationPermission() {
+    if ('Notification' in window) {
+        console.log('Notification API is supported');
+        
+        if (Notification.permission === 'default') {
+            console.log('Requesting notification permission...');
+            
+            // Show a custom prompt first
+            setTimeout(() => {
+                if (confirm('Would you like to receive notifications for new programs and updates?')) {
+                    Notification.requestPermission().then(permission => {
+                        console.log('Notification permission:', permission);
+                        if (permission === 'granted') {
+                            console.log('Notification permission granted!');
+                            showNotification('Notifications enabled! You will now receive alerts for program updates.', 'success');
+                        } else if (permission === 'denied') {
+                            console.log('Notification permission denied');
+                            showNotification('Notifications are disabled. You can enable them in your browser settings.', 'warning');
+                        }
+                    }).catch(error => {
+                        console.error('Error requesting notification permission:', error);
+                    });
+                }
+            }, 3000); // Ask after 3 seconds
+        } else if (Notification.permission === 'granted') {
+            console.log('Notification permission already granted');
+        } else if (Notification.permission === 'denied') {
+            console.log('Notification permission denied by user');
+            showNotification('Notifications are disabled. Enable them in browser settings to receive alerts.', 'warning');
+        }
+    } else {
+        console.log('Notification API is not supported in this browser');
+        showNotification('Your browser does not support notifications.', 'warning');
     }
 }
 
@@ -3751,28 +3628,27 @@ function exportHistoryToExcel(fromDate = '', toDate = '', exportAll = true) {
     }
     
     // Apply date filter if not exporting all dates
-    // Apply date filter if not exporting all dates
-if (!exportAll) {
-    filteredHistory = filteredHistory.filter(program => {
-        const programDate = new Date(program.createdAt);
-        let fromValid = true;
-        let toValid = true;
-        
-        if (fromDate) {
-            const from = new Date(fromDate);
-            from.setHours(0, 0, 0, 0); // Start of the day
-            fromValid = programDate >= from;
-        }
-        
-        if (toDate) {
-            const to = new Date(toDate);
-            to.setHours(23, 59, 59, 999); // End of the day
-            toValid = programDate <= to;
-        }
-        
-        return fromValid && toValid;
-    });
-}
+    if (!exportAll) {
+        filteredHistory = filteredHistory.filter(program => {
+            const programDate = new Date(program.createdAt);
+            let fromValid = true;
+            let toValid = true;
+            
+            if (fromDate) {
+                const from = new Date(fromDate);
+                from.setHours(0, 0, 0, 0); // Start of the day
+                fromValid = programDate >= from;
+            }
+            
+            if (toDate) {
+                const to = new Date(toDate);
+                to.setHours(23, 59, 59, 999); // End of the day
+                toValid = programDate <= to;
+            }
+            
+            return fromValid && toValid;
+        });
+    }
     
     const excelData = [
         ['Machine', 'Design', 'Rounds', 'Status', 'Created', 'Started', 'Completed', 'Feeders']
@@ -3814,28 +3690,27 @@ function exportOperatorHistoryToExcel(fromDate = '', toDate = '', exportAll = tr
     }
     
     // Apply date filter if not exporting all dates
-    // Apply date filter if not exporting all dates
-if (!exportAll) {
-    filteredHistory = filteredHistory.filter(program => {
-        const programDate = new Date(program.createdAt);
-        let fromValid = true;
-        let toValid = true;
-        
-        if (fromDate) {
-            const from = new Date(fromDate);
-            from.setHours(0, 0, 0, 0); // Start of the day
-            fromValid = programDate >= from;
-        }
-        
-        if (toDate) {
-            const to = new Date(toDate);
-            to.setHours(23, 59, 59, 999); // End of the day
-            toValid = programDate <= to;
-        }
-        
-        return fromValid && toValid;
-    });
-}
+    if (!exportAll) {
+        filteredHistory = filteredHistory.filter(program => {
+            const programDate = new Date(program.createdAt);
+            let fromValid = true;
+            let toValid = true;
+            
+            if (fromDate) {
+                const from = new Date(fromDate);
+                from.setHours(0, 0, 0, 0); // Start of the day
+                fromValid = programDate >= from;
+            }
+            
+            if (toDate) {
+                const to = new Date(toDate);
+                to.setHours(23, 59, 59, 999); // End of the day
+                toValid = programDate <= to;
+            }
+            
+            return fromValid && toValid;
+        });
+    }
     
     const excelData = [
         ['Machine', 'Design', 'Rounds', 'Status', 'Created', 'Started', 'Completed', 'Feeders']
@@ -3922,6 +3797,7 @@ document.getElementById('designImage').addEventListener('change', function(e) {
     }
 });
 
+// --- PWA FUNCTIONALITY ---
 function setupPWA() {
     console.log('Setting up PWA...');
     
@@ -3995,449 +3871,6 @@ function setupPWA() {
         }
     }, 2000);
 }
-
-function showPwaPrompt() {
-    const prompt = document.getElementById('pwaInstallPrompt');
-    console.log('Attempting to show PWA prompt:', {
-        promptExists: !!prompt,
-        deferredPrompt: !!deferredPrompt,
-        isAppInstalled: isAppInstalled
-    });
-    
-    if (prompt && deferredPrompt && !isAppInstalled) {
-        prompt.style.display = 'block';
-        setTimeout(() => {
-            prompt.classList.add('show');
-        }, 100);
-        console.log('PWA prompt shown successfully');
-    } else {
-        console.log('Cannot show PWA prompt:', {
-            noPrompt: !prompt,
-            noDeferredPrompt: !deferredPrompt,
-            alreadyInstalled: isAppInstalled
-        });
-    }
-}
-
-function hidePwaPrompt() {
-    const prompt = document.getElementById('pwaInstallPrompt');
-    if (prompt) {
-        prompt.classList.remove('show');
-        setTimeout(() => {
-            prompt.style.display = 'none';
-        }, 300);
-    }
-}
-
-function hidePwaPrompt() {
-    const prompt = document.getElementById('pwaInstallPrompt');
-    if (prompt) {
-        prompt.classList.remove('show');
-    }
-}
-
-function dismissPwaPrompt() {
-    hidePwaPrompt();
-    // Don't show again for 7 days
-    localStorage.setItem('pwaPromptDismissed', Date.now().toString());
-    console.log('PWA prompt dismissed for 7 days');
-}
-
-function installPwa() {
-    if (deferredPrompt) {
-        // Show the install prompt
-        deferredPrompt.prompt();
-        
-        // Wait for the user to respond to the prompt
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the install prompt');
-            } else {
-                console.log('User dismissed the install prompt');
-            }
-            deferredPrompt = null;
-        });
-    }
-    hidePwaPrompt();
-}
-
-// --- NOTIFICATION SYSTEM ---
-function showNotification(message, type = 'info') {
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type} alert-dismissible fade show`;
-    notification.style.cssText = `
-        position: fixed;
-        top: 80px;
-        right: 20px;
-        z-index: 1060;
-        min-width: 300px;
-        max-width: 500px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    `;
-    notification.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    // Add to page
-    document.body.appendChild(notification);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.remove();
-        }
-    }, 5000);
-}
-
-// --- SEARCH VISIBILITY TOGGLE ---
-function toggleSearchVisibility(tab) {
-    const adminDashboard = document.getElementById('adminDashboard');
-    const operatorDashboard = document.getElementById('operatorDashboard');
-    
-    if (adminDashboard && !adminDashboard.classList.contains('d-none')) {
-        const searchContainer = adminDashboard.querySelector('.search-container');
-        if (searchContainer) {
-            if (tab === 'machines') {
-                searchContainer.style.display = 'block';
-                adminDashboard.classList.add('machines-tab-active');
-            } else {
-                searchContainer.style.display = 'none';
-                adminDashboard.classList.remove('machines-tab-active');
-            }
-        }
-    }
-    
-    if (operatorDashboard && !operatorDashboard.classList.contains('d-none')) {
-        const searchContainer = operatorDashboard.querySelector('.search-container');
-        if (searchContainer) {
-            if (tab === 'machines') {
-                searchContainer.style.display = 'block';
-                operatorDashboard.classList.add('machines-tab-active');
-            } else {
-                searchContainer.style.display = 'none';
-                operatorDashboard.classList.remove('machines-tab-active');
-            }
-        }
-    }
-}
-
-// --- SERVICE WORKER REGISTRATION ---
-function registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-        console.log('Service Worker is supported');
-        
-        window.addEventListener('load', function() {
-            // Try multiple paths for service worker
-            const swPaths = [
-                './sw.js',
-                '/sw.js',
-                '/rapier-jacquard-manager/sw.js'
-            ];
-            
-            let registrationAttempts = 0;
-            
-            function tryRegister(pathIndex) {
-                if (pathIndex >= swPaths.length) {
-                    console.log('All Service Worker registration attempts failed');
-                    return;
-                }
-                
-                const swPath = swPaths[pathIndex];
-                console.log(`Attempting to register Service Worker at: ${swPath}`);
-                
-                navigator.serviceWorker.register(swPath)
-                    .then(function(registration) {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    })
-                    .catch(function(error) {
-                        console.log(`ServiceWorker registration failed for ${swPath}:`, error);
-                        tryRegister(pathIndex + 1);
-                    });
-            }
-            
-            tryRegister(0);
-        });
-    } else {
-        console.log('Service Worker is not supported in this browser');
-    }
-}
-
-
-
-
-function setupOperatorNotifications() {
-    if (currentUser !== 'operator') {
-        console.log('Not setting up operator notifications - user is not operator');
-        return;
-    }
-    
-    console.log('Setting up browser notifications for operator...');
-    
-    // Double-check permission
-    if (Notification.permission !== 'granted') {
-        console.log('Notification permission not granted, cannot setup notifications');
-        return;
-    }
-    
-    console.log('Setting up Firebase listeners for notifications...');
-    
-    // Clear any existing listeners first
-    if (window.programListener) {
-        window.programListener();
-    }
-    if (window.statusListener) {
-        window.statusListener();
-    }
-    
-    // Listen for NEW programs (only pending status)
-    const newProgramsQuery = db.collection("programs")
-        .where("status", "==", "pending")
-        .orderBy("createdAt", "desc")
-        .limit(10);
-    
-    let initialNewLoad = true;
-    let lastNewProgramTime = new Date();
-    
-    window.programListener = newProgramsQuery.onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-            if (change.type === "added") {
-                const program = {
-                    id: change.doc.id,
-                    ...change.doc.data(),
-                    createdAt: change.doc.data().createdAt ? change.doc.data().createdAt.toDate() : new Date()
-                };
-                
-                // Skip initial load and very old programs
-                const programTime = program.createdAt;
-                const timeDiff = (new Date() - programTime) / 1000; // in seconds
-                
-                console.log('New program detected:', {
-                    id: program.id,
-                    designName: program.designName,
-                    timeDiff: timeDiff,
-                    initialLoad: initialNewLoad
-                });
-                
-                if (!initialNewLoad && timeDiff < 120) { // Only show notifications for programs created in last 2 minutes
-                    console.log('Showing notification for new program:', program.designName);
-                    
-                    showBrowserNotification(
-                        '📋 New Program Assigned',
-                        `Machine ${program.machineNumber}: ${program.designName} (${program.rounds} rounds) ${program.priority === 'urgent' ? '🚨 URGENT' : ''}`,
-                        program.priority === 'urgent' ? 'high' : 'normal'
-                    );
-                    
-                    // Also show in-app notification
-                    showNotification(`New program assigned to Machine ${program.machineNumber}: ${program.designName}`, 'info');
-                }
-                
-                if (programTime > lastNewProgramTime) {
-                    lastNewProgramTime = programTime;
-                }
-            }
-        });
-        
-        initialNewLoad = false;
-    }, (error) => {
-        console.error('Error in new programs listener:', error);
-    });
-
-    // Listen for program STATUS CHANGES (running -> completed, pending -> running)
-    const statusChangesQuery = db.collection("programs")
-        .where("status", "in", ["running", "completed"]);
-    
-    let initialStatusLoad = true;
-    let processedStatusChanges = new Set();
-    
-    window.statusListener = statusChangesQuery.onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-            if (change.type === "modified") {
-                const program = {
-                    id: change.doc.id,
-                    ...change.doc.data(),
-                    createdAt: change.doc.data().createdAt ? change.doc.data().createdAt.toDate() : new Date(),
-                    startedAt: change.doc.data().startedAt ? change.doc.data().startedAt.toDate() : null,
-                    completedAt: change.doc.data().completedAt ? change.doc.data().completedAt.toDate() : null
-                };
-                
-                const oldData = change.doc._previousData;
-                
-                // Create a unique identifier for this status change to avoid duplicates
-                const statusChangeId = `${program.id}-${program.status}-${Date.now()}`;
-                
-                if (oldData && oldData.status !== program.status && !processedStatusChanges.has(statusChangeId)) {
-                    console.log('Status change detected:', {
-                        programId: program.id,
-                        oldStatus: oldData.status,
-                        newStatus: program.status,
-                        designName: program.designName
-                    });
-                    
-                    // Mark this change as processed
-                    processedStatusChanges.add(statusChangeId);
-                    
-                    // Clean up old processed changes (keep last 100)
-                    if (processedStatusChanges.size > 100) {
-                        const array = Array.from(processedStatusChanges);
-                        processedStatusChanges = new Set(array.slice(-50));
-                    }
-                    
-                    if (program.status === 'running' && oldData.status === 'pending') {
-                        console.log('Program started notification:', program.designName);
-                        
-                        showBrowserNotification(
-                            '▶️ Program Started',
-                            `Machine ${program.machineNumber}: ${program.designName} is now running`
-                        );
-                        
-                        showNotification(`Machine ${program.machineNumber}: ${program.designName} started running`, 'info');
-                    } 
-                    else if (program.status === 'completed' && oldData.status === 'running') {
-                        console.log('Program completed notification:', program.designName);
-                        
-                        showBrowserNotification(
-                            '✅ Program Completed',
-                            `Machine ${program.machineNumber}: ${program.designName} has been completed`
-                        );
-                        
-                        showNotification(`Machine ${program.machineNumber}: ${program.designName} completed`, 'success');
-                    }
-                }
-            }
-        });
-        
-        initialStatusLoad = false;
-    }, (error) => {
-        console.error('Error in status changes listener:', error);
-    });
-    
-    console.log('Firebase notification listeners setup completed');
-}
-
-function showBrowserNotification(title, message, priority = 'normal') {
-    if ('Notification' in window && Notification.permission === 'granted') {
-        console.log('Showing browser notification:', {title, message, priority});
-        
-        const options = {
-            body: message,
-            icon: './icon-192.png',
-            badge: './icon-192.png',
-            tag: 'program-notification',
-            requireInteraction: priority === 'high'
-        };
-        
-        try {
-            new Notification(title, options);
-            console.log('Browser notification sent successfully');
-        } catch (error) {
-            console.error('Error showing browser notification:', error);
-        }
-    } else {
-        console.log('Cannot show notification - permission not granted or not supported');
-    }
-}
-
-function broadcastNotification(type, program, oldProgram = null) {
-    console.log('Broadcasting notification:', type, program);
-    
-    const notificationData = {
-        type: type,
-        program: program,
-        oldProgram: oldProgram,
-        timestamp: new Date().toISOString(),
-        source: 'admin'
-    };
-    
-    // Method 1: localStorage (works across tabs)
-    try {
-        const uniqueKey = `programNotification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem(uniqueKey, JSON.stringify(notificationData));
-        
-        // Remove it after a short time
-        setTimeout(() => {
-            localStorage.removeItem(uniqueKey);
-        }, 5000);
-        
-        console.log('Notification broadcast via localStorage:', uniqueKey);
-    } catch (error) {
-        console.error('Error using localStorage for notifications:', error);
-    }
-    
-    // Method 2: BroadcastChannel (modern browsers)
-    if ('BroadcastChannel' in window) {
-        try {
-            const channel = new BroadcastChannel('program_notifications');
-            channel.postMessage(notificationData);
-            console.log('Notification broadcast via BroadcastChannel');
-            
-            // Close channel after sending
-            setTimeout(() => {
-                channel.close();
-            }, 1000);
-        } catch (error) {
-            console.error('Error using BroadcastChannel:', error);
-        }
-    }
-}
-
-// Listen for cross-tab notifications
-window.addEventListener('storage', (e) => {
-    if (e.key === 'programNotification' && e.newValue && currentUser === 'operator') {
-        try {
-            const notification = JSON.parse(e.newValue);
-            console.log('Cross-tab notification received:', notification);
-            
-            if (notification.type === 'new_program') {
-                showBrowserNotification(
-                    '📋 New Program Created',
-                    `Machine ${notification.program.machineNumber}: ${notification.program.designName} (${notification.program.rounds} rounds) ${notification.program.priority === 'urgent' ? '🚨 URGENT' : ''}`,
-                    notification.program.priority === 'urgent' ? 'high' : 'normal'
-                );
-            } else if (notification.type === 'updated_program') {
-                const changes = [];
-                if (notification.oldProgram.designName !== notification.program.designName) {
-                    changes.push(`Design: ${notification.oldProgram.designName} → ${notification.program.designName}`);
-                }
-                if (notification.oldProgram.rounds !== notification.program.rounds) {
-                    changes.push(`Rounds: ${notification.oldProgram.rounds} → ${notification.program.rounds}`);
-                }
-                
-                if (changes.length > 0) {
-                    showBrowserNotification(
-                        '✏️ Program Updated',
-                        `Machine ${notification.program.machineNumber}: ${changes.join(', ')}`
-                    );
-                }
-            }
-        } catch (error) {
-            console.error('Error parsing cross-tab notification:', error);
-        }
-    }
-});
-
-// Also use BroadcastChannel for modern browsers
-if ('BroadcastChannel' in window) {
-    try {
-        const channel = new BroadcastChannel('program_notifications');
-        channel.addEventListener('message', (event) => {
-            console.log('BroadcastChannel notification received:', event.data);
-            
-            if (event.data.type === 'new_program' && currentUser === 'operator') {
-                showBrowserNotification(
-                    '📋 New Program Created',
-                    `Machine ${event.data.program.machineNumber}: ${event.data.program.designName} (${event.data.program.rounds} rounds) ${event.data.program.priority === 'urgent' ? '🚨 URGENT' : ''}`,
-                    event.data.program.priority === 'urgent' ? 'high' : 'normal'
-                );
-            }
-        });
-    } catch (error) {
-        console.error('Error setting up BroadcastChannel:', error);
-    }
-}
-
-
 
 function showPwaPrompt() {
     const prompt = document.getElementById('pwaInstallPrompt');
@@ -4560,50 +3993,6 @@ function toggleSearchVisibility(tab) {
     }
 }
 
-function requestNotificationPermission() {
-    if ('Notification' in window) {
-        console.log('Notification API is supported');
-        
-        if (Notification.permission === 'default') {
-            console.log('Requesting notification permission...');
-            
-            // Show a custom prompt first
-            setTimeout(() => {
-                if (confirm('Would you like to receive notifications for new programs and updates?')) {
-                    Notification.requestPermission().then(permission => {
-                        console.log('Notification permission:', permission);
-                        if (permission === 'granted') {
-                            console.log('Notification permission granted!');
-                            showNotification('Notifications enabled! You will now receive alerts for program updates.', 'success');
-                            
-                            // Setup notifications for operators
-                            if (currentUser === 'operator') {
-                                setupOperatorNotifications();
-                            }
-                        } else if (permission === 'denied') {
-                            console.log('Notification permission denied');
-                            showNotification('Notifications are disabled. You can enable them in your browser settings.', 'warning');
-                        }
-                    }).catch(error => {
-                        console.error('Error requesting notification permission:', error);
-                    });
-                }
-            }, 3000); // Ask after 3 seconds
-        } else if (Notification.permission === 'granted') {
-            console.log('Notification permission already granted');
-            if (currentUser === 'operator') {
-                setupOperatorNotifications();
-            }
-        } else if (Notification.permission === 'denied') {
-            console.log('Notification permission denied by user');
-            showNotification('Notifications are disabled. Enable them in browser settings to receive alerts.', 'warning');
-        }
-    } else {
-        console.log('Notification API is not supported in this browser');
-        showNotification('Your browser does not support notifications.', 'warning');
-    }
-}
-
 // Make functions available globally
 window.loginAsAdmin = loginAsAdmin;
 window.loginAsOperator = loginAsOperator;
@@ -4638,6 +4027,9 @@ window.exportOperatorHistoryToExcel = exportOperatorHistoryToExcel;
 window.showDateFilterModal = showDateFilterModal;
 window.exportWithDateRange = exportWithDateRange;
 window.exportQueueToExcel = exportQueueToExcel;
+window.showNotifications = showNotifications;
+window.markAllAsRead = markAllAsRead;
+window.clearAllNotifications = clearAllNotifications;
 
 </script>
 </body>
