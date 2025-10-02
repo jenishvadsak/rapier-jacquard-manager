@@ -2019,6 +2019,27 @@ body {
         </div>
     </div>
 </div>
+<!-- Notification Permission Modal -->
+<div class="modal fade" id="notificationPermissionModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Enable Notifications</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-bell fa-3x text-primary mb-3"></i>
+                <p class="mb-3">Get real-time notifications when programs are created, updated, or deleted.</p>
+                <button class="btn btn-primary w-100" onclick="requestNotificationPermission()">
+                    Enable Notifications
+                </button>
+                <button class="btn btn-outline-secondary w-100 mt-2" data-bs-dismiss="modal">
+                    Not Now
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Firebase + libs -->
 <!-- Firebase + libs -->
@@ -2885,12 +2906,11 @@ function viewMachinePrograms(machineNumber) {
     const bsModal = new bootstrap.Modal(modal);
     bsModal.show();
     
-    // Remove modal from DOM after hide
-    modal.addEventListener('hidden.bs.modal', function () {
+modal.addEventListener('hidden.bs.modal', function () {
     if (document.body.contains(modal)) {
         document.body.removeChild(modal);
     }
-});
+});  // Closing brace moved here
 }
 
 function viewOperatorMachinePrograms(machineNumber) {
@@ -4312,134 +4332,6 @@ function hidePwaPrompt() {
     }
 }
 
-function hidePwaPrompt() {
-    const prompt = document.getElementById('pwaInstallPrompt');
-    if (prompt) {
-        prompt.classList.remove('show');
-    }
-}
-
-function dismissPwaPrompt() {
-    hidePwaPrompt();
-    // Don't show again for 7 days
-    localStorage.setItem('pwaPromptDismissed', Date.now().toString());
-    console.log('PWA prompt dismissed for 7 days');
-}
-
-function installPwa() {
-    if (deferredPrompt) {
-        // Show the install prompt
-        deferredPrompt.prompt();
-        
-        // Wait for the user to respond to the prompt
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the install prompt');
-            } else {
-                console.log('User dismissed the install prompt');
-            }
-            deferredPrompt = null;
-        });
-    }
-    hidePwaPrompt();
-}
-
-// --- SEARCH VISIBILITY TOGGLE ---
-function toggleSearchVisibility(tab) {
-    const adminDashboard = document.getElementById('adminDashboard');
-    const operatorDashboard = document.getElementById('operatorDashboard');
-    
-    if (adminDashboard && !adminDashboard.classList.contains('d-none')) {
-        const searchContainer = adminDashboard.querySelector('.search-container');
-        if (searchContainer) {
-            if (tab === 'machines') {
-                searchContainer.style.display = 'block';
-                adminDashboard.classList.add('machines-tab-active');
-            } else {
-                searchContainer.style.display = 'none';
-                adminDashboard.classList.remove('machines-tab-active');
-            }
-        }
-    }
-    
-    if (operatorDashboard && !operatorDashboard.classList.contains('d-none')) {
-        const searchContainer = operatorDashboard.querySelector('.search-container');
-        if (searchContainer) {
-            if (tab === 'machines') {
-                searchContainer.style.display = 'block';
-                operatorDashboard.classList.add('machines-tab-active');
-            } else {
-                searchContainer.style.display = 'none';
-                operatorDashboard.classList.remove('machines-tab-active');
-            }
-        }
-    }
-}
-
-// --- SERVICE WORKER REGISTRATION ---
-function registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-        console.log('Service Worker is supported');
-        
-        window.addEventListener('load', function() {
-            // Try multiple paths for service worker
-            const swPaths = [
-                './sw.js',
-                '/sw.js',
-                '/rapier-jacquard-manager/sw.js'
-            ];
-            
-            let registrationAttempts = 0;
-            
-            function tryRegister(pathIndex) {
-                if (pathIndex >= swPaths.length) {
-                    console.log('All Service Worker registration attempts failed');
-                    return;
-                }
-                
-                const swPath = swPaths[pathIndex];
-                console.log(`Attempting to register Service Worker at: ${swPath}`);
-                
-                navigator.serviceWorker.register(swPath)
-                    .then(function(registration) {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    })
-                    .catch(function(error) {
-                        console.log(`ServiceWorker registration failed for ${swPath}:`, error);
-                        tryRegister(pathIndex + 1);
-                    });
-            }
-            
-            tryRegister(0);
-        });
-    } else {
-        console.log('Service Worker is not supported in this browser');
-    }
-}
-
-function showPwaPrompt() {
-    const prompt = document.getElementById('pwaInstallPrompt');
-    console.log('Attempting to show PWA prompt:', {
-        promptExists: !!prompt,
-        deferredPrompt: !!deferredPrompt,
-        isAppInstalled: isAppInstalled
-    });
-    
-    if (prompt && deferredPrompt && !isAppInstalled) {
-        prompt.classList.add('show');
-        console.log('PWA prompt shown successfully');
-    } else {
-        console.log('Cannot show PWA prompt - conditions not met');
-    }
-}
-
-function hidePwaPrompt() {
-    const prompt = document.getElementById('pwaInstallPrompt');
-    if (prompt) {
-        prompt.classList.remove('show');
-    }
-}
-
 function dismissPwaPrompt() {
     hidePwaPrompt();
     // Don't show again for 7 days
@@ -4505,6 +4397,8 @@ function registerServiceWorker() {
         console.log('Service Worker is not supported in this browser');
     }
 }
+
+
 
 // --- SEARCH VISIBILITY TOGGLE ---
 function toggleSearchVisibility(tab) {
@@ -4601,36 +4495,27 @@ async function initializeFCM() {
     try {
         console.log('Initializing FCM...');
         
-        // Request permission and get token
-        fcmToken = await messaging.getToken({ 
-    vapidKey: 'BA_Byfe45ABbOeCdPfayDcFzINtzc7KwsqNNyz8rcyQWBa1QM6dqmhBckM_SVfXQiynbnCdIJW3KGZ0f1sxri5I' 
-});
-        
-        if (fcmToken) {
-            console.log('FCM token obtained:', fcmToken);
-            // Store the token in Firestore for this user
-            await storeFCMToken(fcmToken);
-            
-            // Show success notification
-            showNotification('Notifications Enabled', 'You will receive real-time updates.', 'success');
-        } else {
-            console.log('No registration token available.');
+        // Check if notifications are supported and permission is granted
+        if (!('Notification' in window) || Notification.permission !== 'granted') {
+            console.log('FCM not initialized: Notifications not supported or permission not granted');
+            return;
         }
         
-        // Handle foreground messages
-        messaging.onMessage((payload) => {
-            console.log('Foreground message received:', payload);
-            const notification = payload.notification;
-            if (notification) {
-                showNotification(notification.title, notification.body, 'info');
-            }
+        // Request permission and get token with error handling
+        fcmToken = await messaging.getToken({ 
+            vapidKey: 'BOQ8Q8_GxByEin5QVW6jlEtTdvuKt3s4K4COq0CgFAHUYE9I4gYQbK4iw4BfgKKzW_s4Dste1Q5BT9j6JA-S8GI' 
         });
+        
+        if (fcmToken) {
+            console.log('FCM token obtained');
+            await storeFCMToken(fcmToken);
+        } else {
+            console.log('No FCM token available');
+        }
         
     } catch (error) {
         console.error('Error initializing FCM:', error);
-        if (error.code === 'messaging/permission-blocked') {
-            showNotification('Notifications Blocked', 'Please enable notifications in your browser settings to receive updates.', 'warning');
-        }
+        // Continue without FCM - don't break the app
     }
 }
 
