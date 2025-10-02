@@ -1320,16 +1320,12 @@
     overflow: hidden;
 }
 
-/* Design name truncation */
 .machine-card .program-info p:first-child,
 .queue-card .card-body p:first-child {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-height: 2.8em;
-    line-height: 1.4em;
+    max-width: 100%;
 }
 
 /* Ensure consistent spacing */
@@ -1510,6 +1506,18 @@
     z-index: 9999;
 }
 
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+/* Ensure cards maintain consistent height */
+.machine-card .card-body,
+.queue-card .card-body {
+    min-height: 200px;
+}
     </style>
 </head>
 <body>
@@ -2428,7 +2436,7 @@ function renderMachinesGrid() {
                     
                     ${currentProgram ? `
                         <div class="program-info">
-                            <p class="mb-1 small" title="${currentProgram.designName}"><strong>Design:</strong> ${currentProgram.designName}</p>
+                            <p class="mb-1 small text-truncate" title="${currentProgram.designName}"><strong>Design:</strong> ${currentProgram.designName}</p>
                             <p class="mb-2 small"><strong>Rounds:</strong> ${currentProgram.rounds}</p>
                             
                             <div class="machine-summary mb-3">
@@ -2549,7 +2557,7 @@ function renderQueueView(searchTerm = '') {
                             </div>
                             <h5 class="card-title">Machine ${machineNumber}</h5>
                             ${currentProgram ? `
-                                <p class="mb-1 small" title="${currentProgram.designName}"><strong>Current:</strong> ${currentProgram.designName}</p>
+                                <p class="mb-1 small text-truncate" title="${currentProgram.designName}"><strong>Current:</strong> ${currentProgram.designName}</p>
                                 <p class="mb-1 small text-muted">Rounds: ${currentProgram.rounds}</p>
                                 <span class="status-badge status-${currentProgram.status} ${currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
                                     ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status}
@@ -2627,7 +2635,7 @@ function renderOperatorMachinesGrid() {
                     </div>
                     
                     <div class="program-info">
-                        <p class="mb-1 small"><strong>Design:</strong> ${currentProgram.designName}</p>
+                        <p class="mb-1 small text-truncate" title="${currentProgram.designName}"><strong>Design:</strong> ${currentProgram.designName}</p>
                         <p class="mb-2 small"><strong>Rounds:</strong> ${currentProgram.rounds}</p>
                         
                         <div class="machine-summary mb-3">
@@ -2724,7 +2732,7 @@ function renderOperatorQueueView(searchTerm = '') {
                                 <i class="fas fa-cog fa-2x text-primary"></i>
                             </div>
                             <h5 class="card-title">Machine ${machineNumber}</h5>
-                            <p class="mb-1 small"><strong>Current:</strong> ${currentProgram.designName}</p>
+                            <p class="mb-1 small text-truncate" title="${currentProgram.designName}"><strong>Current:</strong> ${currentProgram.designName}</p>
                             <p class="mb-1 small text-muted">Rounds: ${currentProgram.rounds}</p>
                             <span class="status-badge status-${currentProgram.status} ${currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
                                 ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status}
