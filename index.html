@@ -2021,9 +2021,11 @@ body {
 </div>
 
 <!-- Firebase + libs -->
+<!-- Firebase + libs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -2042,6 +2044,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
+const messaging = firebase.messaging();
 
 // --- SETTINGS ---
 const PASSWORD = "1234"; // Keep original password
@@ -2070,22 +2073,33 @@ let filteredMachines = [];
 let deferredPrompt = null;
 let isAppInstalled = false;
 
+// Notification variables
+let notificationPermission = null;
+let fcmToken = null;
+
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
-function initializeApp() {
-    loadMachines();
-    setupEventListeners();
-    setupSearchFunctionality();
-    setupAuthStateListener();
-    addViewToggleButton();
-    setupPWA();
-    registerServiceWorker();
-    
-    // Check if user was previously logged in
-    checkPreviousLogin();
+async function initializeApp() {
+    try {
+        loadMachines();
+        setupEventListeners();
+        setupSearchFunctionality();
+        setupAuthStateListener();
+        addViewToggleButton();
+        setupPWA();
+        registerServiceWorker();
+        initializeNotifications();
+        
+        // Check if user was previously logged in
+        checkPreviousLogin();
+        
+        console.log('App initialized successfully');
+    } catch (error) {
+        console.error('Error initializing app:', error);
+    }
 }
 function setupEventListeners() {
     document.getElementById('programForm').addEventListener('submit', function(e) {
@@ -3180,15 +3194,27 @@ async function saveProgram() {
         };
 
         const result = await db.collection("programs").add(programData);
-        
-        console.log('Program saved with ID:', result.id);
-        
-        alert('Program saved successfully!');
-        document.getElementById('programForm').reset();
-        document.getElementById('designPreviewWrap').innerHTML = '';
-        resetFeederInputs();
-        
-        return true;
+
+console.log('Program saved with ID:', result.id);
+
+// SEND NOTIFICATION TO OPERATORS
+if (currentUser === 'admin') {
+    const notificationTitle = 'New Program Created';
+    const notificationMessage = `Machine ${machineNumber}: ${designName} (${rounds} rounds)`;
+    await sendNotificationToOperators(notificationTitle, notificationMessage, 'program_created', {
+        machineNumber: machineNumber,
+        designName: designName,
+        rounds: rounds,
+        programId: result.id
+    });
+}
+
+alert('Program saved successfully!');
+document.getElementById('programForm').reset();
+document.getElementById('designPreviewWrap').innerHTML = '';
+resetFeederInputs();
+
+return true;
         
     } catch (error) {
         console.error('Error saving program:', error);
@@ -3249,15 +3275,29 @@ async function updateProgram(programId) {
         showLoading(true);
         
         await db.collection("programs").doc(programId).update({
-            designName: designName,
-            rounds: rounds,
-            priority: priority,
-            feeders: feeders
-        });
-        
-        alert('Program updated successfully!');
-        const modal = bootstrap.Modal.getInstance(document.getElementById('editProgramModal'));
-        modal.hide();
+    designName: designName,
+    rounds: rounds,
+    priority: priority,
+    feeders: feeders,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    updatedBy: auth.currentUser.email
+});
+
+// SEND NOTIFICATION TO OPERATORS
+if (currentUser === 'admin') {
+    const notificationTitle = 'Program Updated';
+    const notificationMessage = `Machine ${currentProgram.machineNumber}: ${designName} updated`;
+    await sendNotificationToOperators(notificationTitle, notificationMessage, 'program_updated', {
+        machineNumber: currentProgram.machineNumber,
+        designName: designName,
+        rounds: rounds,
+        programId: programId
+    });
+}
+
+alert('Program updated successfully!');
+const modal = bootstrap.Modal.getInstance(document.getElementById('editProgramModal'));
+modal.hide();
         
     } catch (error) {
         console.error('Error updating program:', error);
@@ -3409,7 +3449,19 @@ async function deleteProgram(programId) {
 
     try {
         await db.collection("programs").doc(programId).delete();
-        alert('Program deleted successfully!');
+
+// SEND NOTIFICATION TO OPERATORS
+if (currentUser === 'admin') {
+    const notificationTitle = 'Program Deleted';
+    const notificationMessage = `Machine ${program.machineNumber}: ${program.designName} deleted`;
+    await sendNotificationToOperators(notificationTitle, notificationMessage, 'program_deleted', {
+        machineNumber: program.machineNumber,
+        designName: program.designName,
+        programId: programId
+    });
+}
+
+alert('Program deleted successfully!');
     } catch (error) {
         console.error('Error deleting program:', error);
         alert('Error deleting program');
@@ -4486,6 +4538,208 @@ function toggleSearchVisibility(tab) {
     }
 }
 
+// --- NOTIFICATION SYSTEM ---
+async function initializeNotifications() {
+    // Check if browser supports notifications
+    if (!('Notification' in window)) {
+        console.log('This browser does not support notifications');
+        return;
+    }
+    
+    notificationPermission = Notification.permission;
+    console.log('Notification permission status:', notificationPermission);
+    
+    // If permission is already granted, initialize FCM
+    if (notificationPermission === 'granted') {
+        await initializeFCM();
+    } else if (notificationPermission === 'default') {
+        // Show permission modal after a short delay for operators
+        setTimeout(() => {
+            showNotificationPermissionModal();
+        }, 2000);
+    }
+}
+
+function showNotificationPermissionModal() {
+    // Only show if user is logged in as operator and hasn't dismissed recently
+    const permissionDismissed = localStorage.getItem('notificationPermissionDismissed');
+    const dismissTime = permissionDismissed ? parseInt(permissionDismissed) : 0;
+    const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+    
+    if (currentUser === 'operator' && notificationPermission === 'default' && dismissTime < oneDayAgo) {
+        const modal = new bootstrap.Modal(document.getElementById('notificationPermissionModal'));
+        modal.show();
+    }
+}
+
+async function requestNotificationPermission() {
+    try {
+        console.log('Requesting notification permission...');
+        const permission = await Notification.requestPermission();
+        notificationPermission = permission;
+        console.log('Notification permission result:', permission);
+        
+        if (permission === 'granted') {
+            await initializeFCM();
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('notificationPermissionModal'));
+            if (modal) modal.hide();
+            
+            // Show success message
+            showNotification('Notifications enabled!', 'You will now receive updates about program changes.', 'success');
+        } else {
+            // User denied permission
+            console.log('Notification permission denied');
+            localStorage.setItem('notificationPermissionDismissed', Date.now().toString());
+        }
+    } catch (error) {
+        console.error('Error requesting notification permission:', error);
+    }
+}
+
+async function initializeFCM() {
+    try {
+        console.log('Initializing FCM...');
+        
+        // Request permission and get token
+        fcmToken = await messaging.getToken({ 
+    vapidKey: 'BA_Byfe45ABbOeCdPfayDcFzINtzc7KwsqNNyz8rcyQWBa1QM6dqmhBckM_SVfXQiynbnCdIJW3KGZ0f1sxri5I' 
+});
+        
+        if (fcmToken) {
+            console.log('FCM token obtained:', fcmToken);
+            // Store the token in Firestore for this user
+            await storeFCMToken(fcmToken);
+            
+            // Show success notification
+            showNotification('Notifications Enabled', 'You will receive real-time updates.', 'success');
+        } else {
+            console.log('No registration token available.');
+        }
+        
+        // Handle foreground messages
+        messaging.onMessage((payload) => {
+            console.log('Foreground message received:', payload);
+            const notification = payload.notification;
+            if (notification) {
+                showNotification(notification.title, notification.body, 'info');
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error initializing FCM:', error);
+        if (error.code === 'messaging/permission-blocked') {
+            showNotification('Notifications Blocked', 'Please enable notifications in your browser settings to receive updates.', 'warning');
+        }
+    }
+}
+
+async function storeFCMToken(token) {
+    if (!currentUser || !auth.currentUser) return;
+    
+    try {
+        const userEmail = auth.currentUser.email;
+        await db.collection('fcmTokens').doc(userEmail).set({
+            token: token,
+            email: userEmail,
+            userType: currentUser,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+        
+        console.log('FCM token stored successfully for:', userEmail);
+    } catch (error) {
+        console.error('Error storing FCM token:', error);
+    }
+}
+
+async function removeFCMToken() {
+    if (!auth.currentUser) return;
+    
+    try {
+        const userEmail = auth.currentUser.email;
+        await db.collection('fcmTokens').doc(userEmail).delete();
+        console.log('FCM token removed for:', userEmail);
+    } catch (error) {
+        console.error('Error removing FCM token:', error);
+    }
+}
+
+function showNotification(title, message, type = 'info') {
+    // Create a custom notification UI
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = `
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    
+    notification.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-bell me-2"></i>
+            <div>
+                <strong class="d-block">${title}</strong>
+                <small class="d-block">${message}</small>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// --- NOTIFICATION FUNCTIONS FOR ADMIN ACTIONS ---
+async function sendNotificationToOperators(title, message, actionType, programData = null) {
+    try {
+        console.log(`Sending notification to operators: ${title}`);
+        
+        // Get all operator FCM tokens
+        const tokensSnapshot = await db.collection('fcmTokens')
+            .where('userType', '==', 'operator')
+            .get();
+        
+        if (tokensSnapshot.empty) {
+            console.log('No operator tokens found');
+            return;
+        }
+        
+        const tokens = [];
+        tokensSnapshot.forEach(doc => {
+            tokens.push(doc.data().token);
+        });
+        
+        console.log(`Found ${tokens.length} operator tokens`);
+        
+        // Store notification in Firestore for all operators
+        const notificationData = {
+            title: title,
+            message: message,
+            actionType: actionType,
+            programData: programData,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            sentBy: auth.currentUser.email,
+            readBy: []
+        };
+        
+        await db.collection('notifications').add(notificationData);
+        
+        console.log(`Notification sent to ${tokens.length} operators`);
+        
+    } catch (error) {
+        console.error('Error sending notification to operators:', error);
+    }
+}
+
 // Make functions available globally
 window.loginAsAdmin = loginAsAdmin;
 window.loginAsOperator = loginAsOperator;
@@ -4520,7 +4774,29 @@ window.exportOperatorHistoryToExcel = exportOperatorHistoryToExcel;
 window.showDateFilterModal = showDateFilterModal;
 window.exportWithDateRange = exportWithDateRange;
 window.exportQueueToExcel = exportQueueToExcel;
+window.requestNotificationPermission = requestNotificationPermission;
 
 </script>
+<!-- Notification Permission Modal -->
+<div class="modal fade" id="notificationPermissionModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Enable Notifications</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-bell fa-3x text-primary mb-3"></i>
+                <p class="mb-3">Get real-time notifications when programs are created, updated, or deleted.</p>
+                <button class="btn btn-primary w-100" onclick="requestNotificationPermission()">
+                    Enable Notifications
+                </button>
+                <button class="btn btn-outline-secondary w-100 mt-2" data-bs-dismiss="modal">
+                    Not Now
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>
