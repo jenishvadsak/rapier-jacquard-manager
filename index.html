@@ -4476,31 +4476,33 @@ async function requestNotificationPermission() {
 }
 
 async function initializeFCM() {
-    try {
-        console.log('Initializing FCM...');
-        
-        // Check if notifications are supported and permission is granted
-        if (!('Notification' in window) || Notification.permission !== 'granted') {
-            console.log('FCM not initialized: Notifications not supported or permission not granted');
-            return;
-        }
-        
-        // Request permission and get token with error handling
-        fcmToken = await messaging.getToken({ 
-            vapidKey: 'BOQ8Q8_GxByEin5QVW6jlEtTdvuKt3s4K4COq0CgFAHUYE9I4gYQbK4iw4BfgKKzW_s4Dste1Q5BT9j6JA-S8GI' 
-        });
-        
-        if (fcmToken) {
-            console.log('FCM token obtained');
-            await storeFCMToken(fcmToken);
-        } else {
-            console.log('No FCM token available');
-        }
-        
-    } catch (error) {
-        console.error('Error initializing FCM:', error);
-        // Continue without FCM - don't break the app
+  try {
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+      console.log('Notifications not supported or permission denied');
+      return;
     }
+
+    // Get FCM token
+    fcmToken = await messaging.getToken({ 
+      vapidKey: 'BOQ8Q8_GxByEin5QVW6jlEtTdvuKt3s4K4COq0CgFAHUYE9I4gYbK4iw4BfgKKzW_s4Dste1Q5BT9j6JA-S8GI' 
+    });
+    
+    if (fcmToken) {
+      console.log('FCM Token:', fcmToken);
+      await storeFCMToken(fcmToken);
+    } else {
+      console.log('No registration token available.');
+    }
+
+    // Handle foreground messages
+    messaging.onMessage((payload) => {
+      console.log('Foreground message:', payload);
+      showNotification(payload.notification?.title, payload.notification?.body);
+    });
+
+  } catch (error) {
+    console.error('FCM initialization error:', error);
+  }
 }
 
 async function storeFCMToken(token) {
@@ -4567,46 +4569,47 @@ function showNotification(title, message, type = 'info') {
     }, 5000);
 }
 
-// --- NOTIFICATION FUNCTIONS FOR ADMIN ACTIONS ---
 async function sendNotificationToOperators(title, message, actionType, programData = null) {
-    try {
-        console.log(`Sending notification to operators: ${title}`);
-        
-        // Get all operator FCM tokens
-        const tokensSnapshot = await db.collection('fcmTokens')
-            .where('userType', '==', 'operator')
-            .get();
-        
-        if (tokensSnapshot.empty) {
-            console.log('No operator tokens found');
-            return;
-        }
-        
-        const tokens = [];
-        tokensSnapshot.forEach(doc => {
-            tokens.push(doc.data().token);
-        });
-        
-        console.log(`Found ${tokens.length} operator tokens`);
-        
-        // Store notification in Firestore for all operators
-        const notificationData = {
+  try {
+    // Get all operator FCM tokens
+    const tokensSnapshot = await db.collection('fcmTokens')
+      .where('userType', '==', 'operator')
+      .get();
+    
+    const tokens = [];
+    tokensSnapshot.forEach(doc => {
+      tokens.push(doc.data().token);
+    });
+
+    // Send to each token
+    for (const token of tokens) {
+      await fetch('https://fcm.googleapis.com/fcm/send', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'key=YOUR_SERVER_KEY',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: token,
+          notification: {
             title: title,
-            message: message,
+            body: message,
+            icon: './icon-192.png',
+            click_action: '/'
+          },
+          data: {
             actionType: actionType,
-            programData: programData,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            sentBy: auth.currentUser.email,
-            readBy: []
-        };
-        
-        await db.collection('notifications').add(notificationData);
-        
-        console.log(`Notification sent to ${tokens.length} operators`);
-        
-    } catch (error) {
-        console.error('Error sending notification to operators:', error);
+            programData: JSON.stringify(programData)
+          }
+        })
+      });
     }
+
+    console.log(`Notifications sent to ${tokens.length} operators`);
+    
+  } catch (error) {
+    console.error('Error sending notifications:', error);
+  }
 }
 
 // Make functions available globally
