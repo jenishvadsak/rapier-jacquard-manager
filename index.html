@@ -23,127 +23,133 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
     <style>
     :root {
-        --primary: #2c3e50;
-        --secondary: #3498db;
-        --danger: #e74c3c;
-        --success: #27ae60;
-        --warning: #f39c12;
-    }
+    --primary: #2c3e50;
+    --secondary: #3498db;
+    --danger: #e74c3c;
+    --success: #27ae60;
+    --warning: #f39c12;
+}
 
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #f8f9fa;
-        padding-bottom: 20px;
-    }
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f8f9fa;
+    padding-bottom: 20px;
+}
 
-    .app-header {
-        box-shadow: 0 2px 10px rgba(0,0,0,.08);
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-    }
+.app-header {
+    box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
 
-    .login-screen {
-        background: linear-gradient(135deg, var(--primary), var(--secondary));
-        min-height: 100vh;
-        color: #fff;
-    }
+.login-screen {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    min-height: 100vh;
+    color: #fff;
+}
 
-    .login-card, .program-form, .dashboard-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 6px 20px rgba(0,0,0,.08);
-        border: 1px solid #e9ecef;
-    }
+.login-card, .program-form, .dashboard-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.08);
+    border: 1px solid #e9ecef;
+}
 
-    .machine-card {
-        border-radius: 12px;
-        margin-bottom: 16px;
-        border: none;
-        box-shadow: 0 4px 6px rgba(0,0,0,.1);
-        transition: all 0.3s ease;
-    }
+.machine-card {
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,.1);
+    transition: all 0.3s ease;
+    min-height: 280px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    max-width: 50vw;
+    width: 100%;
+}
 
-    .machine-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 15px rgba(0,0,0,.15);
-    }
+.machine-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,.15);
+}
 
-    .nav-tabs .nav-link.active {
-        font-weight: 600;
-        border-bottom: 3px solid var(--secondary);
-        color: var(--secondary);
-    }
+.nav-tabs .nav-link.active {
+    font-weight: 600;
+    border-bottom: 3px solid var(--secondary);
+    color: var(--secondary);
+}
 
-    .thumbnail {
-        max-width: 120px;
-        max-height: 80px;
-        cursor: pointer;
-        border-radius: 8px;
-        object-fit: cover;
-        border: 2px solid #e9ecef;
-    }
+.thumbnail {
+    max-width: 120px;
+    max-height: 80px;
+    cursor: pointer;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #e9ecef;
+}
 
-    .small-muted {
-        color: #6c757d;
-        font-size: 0.85rem;
-    }
+.small-muted {
+    color: #6c757d;
+    font-size: 0.85rem;
+}
 
-    .progress-container {
-        margin-top: 5px;
-        display: none;
-    }
+.progress-container {
+    margin-top: 5px;
+    display: none;
+}
 
-    .status-badge {
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
 
-    .status-pending { background: #e3f2fd; color: #1976d2; }
-    .status-running { background: #fff3e0; color: #f57c00; }
-    .status-completed { background: #e8f5e8; color: #2e7d32; }
-    .status-urgent { background: #ffebee; color: #c62828; }
+.status-pending { background: #e3f2fd; color: #1976d2; }
+.status-running { background: #fff3e0; color: #f57c00; }
+.status-completed { background: #e8f5e8; color: #2e7d32; }
+.status-urgent { background: #ffebee; color: #c62828; }
 
-    .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.7);
-        display: none;
-        z-index: 9999;
-    }
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    z-index: 9999;
+}
 
-    .loading-spinner {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+.loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
 
-    .feeder-item {
-        margin-bottom: 12px;
-        padding: 12px;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        background: #f8f9fa;
-    }
+.feeder-item {
+    margin-bottom: 12px;
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
 
-    .add-feeder-btn {
-        margin-top: 10px;
-    }
+.add-feeder-btn {
+    margin-top: 10px;
+}
 
-    .image-modal-img {
-        max-width: 100%;
-        max-height: 80vh;
-        border-radius: 8px;
-    }
+.image-modal-img {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 8px;
+}
 
-    /* PWA Install Prompt - ensure it's visible */
+/* PWA Install Prompt */
 .pwa-install-prompt {
     position: fixed;
     bottom: 20px;
@@ -155,7 +161,7 @@
     z-index: 10000;
     max-width: 300px;
     border: 1px solid #e9ecef;
-    display: none; /* Start hidden */
+    display: none;
     opacity: 0;
     transform: translateY(20px);
     transition: all 0.3s ease;
@@ -177,41 +183,42 @@
     }
 }
 
-    @keyframes slideInUp {
-        from {
-            transform: translateY(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
     }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
 
-    .pwa-install-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-    }
+.pwa-install-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
 
-    .pwa-install-icon {
-        width: 40px;
-        height: 40px;
-        background: var(--primary);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 10px;
-        color: white;
-    }
+.pwa-install-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    color: white;
+}
 
-    .pwa-install-buttons {
-        display: flex;
-        gap: 8px;
-        margin-top: 10px;
-    }
-    @media (max-width: 768px) {
+.pwa-install-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
     .queue-search-mobile::placeholder {
         font-size: 0.8rem;
         white-space: nowrap;
@@ -224,10 +231,11 @@
     }
 }
 
-    .pwa-install-buttons .btn {
-        flex: 1;
-    }
-    @media (max-width: 768px) {
+.pwa-install-buttons .btn {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
     /* Queue cards - 2 per row on mobile */
     #queueContent .row.g-3,
     #operatorQueueContent .row.g-3 {
@@ -250,524 +258,525 @@
     }
 }
 
-    /* Mobile-first responsive design improvements */
-    @media (max-width: 768px) {
-        .container {
-            padding: 0 10px;
-        }
-        
-        .machine-card {
-            margin-bottom: 12px;
-        }
-        
-        .btn-group .btn {
-            margin-bottom: 6px;
-            font-size: 0.8rem;
-            padding: 6px 12px;
-        }
-        
-        .status-badge {
-            padding: 4px 8px;
-            font-size: 0.7rem;
-        }
-        
-        .thumbnail {
-            max-width: 80px;
-            max-height: 60px;
-        }
-        
-        .program-form {
-            padding: 15px;
-        }
-        
-        .feeder-item {
-            padding: 8px;
-        }
-        
-        .nav-tabs .nav-link {
-            font-size: 0.9rem;
-            padding: 8px 12px;
-        }
-        
-        /* Header optimizations */
-        .app-header .navbar-brand {
-            font-size: 1rem;
-        }
-        
-        .app-header .text-light small {
-            font-size: 0.75rem;
-        }
-        
-        /* Dashboard controls */
-        .d-flex.justify-content-between.align-items-center.mb-3 {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        
-        .d-flex.justify-content-between.align-items-center.mb-3 .search-box {
-            width: 100%;
-            max-width: none;
-        }
-        
-        /* Tab navigation */
-        .nav-tabs.nav-justified {
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            overflow-y: hidden;
-            -webkit-overflow-scrolling: touch;
-            white-space: nowrap;
-        }
-        
-        .nav-tabs.nav-justified .nav-item {
-            flex: 0 0 auto;
-            min-width: 120px;
-        }
-        
-        .nav-tabs.nav-justified .nav-link {
-            font-size: 0.8rem;
-            padding: 8px 10px;
-            text-align: center;
-        }
-        
-        /* Machine grid layout */
-        /* Machine grid layout */
-#machinesGrid, #operatorMachinesGrid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-}
-        
-        .machine-card {
-            margin-bottom: 0;
-        }
-        
-        .machine-card .card-body {
-            padding: 10px;
-        }
-        
-        .machine-card .card-title {
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
-        
-        .machine-card .program-info p {
-            font-size: 0.75rem;
-            margin-bottom: 3px;
-        }
-        
-        /* Action buttons optimization */
-        .action-buttons {
-            flex-direction: column;
-            gap: 4px;
-        }
-        
-        .action-buttons .btn {
-            min-width: auto;
-            font-size: 0.75rem;
-            padding: 4px 8px;
-        }
-        
-        /* History Table Optimizations */
-        .dashboard-card {
-            padding: 12px;
-        }
-        
-        .dashboard-card h5 {
-            font-size: 1rem;
-            margin-bottom: 12px;
-        }
-        
-        /* History filter controls */
-        .d-flex.flex-column.flex-md-row.align-items-start.align-items-md-center.justify-content-between.mb-3 {
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .d-flex.flex-column.flex-md-row.align-items-start.align-items-md-center.justify-content-between.mb-3 h5 {
-            margin-bottom: 0;
-        }
-        
-        .d-flex.gap-2.align-items-center.w-100.w-md-auto {
-            width: 100%;
-            justify-content: space-between;
-        }
-        
-        .d-flex.gap-2.align-items-center.w-100.w-md-auto label {
-            font-size: 0.8rem;
-            margin-bottom: 0;
-            white-space: nowrap;
-        }
-        
-        .machine-select-table {
-            min-width: auto;
-            flex: 1;
-            margin-left: 8px;
-        }
-        
-        /* Table optimizations */
-        .table-responsive {
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-        }
-        
-        .table-responsive table {
-            font-size: 0.7rem;
-            margin-bottom: 0;
-        }
-        
-        .table-responsive th,
-        .table-responsive td {
-            padding: 4px 6px;
-            vertical-align: middle;
-        }
-        
-        .table-responsive thead th {
-            font-size: 0.65rem;
-            font-weight: 600;
-            padding: 6px 4px;
-            background-color: #f8f9fa;
-        }
-        
-        /* Compact status badges */
-        .status-badge {
-            font-size: 0.6rem;
-            padding: 2px 5px;
-            border-radius: 10px;
-            white-space: nowrap;
-        }
-        
-        /* Reduce table row height */
-        .table-responsive tbody tr {
-            height: 35px;
-        }
-        
-        /* Pagination optimization */
-        .pagination {
-            margin-top: 12px;
-        }
-        
-        .pagination .page-link {
-            font-size: 0.75rem;
-            padding: 4px 8px;
-            margin: 0 1px;
-        }
-        
-        /* Queue view optimizations */
-        .queue-header {
-            padding: 15px;
-        }
-        
-        .queue-header h3 {
-            font-size: 1.3rem;
-        }
-        
-        .queue-card .card-header h5 {
-            font-size: 1rem;
-        }
-        
-        .queue-card .card-body {
-            padding: 12px;
-        }
-        
-        /* Modal optimizations */
-        .modal-dialog {
-            margin: 10px;
-        }
-        
-        /* Modal enhancements */
+/* Mobile-first responsive design improvements */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .machine-card {
+        margin-bottom: 12px;
+        max-width: calc(50vw - 20px);
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 6px;
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+    
+    .status-badge {
+        padding: 4px 8px;
+        font-size: 0.7rem;
+    }
+    
+    .thumbnail {
+        max-width: 80px;
+        max-height: 60px;
+    }
+    
+    .program-form {
+        padding: 15px;
+    }
+    
+    .feeder-item {
+        padding: 8px;
+    }
+    
+    .nav-tabs .nav-link {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+    
+    /* Header optimizations */
+    .app-header .navbar-brand {
+        font-size: 1rem;
+    }
+    
+    .app-header .text-light small {
+        font-size: 0.75rem;
+    }
+    
+    /* Dashboard controls */
+    .d-flex.justify-content-between.align-items-center.mb-3 {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .d-flex.justify-content-between.align-items-center.mb-3 .search-box {
+        width: 100%;
+        max-width: none;
+    }
+    
+    /* Tab navigation */
+    .nav-tabs.nav-justified {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+    }
+    
+    .nav-tabs.nav-justified .nav-item {
+        flex: 0 0 auto;
+        min-width: 120px;
+    }
+    
+    .nav-tabs.nav-justified .nav-link {
+        font-size: 0.8rem;
+        padding: 8px 10px;
+        text-align: center;
+    }
+    
+    /* Machine grid layout */
+    #machinesGrid, #operatorMachinesGrid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .machine-card {
+        margin-bottom: 0;
+    }
+    
+    .machine-card .card-body {
+        padding: 10px;
+    }
+    
+    .machine-card .card-title {
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+    }
+    
+    .machine-card .program-info p {
+        font-size: 0.75rem;
+        margin-bottom: 3px;
+    }
+    
+    /* Action buttons optimization */
+    .action-buttons {
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .action-buttons .btn {
+        min-width: auto;
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+    
+    /* History Table Optimizations */
+    .dashboard-card {
+        padding: 12px;
+    }
+    
+    .dashboard-card h5 {
+        font-size: 1rem;
+        margin-bottom: 12px;
+    }
+    
+    /* History filter controls */
+    .d-flex.flex-column.flex-md-row.align-items-start.align-items-md-center.justify-content-between.mb-3 {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .d-flex.flex-column.flex-md-row.align-items-start.align-items-md-center.justify-content-between.mb-3 h5 {
+        margin-bottom: 0;
+    }
+    
+    .d-flex.gap-2.align-items-center.w-100.w-md-auto {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .d-flex.gap-2.align-items-center.w-100.w-md-auto label {
+        font-size: 0.8rem;
+        margin-bottom: 0;
+        white-space: nowrap;
+    }
+    
+    .machine-select-table {
+        min-width: auto;
+        flex: 1;
+        margin-left: 8px;
+    }
+    
+    /* Table optimizations */
+    .table-responsive {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+    }
+    
+    .table-responsive table {
+        font-size: 0.7rem;
+        margin-bottom: 0;
+    }
+    
+    .table-responsive th,
+    .table-responsive td {
+        padding: 4px 6px;
+        vertical-align: middle;
+    }
+    
+    .table-responsive thead th {
+        font-size: 0.65rem;
+        font-weight: 600;
+        padding: 6px 4px;
+        background-color: #f8f9fa;
+    }
+    
+    /* Compact status badges */
+    .status-badge {
+        font-size: 0.6rem;
+        padding: 2px 5px;
+        border-radius: 10px;
+        white-space: nowrap;
+    }
+    
+    /* Reduce table row height */
+    .table-responsive tbody tr {
+        height: 35px;
+    }
+    
+    /* Pagination optimization */
+    .pagination {
+        margin-top: 12px;
+    }
+    
+    .pagination .page-link {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        margin: 0 1px;
+    }
+    
+    /* Queue view optimizations */
+    .queue-header {
+        padding: 15px;
+    }
+    
+    .queue-header h3 {
+        font-size: 1.3rem;
+    }
+    
+    .queue-card .card-header h5 {
+        font-size: 1rem;
+    }
+    
+    .queue-card .card-body {
+        padding: 12px;
+    }
+    
+    /* Modal optimizations */
+    .modal-dialog {
+        margin: 10px;
+    }
+    
+    /* Modal enhancements */
 .modal-content {
     border-radius: 12px;
     border: none;
-    z-index: 1060; /* Ensure modals appear above other content */
+    z-index: 1060;
 }
 
 .modal {
-    z-index: 1055; /* Ensure modal backdrop appears correctly */
+    z-index: 1055;
 }
-        
-        .modal-body {
-            padding: 15px;
-        }
-        
-        /* Login screen optimizations */
-        .login-card {
-            margin: 15px;
-            padding: 15px;
-        }
-        
-        /* Search box full width */
-        .search-box {
-            max-width: none;
-            width: 100%;
-        }
-        
-        /* Button group optimization */
-        .btn-group .btn {
-            margin-bottom: 4px;
-            font-size: 0.75rem;
-            padding: 5px 10px;
-        }
-        
-        /* Program details modal optimization */
-        .program-details .row {
-            margin-bottom: 8px;
-        }
-        
-        /* PWA Install Prompt mobile adjustments */
-        .pwa-install-prompt {
-            bottom: 10px;
-            right: 10px;
-            left: 10px;
-            max-width: none;
-        }
-        
-        /* Login form optimization */
-        .login-form .form-control {
-            font-size: 16px; /* Prevent zoom on iOS */
-            padding: 12px 15px;
-        }
-        
-        .login-form .btn {
-            padding: 12px;
-            font-size: 1rem;
-        }
-        
-        /* Logout button optimization */
-        .btn-outline-danger.btn-sm {
-            font-size: 0.8rem;
-            padding: 6px 10px;
-        }
-        
-        /* Queue labels optimization */
-        .queue-card .card-header h5 {
-            font-size: 0.9rem;
-        }
-        
-        .queue-card .card-body h6 {
-            font-size: 0.85rem;
-        }
-        
-        /* Queue search label optimization */
-        .queue-header h3 {
-            font-size: 1.1rem;
-        }
-        
-        .queue-header p {
-            font-size: 0.8rem;
-        }
+    
+    .modal-body {
+        padding: 15px;
     }
+    
+    /* Login screen optimizations */
+    .login-card {
+        margin: 15px;
+        padding: 15px;
+    }
+    
+    /* Search box full width */
+    .search-box {
+        max-width: none;
+        width: 100%;
+    }
+    
+    /* Button group optimization */
+    .btn-group .btn {
+        margin-bottom: 4px;
+        font-size: 0.75rem;
+        padding: 5px 10px;
+    }
+    
+    /* Program details modal optimization */
+    .program-details .row {
+        margin-bottom: 8px;
+    }
+    
+    /* PWA Install Prompt mobile adjustments */
+    .pwa-install-prompt {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    /* Login form optimization */
+    .login-form .form-control {
+        font-size: 16px;
+        padding: 12px 15px;
+    }
+    
+    .login-form .btn {
+        padding: 12px;
+        font-size: 1rem;
+    }
+    
+    /* Logout button optimization */
+    .btn-outline-danger.btn-sm {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+    }
+    
+    /* Queue labels optimization */
+    .queue-card .card-header h5 {
+        font-size: 0.9rem;
+    }
+    
+    .queue-card .card-body h6 {
+        font-size: 0.85rem;
+    }
+    
+    /* Queue search label optimization */
+    .queue-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .queue-header p {
+        font-size: 0.8rem;
+    }
+}
 
-    @media (max-width: 576px) {
-        .login-card {
-            margin: 10px;
-            padding: 15px;
-        }
-        
-        .machine-card .card-body {
-            padding: 12px;
-        }
-        
-        h2 {
-            font-size: 1.5rem;
-        }
-        
-        h5 {
-            font-size: 1.1rem;
-        }
-        
-        /* Further optimization for very small screens */
-        /* Machine grid layout */
+@media (max-width: 576px) {
+    .login-card {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .machine-card .card-body {
+        padding: 12px;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    h5 {
+        font-size: 1.1rem;
+    }
+    
+    /* Further optimization for very small screens */
+    /* Machine grid layout */
 #machinesGrid, #operatorMachinesGrid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
 }
-        
-        .nav-tabs.nav-justified .nav-item {
-            min-width: 100px;
-        }
-        
-        .nav-tabs.nav-justified .nav-link {
-            font-size: 0.75rem;
-            padding: 6px 8px;
-        }
-        
-        .machine-card .card-body {
-            padding: 8px;
-        }
-        
-        .action-buttons .btn {
-            font-size: 0.7rem;
-            padding: 3px 6px;
-        }
-        
-        .status-badge {
-            font-size: 0.6rem;
-            padding: 2px 4px;
-        }
-        
-        .thumbnail {
-            max-width: 50px;
-            max-height: 35px;
-        }
-        
-        .queue-card .card-body {
-            padding: 8px;
-        }
-        
-        .program-form {
-            padding: 10px;
-        }
-        
-        .table-responsive table {
-            font-size: 0.65rem;
-        }
-        
-        .table-responsive th,
-        .table-responsive td {
-            padding: 2px 4px;
-        }
-        
-        /* Even more compact on very small screens */
-        .status-badge {
-            font-size: 0.55rem;
-            padding: 1px 4px;
-        }
-        
-        /* Machine filter optimization */
-        .d-flex.gap-2.align-items-center.w-100.w-md-auto {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 4px;
-        }
-        
-        .d-flex.gap-2.align-items-center.w-100.w-md-auto label {
-            font-size: 0.75rem;
-        }
-        
-        .machine-select-table {
-            width: 100%;
-            margin-left: 0;
-        }
-        
-        /* Login form optimization */
-        .login-card h3 {
-            font-size: 1.3rem;
-        }
-        
-        .login-card p {
-            font-size: 0.9rem;
-        }
-        
-        /* Form font size optimization */
-        .form-control, .form-select {
-            font-size: 16px; /* Prevent zoom on iOS */
-        }
-        
-        /* Queue card optimization */
-        .queue-card .card-header {
-            padding: 10px;
-        }
-        
-        .queue-card .card-body {
-            padding: 10px;
-        }
-        
-        /* Queue header optimization */
-        .queue-header h3 {
-            font-size: 1rem;
-        }
-        
-        .queue-header p {
-            font-size: 0.75rem;
-        }
+    
+    .nav-tabs.nav-justified .nav-item {
+        min-width: 100px;
     }
-
-    /* Custom dropdown styling */
-    .dropdown-menu {
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    
+    .nav-tabs.nav-justified .nav-link {
+        font-size: 0.75rem;
+        padding: 6px 8px;
     }
-
-    .dropdown-item {
-        padding: 8px 12px;
-        border-bottom: 1px solid #f8f9fa;
+    
+    .machine-card .card-body {
+        padding: 8px;
+        max-width: calc(50vw - 16px);
     }
-
-    .dropdown-item:last-child {
-        border-bottom: none;
+    
+    .action-buttons .btn {
+        font-size: 0.7rem;
+        padding: 3px 6px;
     }
-
-    .dropdown-item:hover {
-        background: #f8f9fa;
+    
+    .status-badge {
+        font-size: 0.6rem;
+        padding: 2px 4px;
     }
-
-    /* Form enhancements */
+    
+    .thumbnail {
+        max-width: 50px;
+        max-height: 35px;
+    }
+    
+    .queue-card .card-body {
+        padding: 8px;
+    }
+    
+    .program-form {
+        padding: 10px;
+    }
+    
+    .table-responsive table {
+        font-size: 0.65rem;
+    }
+    
+    .table-responsive th,
+    .table-responsive td {
+        padding: 2px 4px;
+    }
+    
+    /* Even more compact on very small screens */
+    .status-badge {
+        font-size: 0.55rem;
+        padding: 1px 4px;
+    }
+    
+    /* Machine filter optimization */
+    .d-flex.gap-2.align-items-center.w-100.w-md-auto {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .d-flex.gap-2.align-items-center.w-100.w-md-auto label {
+        font-size: 0.75rem;
+    }
+    
+    .machine-select-table {
+        width: 100%;
+        margin-left: 0;
+    }
+    
+    /* Login form optimization */
+    .login-card h3 {
+        font-size: 1.3rem;
+    }
+    
+    .login-card p {
+        font-size: 0.9rem;
+    }
+    
+    /* Form font size optimization */
     .form-control, .form-select {
-        border-radius: 8px;
-        border: 1px solid #dee2e6;
-        padding: 8px 12px;
+        font-size: 16px;
     }
-
-    .form-control:focus, .form-select:focus {
-        border-color: var(--secondary);
-        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    
+    /* Queue card optimization */
+    .queue-card .card-header {
+        padding: 10px;
     }
-
-    /* Button enhancements */
-    .btn {
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.3s ease;
+    
+    .queue-card .card-body {
+        padding: 10px;
     }
-
-    .btn-sm {
-        padding: 6px 12px;
-        font-size: 0.85rem;
+    
+    /* Queue header optimization */
+    .queue-header h3 {
+        font-size: 1rem;
     }
-
-    /* Card header enhancements */
-    .card-title {
-        color: var(--primary);
-        font-weight: 600;
+    
+    .queue-header p {
+        font-size: 0.75rem;
     }
+}
 
-    /* Alert enhancements */
-    .alert {
-        border-radius: 8px;
-        border: none;
-    }
+/* Custom dropdown styling */
+.dropdown-menu {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
-    /* Badge enhancements */
-    .badge {
-        font-weight: 500;
-    }
+.dropdown-item {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f8f9fa;
+}
 
-    /* Table responsive */
-    .table-responsive {
-        border-radius: 8px;
-    }
+.dropdown-item:last-child {
+    border-bottom: none;
+}
 
-    /* Pagination */
-    .pagination {
-        margin-bottom: 0;
-    }
+.dropdown-item:hover {
+    background: #f8f9fa;
+}
 
-    .page-link {
-        border-radius: 6px;
-        margin: 0 2px;
-        border: 1px solid #dee2e6;
-    }
+/* Form enhancements */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 8px 12px;
+}
 
-    /* Modal enhancements */
-    /* Modal enhancements */
+.form-control:focus, .form-select:focus {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Button enhancements */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
+/* Card header enhancements */
+.card-title {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* Alert enhancements */
+.alert {
+    border-radius: 8px;
+    border: none;
+}
+
+/* Badge enhancements */
+.badge {
+    font-weight: 500;
+}
+
+/* Table responsive */
+.table-responsive {
+    border-radius: 8px;
+}
+
+/* Pagination */
+.pagination {
+    margin-bottom: 0;
+}
+
+.page-link {
+    border-radius: 6px;
+    margin: 0 2px;
+    border: 1px solid #dee2e6;
+}
+
+/* Modal enhancements */
 .modal-content {
     border-radius: 12px;
     border: none;
-    z-index: 1060; /* Ensure modals appear above other content */
+    z-index: 1060;
 }
+
 /* Ensure program details modal appears above queue modal */
 #programDetailsModal {
     z-index: 1070 !important;
@@ -787,389 +796,398 @@
 }
 
 .modal {
-    z-index: 1055; /* Ensure modal backdrop appears correctly */
+    z-index: 1055;
 }
 
-    .modal-header {
-        border-bottom: 1px solid #e9ecef;
-        padding: 15px 20px;
-    }
+.modal-header {
+    border-bottom: 1px solid #e9ecef;
+    padding: 15px 20px;
+}
 
-    .modal-footer {
-        border-top: 1px solid #e9ecef;
-        padding: 15px 20px;
-    }
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+    padding: 15px 20px;
+}
 
-    /* Feeder input styling */
-    .feeder-input-group {
-        background: white;
-        border-radius: 6px;
-        padding: 4px;
-        border: 1px solid #dee2e6;
-    }
+/* Feeder input styling */
+.feeder-input-group {
+    background: white;
+    border-radius: 6px;
+    padding: 4px;
+    border: 1px solid #dee2e6;
+}
 
-    .feeder-input {
-        border: none;
-        background: transparent;
-        width: 100%;
-        padding: 2px 6px;
-        font-size: 0.85rem;
-    }
+.feeder-input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    padding: 2px 6px;
+    font-size: 0.85rem;
+}
 
-    .feeder-input:focus {
-        outline: none;
-        background: #f8f9fa;
-        border-radius: 4px;
-    }
+.feeder-input:focus {
+    outline: none;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
 
-    /* Action buttons */
-    .action-buttons {
-        display: flex;
-        gap: 4px;
-        flex-wrap: wrap;
-    }
+/* Action buttons */
+.action-buttons {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
 
-    .action-buttons .btn {
-        flex: 1;
-        min-width: 80px;
-    }
+.action-buttons .btn {
+    flex: 1;
+    min-width: 80px;
+}
 
-    /* Search box */
-    .search-box {
-        max-width: 300px;
-    }
+/* Search box */
+.search-box {
+    max-width: 300px;
+}
 
-    /* Machine selection in table */
-    .machine-select-table {
-        min-width: 120px;
-    }
+/* Machine selection in table */
+.machine-select-table {
+    min-width: 120px;
+}
 
-    /* Login form enhancements */
-    .login-form .form-control {
-        padding: 12px 15px;
-    }
+/* Login form enhancements */
+.login-form .form-control {
+    padding: 12px 15px;
+}
 
-    /* Prevent delete for running programs */
-    .btn-danger:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+/* Prevent delete for running programs */
+.btn-danger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
 
-    .auth-error {
-        color: #dc3545;
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-        display: none;
-    }
+.auth-error {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: none;
+}
 
-    /* Feeder grid layout */
-    .feeder-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 6px;
-        margin-top: 8px;
-    }
+/* Feeder grid layout */
+.feeder-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+}
 
-    .feeder-grid-item {
-        text-align: center;
-        padding: 4px;
-        background: #f8f9fa;
-        border-radius: 4px;
-        font-size: 0.9rem;
-    }
+.feeder-grid-item {
+    text-align: center;
+    padding: 4px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
 
-    .feeder-grid-item .feeder-number {
-        font-weight: bold;
-        color: var(--primary);
-        font-size: 0.85rem;
-    }
+.feeder-grid-item .feeder-number {
+    font-weight: bold;
+    color: var(--primary);
+    font-size: 0.85rem;
+}
 
-    .feeder-grid-item .feeder-value {
-        color: var(--secondary);
-        word-break: break-word;
-        font-size: 0.8rem;
-    }
+.feeder-grid-item .feeder-value {
+    color: var(--secondary);
+    word-break: break-word;
+    font-size: 0.8rem;
+}
 
-    /* Queue page styling */
-    .queue-header {
-        background: linear-gradient(135deg, var(--primary), var(--secondary));
-        color: white;
-        padding: 20px;
-        border-radius: 12px;
-        margin-bottom: 20px;
-    }
+/* Queue page styling */
+.queue-header {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
 
-    .queue-card {
-        border-radius: 12px;
-        margin-bottom: 16px;
-        border: none;
-        box-shadow: 0 4px 6px rgba(0,0,0,.1);
-        transition: all 0.3s ease;
-    }
+.queue-card {
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,.1);
+    transition: all 0.3s ease;
+    min-height: 200px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    max-width: 50vw;
+    width: 100%;
+}
 
-    .queue-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 15px rgba(0,0,0,.15);
-    }
+.queue-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,.15);
+}
 
-    .queue-card .card-header {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #e9ecef;
-        font-weight: 600;
-    }
+.queue-card .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    font-weight: 600;
+}
 
-    .empty-queue {
-        text-align: center;
-        padding: 40px 20px;
-        color: #6c757d;
-    }
+.empty-queue {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6c757d;
+}
 
-    .empty-queue i {
-        font-size: 3rem;
-        margin-bottom: 15px;
-        color: #dee2e6;
-    }
+.empty-queue i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: #dee2e6;
+}
 
-    /* Operator queue styling */
-    .operator-queue-card {
-        border-left: 4px solid var(--secondary);
-    }
+/* Operator queue styling */
+.operator-queue-card {
+    border-left: 4px solid var(--secondary);
+}
 
-    .operator-queue-card.urgent {
-        border-left-color: var(--danger);
-    }
+.operator-queue-card.urgent {
+    border-left-color: var(--danger);
+}
 
-    /* Touch-friendly improvements */
-    .btn, .form-control, .form-select, .nav-link {
-        touch-action: manipulation;
-    }
+/* Touch-friendly improvements */
+.btn, .form-control, .form-select, .nav-link {
+    touch-action: manipulation;
+}
 
-    /* Prevent zoom on form inputs */
-    @media (max-width: 768px) {
-        input, select, textarea {
-            font-size: 16px; /* Prevents zoom on iOS */
-        }
+/* Prevent zoom on form inputs */
+@media (max-width: 768px) {
+    input, select, textarea {
+        font-size: 16px;
     }
+}
 
-    /* Improved scrolling for mobile */
-    .mobile-scroll-container {
-        -webkit-overflow-scrolling: touch;
-        overflow-x: auto;
-    }
+/* Improved scrolling for mobile */
+.mobile-scroll-container {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+}
 
-    /* Optimize dropdowns for mobile */
-    .dropdown-menu {
-        max-height: 200px;
-        overflow-y: auto;
-    }
+/* Optimize dropdowns for mobile */
+.dropdown-menu {
+    max-height: 200px;
+    overflow-y: auto;
+}
 
-    /* Ensure proper spacing for stacked elements */
-    .mobile-stack > * {
-        margin-bottom: 8px;
-    }
+/* Ensure proper spacing for stacked elements */
+.mobile-stack > * {
+    margin-bottom: 8px;
+}
 
-    .mobile-stack > *:last-child {
-        margin-bottom: 0;
-    }
+.mobile-stack > *:last-child {
+    margin-bottom: 0;
+}
 
-    /* Card-based history view for mobile */
-    .history-cards-view {
-        display: none;
-    }
+/* Card-based history view for mobile */
+.history-cards-view {
+    display: none;
+}
 
-    .history-card {
-        background: white;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        padding: 8px;
-        margin-bottom: 6px;
-        font-size: 0.75rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
+.history-card {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
 
-    .history-card:hover {
-        background: #f8f9fa;
-    }
+.history-card:hover {
+    background: #f8f9fa;
+}
 
-    .history-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 4px;
-    }
+.history-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
 
-    .history-card-machine {
-        font-weight: 600;
-        color: var(--primary);
-    }
+.history-card-machine {
+    font-weight: 600;
+    color: var(--primary);
+}
 
-    .history-card-status {
-        font-size: 0.65rem;
-        padding: 2px 6px;
-        border-radius: 8px;
-    }
+.history-card-status {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 8px;
+}
 
-    .history-card-design {
-        font-weight: 500;
-        margin-bottom: 2px;
-    }
+.history-card-design {
+    font-weight: 500;
+    margin-bottom: 2px;
+}
 
-    .history-card-details {
-        display: flex;
-        justify-content: space-between;
-        color: #6c757d;
-        font-size: 0.7rem;
-    }
+.history-card-details {
+    display: flex;
+    justify-content: space-between;
+    color: #6c757d;
+    font-size: 0.7rem;
+}
 
-    /* Ensure proper display of history cards when enabled */
-    .show-cards-view .history-cards-view {
-        display: block;
-    }
+/* Ensure proper display of history cards when enabled */
+.show-cards-view .history-cards-view {
+    display: block;
+}
 
-    .show-cards-view .history-table-view {
-        display: none;
-    }
+.show-cards-view .history-table-view {
+    display: none;
+}
 
-    /* Toggle button for view switching */
-    .view-toggle-btn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: none;
-        border: none;
-        font-size: 0.8rem;
-        color: #6c757d;
-        cursor: pointer;
-        padding: 4px 8px;
-        border-radius: 4px;
-        border: 1px solid #dee2e6;
-    }
+/* Toggle button for view switching */
+.view-toggle-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 0.8rem;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
 
-    .view-toggle-btn:hover {
-        background: #f8f9fa;
-    }
+.view-toggle-btn:hover {
+    background: #f8f9fa;
+}
 
-    /* Loading state for history */
-    .history-loading {
-        text-align: center;
-        padding: 20px;
-        color: #6c757d;
-    }
+/* Loading state for history */
+.history-loading {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
 
-    .history-loading .spinner-border {
-        width: 1rem;
-        height: 1rem;
-        margin-right: 8px;
-    }
-    
-    /* Notification badge */
-    .notification-badge {
-        position: absolute;
-        top: -5px;
-        right: -5px;
-        background-color: var(--danger);
-        color: white;
-        border-radius: 50%;
-        width: 18px;
-        height: 18px;
-        font-size: 0.7rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .notification-indicator {
-        position: relative;
-    }
-    @media (max-width: 768px) {
+.history-loading .spinner-border {
+    width: 1rem;
+    height: 1rem;
+    margin-right: 8px;
+}
+
+/* Notification badge */
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--danger);
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-indicator {
+    position: relative;
+}
+
+@media (max-width: 768px) {
     .assign-program-btn {
         font-size: 0.7rem !important;
         padding: 4px 8px !important;
     }
 }
-    
-    /* Compact machine card */
-    .machine-summary {
-        font-size: 0.8rem;
-        color: #6c757d;
-    }
-    
-    /* Hide feeders in machine card */
-    .feeders-hidden {
-        display: none;
-    }
-    
-    /* Excel export button */
-    .excel-export {
-        margin-top: 10px;
-    }
-    
-    /* Queue number styling */
-    .queue-number {
-        background-color: var(--primary);
-        color: white;
-        border-radius: 50%;
-        width: 24px;
-        height: 24px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.75rem;
-        font-weight: bold;
-        margin-right: 8px;
-    }
-    
-    /* Compact logout button */
-    .logout-btn {
-        font-size: 0.75rem;
-        padding: 4px 8px;
-        border: 1px solid #6c757d;
-        color: #6c757d;
-        background: transparent;
-    }
-    
-    .logout-btn:hover {
-        background-color: rgba(108, 117, 125, 0.1);
-    }
-    
-    /* Compact program form for mobile */
-    .compact-form .form-group {
-        margin-bottom: 8px;
-    }
-    
-    .compact-form .form-label {
-        font-size: 0.85rem;
-        margin-bottom: 4px;
-    }
-    
-    .compact-form .form-control, 
-    .compact-form .form-select {
-        font-size: 0.85rem;
-        padding: 6px 10px;
-    }
-    
-    /* Hide search in non-machine tabs */
-    .search-container {
-        display: none;
-    }
-    
-    .machines-tab-active .search-container {
-        display: block;
-    }
-    
-    /* Header logout button */
-    .header-logout {
-        font-size: 0.8rem;
-        padding: 4px 8px;
-        margin-left: 10px;
-    }
-    /* Hide dashboard titles on mobile */
+
+/* Compact machine card */
+.machine-summary {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* Hide feeders in machine card */
+.feeders-hidden {
+    display: none;
+}
+
+/* Excel export button */
+.excel-export {
+    margin-top: 10px;
+}
+
+/* Queue number styling */
+.queue-number {
+    background-color: var(--primary);
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-right: 8px;
+}
+
+/* Compact logout button */
+.logout-btn {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border: 1px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.logout-btn:hover {
+    background-color: rgba(108, 117, 125, 0.1);
+}
+
+/* Compact program form for mobile */
+.compact-form .form-group {
+    margin-bottom: 8px;
+}
+
+.compact-form .form-label {
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+.compact-form .form-control, 
+.compact-form .form-select {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+}
+
+/* Hide search in non-machine tabs */
+.search-container {
+    display: none;
+}
+
+.machines-tab-active .search-container {
+    display: block;
+}
+
+/* Header logout button */
+.header-logout {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    margin-left: 10px;
+}
+
+/* Hide dashboard titles on mobile */
 @media (max-width: 768px) {
     .dashboard-title {
         display: none !important;
     }
 }
+
 /* Ensure 2 cards per row in queue on mobile */
 @media (max-width: 768px) {
     #queueContent .row.g-3,
@@ -1190,6 +1208,7 @@
         margin-bottom: 15px;
     }
 }
+
 /* Add to mobile CSS */
 @media (max-width: 576px) {
     .header-logout {
@@ -1201,6 +1220,7 @@
         margin-right: 0 !important;
     }
 }
+
 /* Mobile-specific optimizations */
 @media (max-width: 768px) {
     /* Assign program button */
@@ -1238,6 +1258,7 @@
     .queue-card {
         margin-bottom: 0 !important;
         min-height: 140px;
+        max-width: calc(50vw - 20px);
     }
     
     /* Header logout button */
@@ -1276,33 +1297,40 @@
         padding: 2px 6px !important;
     }
 }
+
 /* Add these styles to fix card size consistency */
 
-/* Machine Cards - Fixed Height */
+/* Machine Cards - Fixed Height and Width */
 .machine-card {
     min-height: 280px;
     height: auto;
     display: flex;
     flex-direction: column;
+    max-width: 50vw;
+    width: 100%;
 }
 
 .machine-card .card-body {
     flex: 1;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .machine-card .program-info {
     flex: 1;
     min-height: 80px;
+    overflow: hidden;
 }
 
-/* Queue Cards - Fixed Height */
+/* Queue Cards - Fixed Height and Width */
 .queue-card {
     min-height: 200px;
     height: auto;
     display: flex;
     flex-direction: column;
+    max-width: 50vw;
+    width: 100%;
 }
 
 .queue-card .card-body {
@@ -1310,6 +1338,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    overflow: hidden;
 }
 
 /* Text Truncation for Long Design Names */
@@ -1318,13 +1347,8 @@
     margin-bottom: 0.5rem;
     word-wrap: break-word;
     overflow: hidden;
-}
-
-.machine-card .program-info p:first-child,
-.queue-card .card-body p:first-child {
-    white-space: nowrap;
-    overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
     max-width: 100%;
 }
 
@@ -1336,16 +1360,19 @@
 .action-buttons {
     margin-top: auto;
     padding-top: 10px;
+    flex-shrink: 0;
 }
 
 /* Mobile adjustments for consistent card sizing */
 @media (max-width: 768px) {
     .machine-card {
         min-height: 240px;
+        max-width: calc(50vw - 20px);
     }
     
     .queue-card {
         min-height: 180px;
+        max-width: calc(50vw - 20px);
     }
     
     /* Ensure 2 cards per row in queue on mobile */
@@ -1392,10 +1419,12 @@
 @media (max-width: 576px) {
     .machine-card {
         min-height: 220px;
+        max-width: calc(50vw - 16px);
     }
     
     .queue-card {
         min-height: 160px;
+        max-width: calc(50vw - 16px);
     }
     
     /* Further mobile optimization */
@@ -1517,6 +1546,20 @@
 .machine-card .card-body,
 .queue-card .card-body {
     min-height: 200px;
+}
+
+/* Additional fixes for card containment */
+.machine-card .card-body > *,
+.queue-card .card-body > * {
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Prevent any element from expanding beyond card boundaries */
+.machine-card *,
+.queue-card * {
+    max-width: 100%;
+    box-sizing: border-box;
 }
     </style>
 </head>
