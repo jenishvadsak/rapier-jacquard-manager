@@ -1,59 +1,48 @@
-// sw.js - Service Worker
-const CACHE_NAME = 'rapier-jacquard-manager-v1';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/icon-192.png',
-  '/icon-512.png'
-];
+// sw.js - Place this in your root directory
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-self.addEventListener('install', (event) => {
-  console.log('Service Worker installing...');
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-  );
+firebase.initializeApp({
+  apiKey: "AIzaSyDHBa63-zdatu-5xvHA7tdJMeBx9wFb9fw",
+  authDomain: "rapier-manager.firebaseapp.com",
+  projectId: "rapier-manager",
+  storageBucket: "rapier-manager.firebasestorage.app",
+  messagingSenderId: "161632944775",
+  appId: "1:161632944775:web:be4a6493d8614938ceae22"
 });
 
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      }
-    )
-  );
-});
+const messaging = firebase.messaging();
 
-// Handle background messages for notifications
-self.addEventListener('push', (event) => {
-  console.log('Push message received', event);
-  
-  const options = {
-    body: event.data.text(),
-    icon: '/icon-192.png',
-    badge: '/icon-192.png',
-    vibrate: [100, 50, 100],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: '2'
-    }
+// Handle background messages
+messaging.onBackgroundMessage((payload) => {
+  console.log('Received background message ', payload);
+
+  const notificationTitle = payload.notification?.title || 'New Notification';
+  const notificationOptions = {
+    body: payload.notification?.body || 'You have a new update',
+    icon: './icon-192.png',
+    badge: './icon-192.png',
+    tag: 'rapier-notification',
+    renotify: true
   };
 
-  event.waitUntil(
-    self.registration.showNotification('Rapier Jacquard Manager', options)
-  );
+  self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
+// Handle notification click
 self.addEventListener('notificationclick', (event) => {
-  console.log('Notification click received.');
   event.notification.close();
   
   event.waitUntil(
-    clients.openWindow('/')
+    clients.matchAll({ type: 'window' }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes('/') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('/');
+      }
+    })
   );
 });
