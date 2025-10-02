@@ -57,108 +57,17 @@
         border: 1px solid #e9ecef;
     }
 
-    /* FIXED CARD SIZES */
     .machine-card {
         border-radius: 12px;
         margin-bottom: 16px;
         border: none;
         box-shadow: 0 4px 6px rgba(0,0,0,.1);
         transition: all 0.3s ease;
-        min-height: 280px;
-        height: auto;
-        display: flex;
-        flex-direction: column;
     }
 
     .machine-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 15px rgba(0,0,0,.15);
-    }
-
-    .machine-card .card-body {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        padding: 15px;
-    }
-
-    .machine-card .program-info {
-        flex: 1;
-        min-height: 80px;
-    }
-
-    .machine-card .program-info p {
-        margin-bottom: 0.5rem;
-        word-wrap: break-word;
-        overflow: hidden;
-    }
-
-    .machine-card .program-info p:first-child {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-height: 2.8em;
-        line-height: 1.4em;
-    }
-
-    .queue-card {
-        border-radius: 12px;
-        margin-bottom: 16px;
-        border: none;
-        box-shadow: 0 4px 6px rgba(0,0,0,.1);
-        transition: all 0.3s ease;
-        min-height: 200px;
-        height: auto;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .queue-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 15px rgba(0,0,0,.15);
-    }
-
-    .queue-card .card-body {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 20px;
-        text-align: center;
-    }
-
-    .queue-card .card-body p {
-        margin-bottom: 0.5rem;
-        word-wrap: break-word;
-        overflow: hidden;
-    }
-
-    .queue-card .card-body p:first-child {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-height: 2.8em;
-        line-height: 1.4em;
-    }
-
-    .action-buttons {
-        margin-top: auto;
-        padding-top: 10px;
-        display: flex;
-        gap: 4px;
-        flex-wrap: wrap;
-    }
-
-    .action-buttons .btn {
-        flex: 1;
-        min-width: 80px;
-        font-size: 0.75rem;
-        padding: 4px 8px;
-        white-space: nowrap;
     }
 
     .nav-tabs .nav-link.active {
@@ -234,28 +143,49 @@
         border-radius: 8px;
     }
 
-    /* PWA Install Prompt */
-    .pwa-install-prompt {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: white;
-        border-radius: 12px;
-        padding: 15px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        z-index: 10000;
-        max-width: 300px;
-        border: 1px solid #e9ecef;
-        display: none;
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.3s ease;
-    }
+    /* PWA Install Prompt - ensure it's visible */
+.pwa-install-prompt {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 10000;
+    max-width: 300px;
+    border: 1px solid #e9ecef;
+    display: none; /* Start hidden */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
 
-    .pwa-install-prompt.show {
-        display: block;
-        opacity: 1;
-        transform: translateY(0);
+.pwa-install-prompt.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .pwa-install-prompt {
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+}
+
+    @keyframes slideInUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
     }
 
     .pwa-install-header {
@@ -281,113 +211,705 @@
         gap: 8px;
         margin-top: 10px;
     }
+    @media (max-width: 768px) {
+    .queue-search-mobile::placeholder {
+        font-size: 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .queue-header .search-box {
+        max-width: none;
+    }
+}
 
     .pwa-install-buttons .btn {
         flex: 1;
     }
-
-    /* Mobile adjustments for consistent card sizing */
     @media (max-width: 768px) {
-        .machine-card {
-            min-height: 240px;
+    /* Queue cards - 2 per row on mobile */
+    #queueContent .row.g-3,
+    #operatorQueueContent .row.g-3 {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        margin: 0 !important;
+    }
+    
+    #queueContent .col-12.col-sm-6,
+    #operatorQueueContent .col-12.col-sm-6 {
+        width: 100% !important;
+        max-width: none !important;
+        flex: none !important;
+        padding: 0 !important;
+    }
+    
+    .queue-card {
+        margin-bottom: 0 !important;
+    }
+}
+
+    /* Mobile-first responsive design improvements */
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 10px;
         }
         
-        .queue-card {
-            min-height: 180px;
+        .machine-card {
+            margin-bottom: 12px;
         }
-
-        .machine-card .card-body,
+        
+        .btn-group .btn {
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+        }
+        
+        .status-badge {
+            padding: 4px 8px;
+            font-size: 0.7rem;
+        }
+        
+        .thumbnail {
+            max-width: 80px;
+            max-height: 60px;
+        }
+        
+        .program-form {
+            padding: 15px;
+        }
+        
+        .feeder-item {
+            padding: 8px;
+        }
+        
+        .nav-tabs .nav-link {
+            font-size: 0.9rem;
+            padding: 8px 12px;
+        }
+        
+        /* Header optimizations */
+        .app-header .navbar-brand {
+            font-size: 1rem;
+        }
+        
+        .app-header .text-light small {
+            font-size: 0.75rem;
+        }
+        
+        /* Dashboard controls */
+        .d-flex.justify-content-between.align-items-center.mb-3 {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .d-flex.justify-content-between.align-items-center.mb-3 .search-box {
+            width: 100%;
+            max-width: none;
+        }
+        
+        /* Tab navigation */
+        .nav-tabs.nav-justified {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            white-space: nowrap;
+        }
+        
+        .nav-tabs.nav-justified .nav-item {
+            flex: 0 0 auto;
+            min-width: 120px;
+        }
+        
+        .nav-tabs.nav-justified .nav-link {
+            font-size: 0.8rem;
+            padding: 8px 10px;
+            text-align: center;
+        }
+        
+        /* Machine grid layout */
+        /* Machine grid layout */
+#machinesGrid, #operatorMachinesGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+        
+        .machine-card {
+            margin-bottom: 0;
+        }
+        
+        .machine-card .card-body {
+            padding: 10px;
+        }
+        
+        .machine-card .card-title {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .machine-card .program-info p {
+            font-size: 0.75rem;
+            margin-bottom: 3px;
+        }
+        
+        /* Action buttons optimization */
+        .action-buttons {
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .action-buttons .btn {
+            min-width: auto;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+        }
+        
+        /* History Table Optimizations */
+        .dashboard-card {
+            padding: 12px;
+        }
+        
+        .dashboard-card h5 {
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+        
+        /* History filter controls */
+        .d-flex.flex-column.flex-md-row.align-items-start.align-items-md-center.justify-content-between.mb-3 {
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .d-flex.flex-column.flex-md-row.align-items-start.align-items-md-center.justify-content-between.mb-3 h5 {
+            margin-bottom: 0;
+        }
+        
+        .d-flex.gap-2.align-items-center.w-100.w-md-auto {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .d-flex.gap-2.align-items-center.w-100.w-md-auto label {
+            font-size: 0.8rem;
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+        
+        .machine-select-table {
+            min-width: auto;
+            flex: 1;
+            margin-left: 8px;
+        }
+        
+        /* Table optimizations */
+        .table-responsive {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+        
+        .table-responsive table {
+            font-size: 0.7rem;
+            margin-bottom: 0;
+        }
+        
+        .table-responsive th,
+        .table-responsive td {
+            padding: 4px 6px;
+            vertical-align: middle;
+        }
+        
+        .table-responsive thead th {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 6px 4px;
+            background-color: #f8f9fa;
+        }
+        
+        /* Compact status badges */
+        .status-badge {
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            border-radius: 10px;
+            white-space: nowrap;
+        }
+        
+        /* Reduce table row height */
+        .table-responsive tbody tr {
+            height: 35px;
+        }
+        
+        /* Pagination optimization */
+        .pagination {
+            margin-top: 12px;
+        }
+        
+        .pagination .page-link {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            margin: 0 1px;
+        }
+        
+        /* Queue view optimizations */
+        .queue-header {
+            padding: 15px;
+        }
+        
+        .queue-header h3 {
+            font-size: 1.3rem;
+        }
+        
+        .queue-card .card-header h5 {
+            font-size: 1rem;
+        }
+        
         .queue-card .card-body {
             padding: 12px;
         }
-
-        /* Ensure 2 cards per row in both views */
-        #machinesGrid, #operatorMachinesGrid {
-            display: grid !important;
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 12px !important;
-            margin: 0 !important;
+        
+        /* Modal optimizations */
+        .modal-dialog {
+            margin: 10px;
         }
+        
+        /* Modal enhancements */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    z-index: 1060; /* Ensure modals appear above other content */
+}
 
-        #queueContent .row.g-3,
-        #operatorQueueContent .row.g-3 {
-            display: grid !important;
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 12px !important;
-            margin: 0 !important;
+.modal {
+    z-index: 1055; /* Ensure modal backdrop appears correctly */
+}
+        
+        .modal-body {
+            padding: 15px;
         }
-
-        #machinesGrid .col-12.col-sm-6.col-lg-4.col-xl-3,
-        #operatorMachinesGrid .col-12.col-sm-6.col-lg-4,
-        #queueContent .col-12.col-sm-6,
-        #operatorQueueContent .col-12.col-sm-6 {
-            padding: 0 !important;
-            width: 100% !important;
-            display: flex !important;
+        
+        /* Login screen optimizations */
+        .login-card {
+            margin: 15px;
+            padding: 15px;
         }
-
-        .machine-card,
-        .queue-card {
+        
+        /* Search box full width */
+        .search-box {
+            max-width: none;
             width: 100%;
-            margin-bottom: 0 !important;
         }
-
-        .action-buttons .btn {
-            font-size: 0.7rem;
-            padding: 3px 6px;
+        
+        /* Button group optimization */
+        .btn-group .btn {
+            margin-bottom: 4px;
+            font-size: 0.75rem;
+            padding: 5px 10px;
         }
-
-        .status-badge {
-            font-size: 0.6rem;
-            padding: 2px 6px;
+        
+        /* Program details modal optimization */
+        .program-details .row {
+            margin-bottom: 8px;
         }
-
-        .machine-card .card-title,
-        .queue-card h5 {
-            font-size: 0.9rem !important;
+        
+        /* PWA Install Prompt mobile adjustments */
+        .pwa-install-prompt {
+            bottom: 10px;
+            right: 10px;
+            left: 10px;
+            max-width: none;
         }
-
-        .machine-card p,
-        .queue-card p {
-            font-size: 0.75rem !important;
-            margin-bottom: 4px !important;
+        
+        /* Login form optimization */
+        .login-form .form-control {
+            font-size: 16px; /* Prevent zoom on iOS */
+            padding: 12px 15px;
         }
-
-        .assign-program-btn {
-            font-size: 0.7rem !important;
-            padding: 6px 8px !important;
-            min-height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        
+        .login-form .btn {
+            padding: 12px;
+            font-size: 1rem;
+        }
+        
+        /* Logout button optimization */
+        .btn-outline-danger.btn-sm {
+            font-size: 0.8rem;
+            padding: 6px 10px;
+        }
+        
+        /* Queue labels optimization */
+        .queue-card .card-header h5 {
+            font-size: 0.9rem;
+        }
+        
+        .queue-card .card-body h6 {
+            font-size: 0.85rem;
+        }
+        
+        /* Queue search label optimization */
+        .queue-header h3 {
+            font-size: 1.1rem;
+        }
+        
+        .queue-header p {
+            font-size: 0.8rem;
         }
     }
 
     @media (max-width: 576px) {
-        .machine-card {
-            min-height: 220px;
+        .login-card {
+            margin: 10px;
+            padding: 15px;
         }
         
-        .queue-card {
-            min-height: 160px;
-        }
-
         .machine-card .card-body {
-            padding: 10px !important;
+            padding: 12px;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+        }
+        
+        h5 {
+            font-size: 1.1rem;
+        }
+        
+        /* Further optimization for very small screens */
+        /* Machine grid layout */
+#machinesGrid, #operatorMachinesGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+        
+        .nav-tabs.nav-justified .nav-item {
+            min-width: 100px;
+        }
+        
+        .nav-tabs.nav-justified .nav-link {
+            font-size: 0.75rem;
+            padding: 6px 8px;
+        }
+        
+        .machine-card .card-body {
+            padding: 8px;
+        }
+        
+        .action-buttons .btn {
+            font-size: 0.7rem;
+            padding: 3px 6px;
+        }
+        
+        .status-badge {
+            font-size: 0.6rem;
+            padding: 2px 4px;
+        }
+        
+        .thumbnail {
+            max-width: 50px;
+            max-height: 35px;
         }
         
         .queue-card .card-body {
-            padding: 15px !important;
+            padding: 8px;
+        }
+        
+        .program-form {
+            padding: 10px;
+        }
+        
+        .table-responsive table {
+            font-size: 0.65rem;
+        }
+        
+        .table-responsive th,
+        .table-responsive td {
+            padding: 2px 4px;
+        }
+        
+        /* Even more compact on very small screens */
+        .status-badge {
+            font-size: 0.55rem;
+            padding: 1px 4px;
+        }
+        
+        /* Machine filter optimization */
+        .d-flex.gap-2.align-items-center.w-100.w-md-auto {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+        
+        .d-flex.gap-2.align-items-center.w-100.w-md-auto label {
+            font-size: 0.75rem;
+        }
+        
+        .machine-select-table {
+            width: 100%;
+            margin-left: 0;
+        }
+        
+        /* Login form optimization */
+        .login-card h3 {
+            font-size: 1.3rem;
+        }
+        
+        .login-card p {
+            font-size: 0.9rem;
+        }
+        
+        /* Form font size optimization */
+        .form-control, .form-select {
+            font-size: 16px; /* Prevent zoom on iOS */
+        }
+        
+        /* Queue card optimization */
+        .queue-card .card-header {
+            padding: 10px;
+        }
+        
+        .queue-card .card-body {
+            padding: 10px;
+        }
+        
+        /* Queue header optimization */
+        .queue-header h3 {
+            font-size: 1rem;
+        }
+        
+        .queue-header p {
+            font-size: 0.75rem;
         }
     }
 
-    /* Rest of your existing CSS styles... */
+    /* Custom dropdown styling */
+    .dropdown-menu {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .dropdown-item {
+        padding: 8px 12px;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .dropdown-item:last-child {
+        border-bottom: none;
+    }
+
+    .dropdown-item:hover {
+        background: #f8f9fa;
+    }
+
+    /* Form enhancements */
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        padding: 8px 12px;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--secondary);
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    /* Button enhancements */
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    /* Card header enhancements */
+    .card-title {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    /* Alert enhancements */
+    .alert {
+        border-radius: 8px;
+        border: none;
+    }
+
+    /* Badge enhancements */
+    .badge {
+        font-weight: 500;
+    }
+
+    /* Table responsive */
+    .table-responsive {
+        border-radius: 8px;
+    }
+
+    /* Pagination */
+    .pagination {
+        margin-bottom: 0;
+    }
+
+    .page-link {
+        border-radius: 6px;
+        margin: 0 2px;
+        border: 1px solid #dee2e6;
+    }
+
+    /* Modal enhancements */
+    /* Modal enhancements */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    z-index: 1060; /* Ensure modals appear above other content */
+}
+/* Ensure program details modal appears above queue modal */
+#programDetailsModal {
+    z-index: 1070 !important;
+}
+
+#programDetailsModal .modal-content {
+    z-index: 1071 !important;
+}
+
+/* Ensure image modal appears above all */
+#imageModal {
+    z-index: 1080 !important;
+}
+
+#imageModal .modal-content {
+    z-index: 1081 !important;
+}
+
+.modal {
+    z-index: 1055; /* Ensure modal backdrop appears correctly */
+}
+
+    .modal-header {
+        border-bottom: 1px solid #e9ecef;
+        padding: 15px 20px;
+    }
+
+    .modal-footer {
+        border-top: 1px solid #e9ecef;
+        padding: 15px 20px;
+    }
+
+    /* Feeder input styling */
+    .feeder-input-group {
+        background: white;
+        border-radius: 6px;
+        padding: 4px;
+        border: 1px solid #dee2e6;
+    }
+
+    .feeder-input {
+        border: none;
+        background: transparent;
+        width: 100%;
+        padding: 2px 6px;
+        font-size: 0.85rem;
+    }
+
+    .feeder-input:focus {
+        outline: none;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    /* Action buttons */
+    .action-buttons {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+    }
+
+    .action-buttons .btn {
+        flex: 1;
+        min-width: 80px;
+    }
+
+    /* Search box */
+    .search-box {
+        max-width: 300px;
+    }
+
+    /* Machine selection in table */
+    .machine-select-table {
+        min-width: 120px;
+    }
+
+    /* Login form enhancements */
+    .login-form .form-control {
+        padding: 12px 15px;
+    }
+
+    /* Prevent delete for running programs */
+    .btn-danger:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .auth-error {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+
+    /* Feeder grid layout */
+    .feeder-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .feeder-grid-item {
+        text-align: center;
+        padding: 4px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+
+    .feeder-grid-item .feeder-number {
+        font-weight: bold;
+        color: var(--primary);
+        font-size: 0.85rem;
+    }
+
+    .feeder-grid-item .feeder-value {
+        color: var(--secondary);
+        word-break: break-word;
+        font-size: 0.8rem;
+    }
+
+    /* Queue page styling */
     .queue-header {
         background: linear-gradient(135deg, var(--primary), var(--secondary));
         color: white;
         padding: 20px;
         border-radius: 12px;
         margin-bottom: 20px;
+    }
+
+    .queue-card {
+        border-radius: 12px;
+        margin-bottom: 16px;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0,0,0,.1);
+        transition: all 0.3s ease;
+    }
+
+    .queue-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0,0,0,.15);
     }
 
     .queue-card .card-header {
@@ -398,7 +920,7 @@
 
     .empty-queue {
         text-align: center;
-        padding: 60px 20px;
+        padding: 40px 20px;
         color: #6c757d;
     }
 
@@ -408,52 +930,181 @@
         color: #dee2e6;
     }
 
-    /* Program details modal - full text display */
-    #programDetailsModal .program-details {
-        max-height: 70vh;
+    /* Operator queue styling */
+    .operator-queue-card {
+        border-left: 4px solid var(--secondary);
+    }
+
+    .operator-queue-card.urgent {
+        border-left-color: var(--danger);
+    }
+
+    /* Touch-friendly improvements */
+    .btn, .form-control, .form-select, .nav-link {
+        touch-action: manipulation;
+    }
+
+    /* Prevent zoom on form inputs */
+    @media (max-width: 768px) {
+        input, select, textarea {
+            font-size: 16px; /* Prevents zoom on iOS */
+        }
+    }
+
+    /* Improved scrolling for mobile */
+    .mobile-scroll-container {
+        -webkit-overflow-scrolling: touch;
+        overflow-x: auto;
+    }
+
+    /* Optimize dropdowns for mobile */
+    .dropdown-menu {
+        max-height: 200px;
         overflow-y: auto;
     }
 
-    #programDetailsModal .feeder-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        margin-top: 10px;
+    /* Ensure proper spacing for stacked elements */
+    .mobile-stack > * {
+        margin-bottom: 8px;
     }
 
-    #programDetailsModal .feeder-grid-item {
-        text-align: center;
-        padding: 8px;
-        background: #f8f9fa;
+    .mobile-stack > *:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Card-based history view for mobile */
+    .history-cards-view {
+        display: none;
+    }
+
+    .history-card {
+        background: white;
+        border: 1px solid #dee2e6;
         border-radius: 6px;
+        padding: 8px;
+        margin-bottom: 6px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .history-card:hover {
+        background: #f8f9fa;
+    }
+
+    .history-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+
+    .history-card-machine {
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .history-card-status {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        border-radius: 8px;
+    }
+
+    .history-card-design {
+        font-weight: 500;
+        margin-bottom: 2px;
+    }
+
+    .history-card-details {
+        display: flex;
+        justify-content: space-between;
+        color: #6c757d;
+        font-size: 0.7rem;
+    }
+
+    /* Ensure proper display of history cards when enabled */
+    .show-cards-view .history-cards-view {
+        display: block;
+    }
+
+    .show-cards-view .history-table-view {
+        display: none;
+    }
+
+    /* Toggle button for view switching */
+    .view-toggle-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: none;
+        font-size: 0.8rem;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 4px;
         border: 1px solid #dee2e6;
     }
 
-    #programDetailsModal .feeder-number {
-        font-weight: bold;
-        color: var(--primary);
-        font-size: 0.9rem;
+    .view-toggle-btn:hover {
+        background: #f8f9fa;
     }
 
-    #programDetailsModal .feeder-value {
-        color: var(--secondary);
-        word-break: break-word;
-        font-size: 0.85rem;
-        margin-top: 4px;
+    /* Loading state for history */
+    .history-loading {
+        text-align: center;
+        padding: 20px;
+        color: #6c757d;
     }
 
-    /* Ensure consistent card header heights */
-    .machine-card .card-title,
-    .queue-card .card-title {
-        min-height: 2.2em;
+    .history-loading .spinner-border {
+        width: 1rem;
+        height: 1rem;
+        margin-right: 8px;
+    }
+    
+    /* Notification badge */
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background-color: var(--danger);
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        font-size: 0.7rem;
         display: flex;
         align-items: center;
+        justify-content: center;
     }
-
+    
+    .notification-indicator {
+        position: relative;
+    }
+    @media (max-width: 768px) {
+    .assign-program-btn {
+        font-size: 0.7rem !important;
+        padding: 4px 8px !important;
+    }
+}
+    
+    /* Compact machine card */
     .machine-summary {
-        min-height: 20px;
+        font-size: 0.8rem;
+        color: #6c757d;
     }
-
+    
+    /* Hide feeders in machine card */
+    .feeders-hidden {
+        display: none;
+    }
+    
+    /* Excel export button */
+    .excel-export {
+        margin-top: 10px;
+    }
+    
     /* Queue number styling */
     .queue-number {
         background-color: var(--primary);
@@ -468,83 +1119,396 @@
         font-weight: bold;
         margin-right: 8px;
     }
-
-    /* Your existing responsive styles... */
-    @media (max-width: 768px) {
-        .container {
-            padding: 0 10px;
-        }
-        
-        .nav-tabs .nav-link {
-            font-size: 0.9rem;
-            padding: 8px 12px;
-        }
-        
-        .app-header .navbar-brand {
-            font-size: 1rem;
-        }
-        
-        .program-form {
-            padding: 15px;
-        }
-        
-        .search-box {
-            max-width: none;
-            width: 100%;
-        }
-
-        /* Hide user type label on mobile */
-        #currentUserType {
-            display: none !important;
-        }
-
-        .header-logout {
-            padding: 4px 8px !important;
-            font-size: 0.75rem !important;
-        }
+    
+    /* Compact logout button */
+    .logout-btn {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        border: 1px solid #6c757d;
+        color: #6c757d;
+        background: transparent;
     }
-
-    /* Modal enhancements */
-    .modal-content {
-        border-radius: 12px;
-        border: none;
-        z-index: 1060;
+    
+    .logout-btn:hover {
+        background-color: rgba(108, 117, 125, 0.1);
     }
-
-    .modal {
-        z-index: 1055;
+    
+    /* Compact program form for mobile */
+    .compact-form .form-group {
+        margin-bottom: 8px;
     }
-
-    #programDetailsModal {
-        z-index: 1070 !important;
+    
+    .compact-form .form-label {
+        font-size: 0.85rem;
+        margin-bottom: 4px;
     }
-
-    #programDetailsModal .modal-content {
-        z-index: 1071 !important;
+    
+    .compact-form .form-control, 
+    .compact-form .form-select {
+        font-size: 0.85rem;
+        padding: 6px 10px;
     }
-
-    #imageModal {
-        z-index: 1080 !important;
+    
+    /* Hide search in non-machine tabs */
+    .search-container {
+        display: none;
     }
-
-    #imageModal .modal-content {
-        z-index: 1081 !important;
+    
+    .machines-tab-active .search-container {
+        display: block;
     }
-
-    /* Form enhancements */
-    .form-control, .form-select {
-        border-radius: 8px;
-        border: 1px solid #dee2e6;
-        padding: 8px 12px;
+    
+    /* Header logout button */
+    .header-logout {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        margin-left: 10px;
     }
-
-    .btn {
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.3s ease;
+    /* Hide dashboard titles on mobile */
+@media (max-width: 768px) {
+    .dashboard-title {
+        display: none !important;
     }
+}
+/* Ensure 2 cards per row in queue on mobile */
+@media (max-width: 768px) {
+    #queueContent .row.g-3,
+    #operatorQueueContent .row.g-3 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin: 0;
+    }
+    
+    #queueContent .col-12.col-sm-6,
+    #operatorQueueContent .col-12.col-sm-6 {
+        padding: 0;
+        width: 100%;
+    }
+    
+    .queue-header + .d-flex {
+        margin-bottom: 15px;
+    }
+}
+/* Add to mobile CSS */
+@media (max-width: 576px) {
+    .header-logout {
+        padding: 4px 8px !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .header-logout i {
+        margin-right: 0 !important;
+    }
+}
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+    /* Assign program button */
+    .assign-program-btn {
+        font-size: 0.7rem !important;
+        padding: 4px 8px !important;
+        min-height: 32px;
+    }
+    
+    /* Queue search placeholder */
+    .queue-search-mobile::placeholder {
+        font-size: 0.8rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* Queue layout - 2 cards per row */
+    #queueContent .row.g-3,
+    #operatorQueueContent .row.g-3 {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        margin: 0 !important;
+    }
+    
+    #queueContent .col-12.col-sm-6,
+    #operatorQueueContent .col-12.col-sm-6 {
+        width: 100% !important;
+        max-width: none !important;
+        flex: none !important;
+        padding: 0 !important;
+    }
+    
+    .queue-card {
+        margin-bottom: 0 !important;
+        min-height: 140px;
+    }
+    
+    /* Header logout button */
+    .header-logout {
+        padding: 4px 8px !important;
+        font-size: 0.75rem !important;
+    }
+    
+    .header-logout i {
+        margin-right: 0 !important;
+    }
+    
+    /* Hide user type label */
+    #currentUserType {
+        display: none !important;
+    }
+}
 
-    /* Add any other existing styles you need to keep... */
+@media (max-width: 576px) {
+    /* Further mobile optimizations */
+    .queue-card .card-body {
+        padding: 10px !important;
+    }
+    
+    .queue-card h5 {
+        font-size: 0.9rem !important;
+    }
+    
+    .queue-card p {
+        font-size: 0.75rem !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .status-badge {
+        font-size: 0.6rem !important;
+        padding: 2px 6px !important;
+    }
+}
+/* Add these styles to fix card size consistency */
+
+/* Machine Cards - Fixed Height */
+.machine-card {
+    min-height: 280px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.machine-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.machine-card .program-info {
+    flex: 1;
+    min-height: 80px;
+}
+
+/* Queue Cards - Fixed Height */
+.queue-card {
+    min-height: 200px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.queue-card .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Text Truncation for Long Design Names */
+.machine-card .program-info p,
+.queue-card .card-body p {
+    margin-bottom: 0.5rem;
+    word-wrap: break-word;
+    overflow: hidden;
+}
+
+/* Design name truncation */
+.machine-card .program-info p:first-child,
+.queue-card .card-body p:first-child {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 2.8em;
+    line-height: 1.4em;
+}
+
+/* Ensure consistent spacing */
+.machine-summary {
+    min-height: 20px;
+}
+
+.action-buttons {
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+/* Mobile adjustments for consistent card sizing */
+@media (max-width: 768px) {
+    .machine-card {
+        min-height: 240px;
+    }
+    
+    .queue-card {
+        min-height: 180px;
+    }
+    
+    /* Ensure 2 cards per row in queue on mobile */
+    #queueContent .row.g-3,
+    #operatorQueueContent .row.g-3 {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+        margin: 0 !important;
+    }
+    
+    #queueContent .col-12.col-sm-6,
+    #operatorQueueContent .col-12.col-sm-6 {
+        padding: 0 !important;
+        width: 100% !important;
+        display: flex !important;
+    }
+    
+    .queue-card {
+        width: 100%;
+        margin-bottom: 0 !important;
+    }
+    
+    /* Machine grid layout optimization */
+    #machinesGrid, #operatorMachinesGrid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+    
+    #machinesGrid .col-12.col-sm-6.col-lg-4.col-xl-3,
+    #operatorMachinesGrid .col-12.col-sm-6.col-lg-4 {
+        padding: 0 !important;
+        width: 100% !important;
+        display: flex !important;
+    }
+    
+    .machine-card {
+        width: 100%;
+        margin-bottom: 0 !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .machine-card {
+        min-height: 220px;
+    }
+    
+    .queue-card {
+        min-height: 160px;
+    }
+    
+    /* Further mobile optimization */
+    .machine-card .card-body {
+        padding: 12px !important;
+    }
+    
+    .queue-card .card-body {
+        padding: 15px !important;
+    }
+    
+    /* Text size adjustments for mobile */
+    .machine-card .card-title {
+        font-size: 0.9rem !important;
+    }
+    
+    .queue-card h5 {
+        font-size: 0.9rem !important;
+    }
+    
+    .machine-card p,
+    .queue-card p {
+        font-size: 0.75rem !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .status-badge {
+        font-size: 0.6rem !important;
+        padding: 2px 6px !important;
+    }
+}
+
+/* Ensure buttons don't overflow */
+.action-buttons .btn {
+    min-width: auto;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    white-space: nowrap;
+}
+
+/* Queue number styling adjustment */
+.queue-number {
+    flex-shrink: 0;
+}
+
+/* Program details modal - full text display */
+#programDetailsModal .program-details {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+#programDetailsModal .feeder-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+#programDetailsModal .feeder-grid-item {
+    text-align: center;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+#programDetailsModal .feeder-number {
+    font-weight: bold;
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+#programDetailsModal .feeder-value {
+    color: var(--secondary);
+    word-break: break-word;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+
+/* Fix for assign program button on mobile */
+@media (max-width: 768px) {
+    .assign-program-btn {
+        font-size: 0.7rem !important;
+        padding: 6px 8px !important;
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Ensure consistent card header heights */
+.machine-card .card-title,
+.queue-card .card-title {
+    min-height: 2.2em;
+    display: flex;
+    align-items: center;
+}
+
+/* Fix for empty states */
+.empty-queue {
+    padding: 60px 20px;
+    text-align: center;
+}
+
+/* Loading state consistency */
+.loading-overlay {
+    z-index: 9999;
+}
 
     </style>
 </head>
@@ -742,6 +1706,10 @@
                             </button>
                         </div>
 
+                        <!-- Cards view for mobile -->
+                        <div id="historyCards" class="history-cards-view"></div>
+
+                        <!-- Table view for desktop -->
                         <div class="table-responsive history-table-view">
                             <table class="table table-sm table-striped table-hover">
                                 <thead class="table-light">
@@ -824,6 +1792,7 @@
 
             <div class="tab-content">
                 <div id="opMachines" class="tab-pane fade show active">
+                    
                     <div class="row g-2" id="operatorMachinesGrid"></div>
                 </div>
 
@@ -904,6 +1873,8 @@
         <button class="btn btn-primary btn-sm" onclick="installPwa()">Install</button>
     </div>
 </div>
+
+
 
 <!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
@@ -1022,7 +1993,7 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 
 // --- SETTINGS ---
-const PASSWORD = "1234";
+const PASSWORD = "1234"; // Keep original password
 const TOTAL_MACHINES = 24;
 const HISTORY_PAGE_SIZE = 10;
 
@@ -1058,13 +2029,13 @@ function initializeApp() {
     setupEventListeners();
     setupSearchFunctionality();
     setupAuthStateListener();
+    addViewToggleButton();
     setupPWA();
     registerServiceWorker();
     
     // Check if user was previously logged in
     checkPreviousLogin();
 }
-
 function setupEventListeners() {
     document.getElementById('programForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -1376,7 +2347,7 @@ function loadPrograms() {
     // Use efficient query with limits for real-time updates
     const programsQuery = db.collection("programs")
         .orderBy("createdAt", "desc")
-        .limit(200);
+        .limit(200); // Increased but reasonable limit
 
     programsQuery.onSnapshot((snapshot) => {
         programs = [];
@@ -1420,23 +2391,12 @@ function loadPrograms() {
     });
 }
 
-// --- MACHINE CARD RENDERING WITH FIXED SIZES ---
+// Update the machine card rendering to handle long text
 function renderMachinesGrid() {
     const grid = document.getElementById('machinesGrid');
     grid.innerHTML = '';
 
     const machinesToRender = filteredMachines.length > 0 ? filteredMachines : machines;
-
-    if (machinesToRender.length === 0) {
-        grid.innerHTML = `
-            <div class="col-12">
-                <div class="alert alert-info text-center">
-                    <i class="fas fa-info-circle me-2"></i>No machines found matching your search
-                </div>
-            </div>
-        `;
-        return;
-    }
 
     machinesToRender.forEach(machine => {
         let machinePrograms = programs.filter(p => p.machineNumber === machine.machineNumber && p.status !== 'completed');
@@ -1462,7 +2422,7 @@ function renderMachinesGrid() {
                             <i class="fas fa-cog me-2 text-primary"></i>Machine ${machine.machineNumber}
                         </h6>
                         <span class="status-badge status-${currentProgram ? currentProgram.status : 'idle'} ${currentProgram && currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
-                            ${currentProgram ? (currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status.toUpperCase()) : 'IDLE'}
+                            ${currentProgram ? (currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status) : 'IDLE'}
                         </span>
                     </div>
                     
@@ -1470,7 +2430,10 @@ function renderMachinesGrid() {
                         <div class="program-info">
                             <p class="mb-1 small" title="${currentProgram.designName}"><strong>Design:</strong> ${currentProgram.designName}</p>
                             <p class="mb-2 small"><strong>Rounds:</strong> ${currentProgram.rounds}</p>
-                            <div class="machine-summary mb-3"></div>
+                            
+                            <div class="machine-summary mb-3">
+                                <!-- Summary content if needed -->
+                            </div>
                         </div>
                         
                         <div class="action-buttons">
@@ -1531,7 +2494,7 @@ function renderMachinesGrid() {
     });
 }
 
-// --- QUEUE CARD RENDERING WITH FIXED SIZES ---
+// Update queue card rendering for consistent sizing
 function renderQueueView(searchTerm = '') {
     const queueContent = document.getElementById('queueContent');
     
@@ -1580,24 +2543,22 @@ function renderQueueView(searchTerm = '') {
             queueHtml += `
                 <div class="col-12 col-sm-6">
                     <div class="card queue-card h-100" onclick="viewMachinePrograms(${machineNumber})" style="cursor: pointer;">
-                        <div class="card-body">
-                            <div class="mb-3 text-center">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
                                 <i class="fas fa-cog fa-2x text-primary"></i>
                             </div>
-                            <h5 class="card-title text-center">Machine ${machineNumber}</h5>
+                            <h5 class="card-title">Machine ${machineNumber}</h5>
                             ${currentProgram ? `
                                 <p class="mb-1 small" title="${currentProgram.designName}"><strong>Current:</strong> ${currentProgram.designName}</p>
                                 <p class="mb-1 small text-muted">Rounds: ${currentProgram.rounds}</p>
-                                <div class="text-center">
-                                    <span class="status-badge status-${currentProgram.status} ${currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
-                                        ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status.toUpperCase()}
-                                    </span>
-                                </div>
+                                <span class="status-badge status-${currentProgram.status} ${currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
+                                    ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status}
+                                </span>
                             ` : `
-                                <p class="text-muted small text-center">No program assigned</p>
+                                <p class="text-muted small">No program assigned</p>
                             `}
                             ${queueCount > 0 ? `
-                                <div class="mt-2 text-center">
+                                <div class="mt-2">
                                     <span class="badge bg-warning">+${queueCount} in queue</span>
                                 </div>
                             ` : ''}
@@ -1614,8 +2575,6 @@ function renderQueueView(searchTerm = '') {
         </div>
     `;
 }
-
-// --- OPERATOR VIEWS ---
 function renderOperatorMachinesGrid() {
     const grid = document.getElementById('operatorMachinesGrid');
     grid.innerHTML = '';
@@ -1663,14 +2622,19 @@ function renderOperatorMachinesGrid() {
                             <i class="fas fa-cog me-2 text-primary"></i>Machine ${machine.machineNumber}
                         </h6>
                         <span class="status-badge status-${currentProgram.status} ${currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
-                            ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status.toUpperCase()}
+                            ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status}
                         </span>
                     </div>
                     
                     <div class="program-info">
-                        <p class="mb-1 small" title="${currentProgram.designName}"><strong>Design:</strong> ${currentProgram.designName}</p>
+                        <p class="mb-1 small"><strong>Design:</strong> ${currentProgram.designName}</p>
                         <p class="mb-2 small"><strong>Rounds:</strong> ${currentProgram.rounds}</p>
-                        <div class="machine-summary mb-3"></div>
+                        
+                        <div class="machine-summary mb-3">
+                            
+                        </div>
+                        
+                        <!-- Photo removed from operator machine card -->
                     </div>
                     
                     <div class="action-buttons">
@@ -1705,6 +2669,8 @@ function renderOperatorMachinesGrid() {
         grid.appendChild(card);
     });
 }
+
+
 
 function renderOperatorQueueView(searchTerm = '') {
     const queueContent = document.getElementById('operatorQueueContent');
@@ -1752,21 +2718,19 @@ function renderOperatorQueueView(searchTerm = '') {
             
             queueHtml += `
                 <div class="col-12 col-sm-6">
-                    <div class="card queue-card h-100" onclick="viewOperatorMachinePrograms(${machineNumber})" style="cursor: pointer;">
-                        <div class="card-body">
-                            <div class="mb-3 text-center">
+                    <div class="card machine-card h-100" onclick="viewOperatorMachinePrograms(${machineNumber})" style="cursor: pointer;">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
                                 <i class="fas fa-cog fa-2x text-primary"></i>
                             </div>
-                            <h5 class="card-title text-center">Machine ${machineNumber}</h5>
-                            <p class="mb-1 small" title="${currentProgram.designName}"><strong>Current:</strong> ${currentProgram.designName}</p>
+                            <h5 class="card-title">Machine ${machineNumber}</h5>
+                            <p class="mb-1 small"><strong>Current:</strong> ${currentProgram.designName}</p>
                             <p class="mb-1 small text-muted">Rounds: ${currentProgram.rounds}</p>
-                            <div class="text-center">
-                                <span class="status-badge status-${currentProgram.status} ${currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
-                                    ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status.toUpperCase()}
-                                </span>
-                            </div>
+                            <span class="status-badge status-${currentProgram.status} ${currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
+                                ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status}
+                            </span>
                             ${queueCount > 0 ? `
-                                <div class="mt-2 text-center">
+                                <div class="mt-2">
                                     <span class="badge bg-warning">+${queueCount} in queue</span>
                                 </div>
                             ` : ''}
@@ -3471,12 +4435,6 @@ function toggleSearchVisibility(tab) {
     }
 }
 
-// [Rest of your JavaScript functions remain the same...]
-// The remaining functions (viewMachinePrograms, viewOperatorMachinePrograms, etc.)
-// should be kept as they are in your original code
-
-// ... [Include all the remaining JavaScript functions from your original code]
-
 // Make functions available globally
 window.loginAsAdmin = loginAsAdmin;
 window.loginAsOperator = loginAsOperator;
@@ -3501,6 +4459,7 @@ window.viewMachineQueue = viewMachineQueue;
 window.viewOperatorMachineQueue = viewOperatorMachineQueue;
 window.renderQueueView = renderQueueView;
 window.renderOperatorQueueView = renderOperatorQueueView;
+window.toggleHistoryView = toggleHistoryView;
 window.installPwa = installPwa;
 window.dismissPwaPrompt = dismissPwaPrompt;
 window.requestEditProgram = requestEditProgram;
