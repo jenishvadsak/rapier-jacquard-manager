@@ -8,7 +8,7 @@
     <title>Rapier Jacquard Manager</title>
     
     <!-- PWA Manifest -->
-    <link rel="manifest" href="./manifest.json">
+    <link rel="manifest" href="/manifest.json">
     
     <!-- iOS specific -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -4257,19 +4257,12 @@ function setupPWA() {
         // Stash the event so it can be triggered later
         deferredPrompt = e;
         
-        console.log('Deferred prompt stored:', !!deferredPrompt);
+        console.log('Deferred prompt stored');
         
         // Check if prompt was recently dismissed
         const promptDismissed = localStorage.getItem('pwaPromptDismissed');
         const dismissTime = promptDismissed ? parseInt(promptDismissed) : 0;
         const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-        
-        console.log('Prompt check:', {
-            isAppInstalled,
-            dismissTime,
-            oneWeekAgo,
-            shouldShow: !isAppInstalled && dismissTime < oneWeekAgo
-        });
         
         // Show install prompt if app is not installed and not recently dismissed
         if (!isAppInstalled && dismissTime < oneWeekAgo) {
@@ -4277,7 +4270,7 @@ function setupPWA() {
             // Show after a short delay
             setTimeout(() => {
                 showPwaPrompt();
-            }, 3000);
+            }, 5000);
         }
     });
     
@@ -4289,18 +4282,6 @@ function setupPWA() {
         hidePwaPrompt();
         document.body.classList.add('pwa-installed');
     });
-    
-    // Check if we should show the prompt on load
-    setTimeout(() => {
-        const promptDismissed = localStorage.getItem('pwaPromptDismissed');
-        const dismissTime = promptDismissed ? parseInt(promptDismissed) : 0;
-        const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-        
-        if (!isAppInstalled && deferredPrompt && dismissTime < oneWeekAgo) {
-            console.log('Showing PWA prompt on load');
-            showPwaPrompt();
-        }
-    }, 2000);
 }
 
 function showPwaPrompt() {
@@ -4363,35 +4344,19 @@ function registerServiceWorker() {
         console.log('Service Worker is supported');
         
         window.addEventListener('load', function() {
-            // Try multiple paths for service worker
-            const swPaths = [
-                './sw.js',
-                '/sw.js',
-                '/rapier-jacquard-manager/sw.js'
-            ];
-            
-            let registrationAttempts = 0;
-            
-            function tryRegister(pathIndex) {
-                if (pathIndex >= swPaths.length) {
-                    console.log('All Service Worker registration attempts failed');
-                    return;
-                }
-                
-                const swPath = swPaths[pathIndex];
-                console.log(`Attempting to register Service Worker at: ${swPath}`);
-                
-                navigator.serviceWorker.register(swPath)
-                    .then(function(registration) {
-                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    })
-                    .catch(function(error) {
-                        console.log(`ServiceWorker registration failed for ${swPath}:`, error);
-                        tryRegister(pathIndex + 1);
-                    });
-            }
-            
-            tryRegister(0);
+            // Register service worker
+            navigator.serviceWorker.register('/sw.js')
+                .then(function(registration) {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    
+                    // Check if service worker is controlling the page
+                    if (navigator.serviceWorker.controller) {
+                        console.log('Service worker is controlling the page');
+                    }
+                })
+                .catch(function(error) {
+                    console.log('ServiceWorker registration failed: ', error);
+                });
         });
     } else {
         console.log('Service Worker is not supported in this browser');
@@ -4432,7 +4397,6 @@ function toggleSearchVisibility(tab) {
     }
 }
 
-// --- NOTIFICATION SYSTEM ---
 async function initializeNotifications() {
     // Check if browser supports notifications
     if (!('Notification' in window)) {
@@ -4441,16 +4405,25 @@ async function initializeNotifications() {
     }
     
     notificationPermission = Notification.permission;
-    console.log('Notification permission status:', notificationPermission);
+    console.log('Initial notification permission:', notificationPermission);
     
-    // If permission is already granted, initialize FCM
-    if (notificationPermission === 'granted') {
+    // Only auto-show modal for operators who haven't decided yet
+    if (notificationPermission === 'default' && currentUser === 'operator') {
+        const permissionDismissed = localStorage.getItem('notificationPermissionDismissed');
+        const dismissTime = permissionDismissed ? parseInt(permissionDismissed) : 0;
+        const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+        
+        if (dismissTime < oneDayAgo) {
+            console.log('Showing notification permission modal');
+            // Show after a delay when user is settled
+            setTimeout(() => {
+                const modal = new bootstrap.Modal(document.getElementById('notificationPermissionModal'));
+                modal.show();
+            }, 3000);
+        }
+    } else if (notificationPermission === 'granted') {
+        console.log('Notification permission already granted, initializing FCM');
         await initializeFCM();
-    } else if (notificationPermission === 'default') {
-        // Show permission modal after a short delay for operators
-        setTimeout(() => {
-            showNotificationPermissionModal();
-        }, 2000);
     }
 }
 
@@ -4469,22 +4442,33 @@ function showNotificationPermissionModal() {
 async function requestNotificationPermission() {
     try {
         console.log('Requesting notification permission...');
+        
+        // Use the modern API
         const permission = await Notification.requestPermission();
         notificationPermission = permission;
         console.log('Notification permission result:', permission);
         
+        // Close the modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('notificationPermissionModal'));
+        if (modal) modal.hide();
+        
         if (permission === 'granted') {
+            console.log('Notification permission granted');
             await initializeFCM();
-            // Close the modal
-            const modal = bootstrap.Modal.getInstance(document.getElementById('notificationPermissionModal'));
-            if (modal) modal.hide();
             
             // Show success message
-            showNotification('Notifications enabled!', 'You will now receive updates about program changes.', 'success');
+            showNotification('Notifications Enabled!', 'You will now receive program updates.', 'success');
+            
+            // Store that permission was granted
+            localStorage.setItem('notificationPermission', 'granted');
         } else {
-            // User denied permission
             console.log('Notification permission denied');
+            // Store dismissal for 7 days
             localStorage.setItem('notificationPermissionDismissed', Date.now().toString());
+            
+            if (permission === 'denied') {
+                showNotification('Notifications Blocked', 'You can enable notifications in browser settings.', 'warning');
+            }
         }
     } catch (error) {
         console.error('Error requesting notification permission:', error);
