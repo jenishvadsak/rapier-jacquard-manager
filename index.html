@@ -2897,7 +2897,7 @@ modal.addEventListener('hidden.bs.modal', function () {
     if (document.body.contains(modal)) {
         document.body.removeChild(modal);
     }
-});  // Closing brace moved here
+});
 }
 
 function viewOperatorMachinePrograms(machineNumber) {
@@ -4351,7 +4351,6 @@ function registerServiceWorker() {
 }
 
 
-
 // --- SEARCH VISIBILITY TOGGLE ---
 function toggleSearchVisibility(tab) {
     const adminDashboard = document.getElementById('adminDashboard');
@@ -4482,10 +4481,11 @@ async function initializeFCM() {
     }
 
     // Handle foreground messages
-    messaging.onMessage((payload) => {
-      console.log('Foreground message:', payload);
-      showNotification(payload.notification?.title, payload.notification?.body);
-    });
+    // Handle background messages only - no foreground handling
+messaging.onMessage((payload) => {
+  console.log('Foreground message received (ignored):', payload);
+  // We're ignoring foreground messages since we only want background push notifications
+});
 
   } catch (error) {
     console.error('FCM initialization error:', error);
@@ -4522,80 +4522,84 @@ async function removeFCMToken() {
     }
 }
 
-function showNotification(title, message, type = 'info') {
-    // Create a custom notification UI
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    notification.style.cssText = `
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        min-width: 300px;
-        max-width: 400px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    `;
-    
-    notification.innerHTML = `
-        <div class="d-flex align-items-center">
-            <i class="fas fa-bell me-2"></i>
-            <div>
-                <strong class="d-block">${title}</strong>
-                <small class="d-block">${message}</small>
-            </div>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.remove();
-        }
-    }, 5000);
-}
-
 async function sendNotificationToOperators(title, message, actionType, programData = null) {
   try {
-    // Get all operator FCM tokens
+    console.log('Sending push notification to operators:', { title, message, actionType });
+    
+    // Get all active operator FCM tokens
     const tokensSnapshot = await db.collection('fcmTokens')
       .where('userType', '==', 'operator')
+      .where('isActive', '==', true)
       .get();
     
     const tokens = [];
     tokensSnapshot.forEach(doc => {
-      tokens.push(doc.data().token);
+      const tokenData = doc.data();
+      if (tokenData.token && tokenData.token.length > 0) {
+        tokens.push(tokenData.token);
+      }
     });
 
-    // Send to each token
-    for (const token of tokens) {
-      await fetch('https://fcm.googleapis.com/fcm/send', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'key=YOUR_SERVER_KEY',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          to: token,
-          notification: {
-            title: title,
-            body: message,
-            icon: './icon-192.png',
-            click_action: '/'
-          },
-          data: {
-            actionType: actionType,
-            programData: JSON.stringify(programData)
-          }
-        })
-      });
+    if (tokens.length === 0) {
+      console.log('No active operator tokens found');
+      return;
     }
 
-    console.log(`Notifications sent to ${tokens.length} operators`);
+    console.log(`Sending push notifications to ${tokens.length} operators`);
+
+    // Send to each token - using data-only payload for background notifications
+    const sendPromises = tokens.map(async (token) => {
+      try {
+        const response = await fetch('https://fcm.googleapis.com/fcm/send', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'key=BOWS7kTkuF3cmrKAiUAV6u51HLDujIfDGKYn_aME3kFN4Omi-8NLaJ06DFe6ugrBpeBLZdC5QqmxFhF0gK4OOYk',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+    to: token,
+    data: {
+        title: title,
+        body: message,
+        icon: './icon-192.png', // Same folder
+        actionType: actionType,
+        programData: JSON.stringify(programData || {}),
+        timestamp: new Date().toISOString(),
+        priority: "high",
+        content_available: true
+    },
+    android: {
+        priority: "high"
+    },
+    apns: {
+        payload: {
+            aps: {
+                contentAvailable: true
+            }
+        }
+    }
+})
+        });
+
+        if (!response.ok) {
+          console.error('Failed to send push notification to token:', token.substring(0, 10) + '...');
+          // If token is invalid, mark it as inactive
+          if (response.status === 404 || response.status === 400) {
+            await markTokenAsInactive(token);
+          }
+        } else {
+          console.log('Push notification sent successfully to:', token.substring(0, 10) + '...');
+        }
+      } catch (error) {
+        console.error('Error sending push notification to token:', token.substring(0, 10) + '...', error);
+      }
+    });
+
+    await Promise.all(sendPromises);
+    console.log(`All push notifications processed for ${tokens.length} operators`);
     
   } catch (error) {
-    console.error('Error sending notifications:', error);
+    console.error('Error in sendNotificationToOperators:', error);
   }
 }
 
