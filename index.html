@@ -4234,17 +4234,26 @@ function installPwa() {
                 console.log('User accepted the install prompt');
                 isAppInstalled = true;
                 hidePwaPrompt();
+                // Clear dismissal timer since user accepted
+                localStorage.removeItem('pwaPromptDismissed');
             } else {
                 console.log('User dismissed the install prompt');
-                // Don't show again for 7 days
+                // Don't show again for 1 minute
                 localStorage.setItem('pwaPromptDismissed', Date.now().toString());
+                
+                // Schedule to show again after 1 minute
+                setTimeout(() => {
+                    if (!isAppInstalled && deferredPrompt) {
+                        console.log('Showing PWA prompt again after user dismissal');
+                        showPwaPrompt();
+                    }
+                }, 60000); // 1 minute
             }
             deferredPrompt = null;
         });
     }
     hidePwaPrompt();
 }
-
 // --- SERVICE WORKER REGISTRATION ---
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
