@@ -1302,7 +1302,7 @@ body {
 
 /* Machine Cards - Fixed Height and Width */
 .machine-card {
-    min-height: 280px;
+    min-height: 240px;
     height: auto;
     display: flex;
     flex-direction: column;
@@ -1318,8 +1318,8 @@ body {
 }
 
 .machine-card .program-info {
-    flex: 1;
-    min-height: 80px;
+    flex: 0 1 auto;
+    min-height: auto;
     overflow: hidden;
 }
 
@@ -1354,11 +1354,11 @@ body {
 
 /* Ensure consistent spacing */
 .machine-summary {
-    min-height: 20px;
+    min-height: auto;
 }
 
 .action-buttons {
-    margin-top: auto;
+    margin-top: 15px;
     padding-top: 10px;
     flex-shrink: 0;
 }
@@ -1366,9 +1366,10 @@ body {
 /* Mobile adjustments for consistent card sizing */
 @media (max-width: 768px) {
     .machine-card {
-        min-height: 240px;
+        min-height: 200px;
         max-width: calc(50vw - 20px);
     }
+}
     
     .queue-card {
         min-height: 180px;
@@ -1417,8 +1418,8 @@ body {
 }
 
 @media (max-width: 576px) {
-    .machine-card {
-        min-height: 220px;
+     .machine-card {
+        min-height: 180px;
         max-width: calc(50vw - 16px);
     }
     
@@ -2505,8 +2506,8 @@ function renderMachinesGrid() {
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h6 class="card-title mb-0">
-                            <i class="fas fa-cog me-2 text-primary"></i>Machine ${machine.machineNumber}
-                        </h6>
+    Machine ${machine.machineNumber}
+</h6>
                         <span class="status-badge status-${currentProgram ? currentProgram.status : 'idle'} ${currentProgram && currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
                             ${currentProgram ? (currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status) : 'IDLE'}
                         </span>
@@ -2516,10 +2517,6 @@ function renderMachinesGrid() {
                         <div class="program-info">
                             <p class="mb-1 small text-truncate" title="${currentProgram.designName}"><strong>Design:</strong> ${currentProgram.designName}</p>
                             <p class="mb-2 small"><strong>Rounds:</strong> ${currentProgram.rounds}</p>
-                            
-                            <div class="machine-summary mb-3">
-                                <!-- Summary content if needed -->
-                            </div>
                         </div>
                         
                         <div class="action-buttons">
@@ -2630,9 +2627,6 @@ function renderQueueView(searchTerm = '') {
                 <div class="col-12 col-sm-6">
                     <div class="card queue-card h-100" onclick="viewMachinePrograms(${machineNumber})" style="cursor: pointer;">
                         <div class="card-body text-center">
-                            <div class="mb-3">
-                                <i class="fas fa-cog fa-2x text-primary"></i>
-                            </div>
                             <h5 class="card-title">Machine ${machineNumber}</h5>
                             ${currentProgram ? `
                                 <p class="mb-1 small text-truncate" title="${currentProgram.designName}"><strong>Current:</strong> ${currentProgram.designName}</p>
@@ -2705,8 +2699,8 @@ function renderOperatorMachinesGrid() {
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h6 class="card-title mb-0">
-                            <i class="fas fa-cog me-2 text-primary"></i>Machine ${machine.machineNumber}
-                        </h6>
+    Machine ${machine.machineNumber}
+</h6>
                         <span class="status-badge status-${currentProgram.status} ${currentProgram.priority === 'urgent' ? 'status-urgent' : ''}">
                             ${currentProgram.priority === 'urgent' ? 'URGENT' : currentProgram.status}
                         </span>
@@ -2715,10 +2709,6 @@ function renderOperatorMachinesGrid() {
                     <div class="program-info">
                         <p class="mb-1 small text-truncate" title="${currentProgram.designName}"><strong>Design:</strong> ${currentProgram.designName}</p>
                         <p class="mb-2 small"><strong>Rounds:</strong> ${currentProgram.rounds}</p>
-                        
-                        <div class="machine-summary mb-3">
-                            
-                        </div>
                         
                         <!-- Photo removed from operator machine card -->
                     </div>
@@ -2806,9 +2796,6 @@ function renderOperatorQueueView(searchTerm = '') {
                 <div class="col-12 col-sm-6">
                     <div class="card machine-card h-100" onclick="viewOperatorMachinePrograms(${machineNumber})" style="cursor: pointer;">
                         <div class="card-body text-center">
-                            <div class="mb-3">
-                                <i class="fas fa-cog fa-2x text-primary"></i>
-                            </div>
                             <h5 class="card-title">Machine ${machineNumber}</h5>
                             <p class="mb-1 small text-truncate" title="${currentProgram.designName}"><strong>Current:</strong> ${currentProgram.designName}</p>
                             <p class="mb-1 small text-muted">Rounds: ${currentProgram.rounds}</p>
