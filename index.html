@@ -2063,10 +2063,6 @@ let uploading = false;
 let feederCount = 1;
 let filteredMachines = [];
 
-// PWA variables
-let deferredPrompt = null;
-let isAppInstalled = false;
-
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -4138,10 +4134,28 @@ document.getElementById('designImage').addEventListener('change', function(e) {
     }
 });
 
+// --- PWA SETUP ---
+let deferredPrompt = null;
+let isAppInstalled = false;
+
 function setupPWA() {
     console.log('Setting up PWA...');
     
     // Check if app is already installed
+    checkAppInstalledStatus();
+    
+    // Listen for beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    
+    // Listen for app installed event
+    window.addEventListener('appinstalled', handleAppInstalled);
+    
+    // Check if we can show prompt
+    setTimeout(checkPwaInstallability, 1000);
+}
+
+function checkAppInstalledStatus() {
+    // Check multiple methods for detecting installed PWA
     if (window.matchMedia('(display-mode: standalone)').matches) {
         isAppInstalled = true;
         console.log('App is running in standalone mode');
@@ -4155,12 +4169,13 @@ function setupPWA() {
         document.body.classList.add('pwa-installed');
     }
     
-    // Listen for beforeinstallprompt event - add this immediately
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    
-    // Also check if we can show prompt on load
-    setTimeout(checkPwaInstallability, 2000);
+    // Check if launched from home screen
+    if (window.location.search.includes('from_homescreen')) {
+        isAppInstalled = true;
+        document.body.classList.add('pwa-installed');
+    }
 }
+
 function handleBeforeInstallPrompt(e) {
     console.log('beforeinstallprompt event fired');
     
@@ -4172,8 +4187,18 @@ function handleBeforeInstallPrompt(e) {
     
     console.log('Deferred prompt stored');
     
-    // Show install prompt
-    checkPwaInstallability();
+    // Update UI to show install button
+    showPwaPrompt();
+}
+
+function handleAppInstalled(evt) {
+    console.log('App was installed');
+    isAppInstalled = true;
+    hidePwaPrompt();
+    document.body.classList.add('pwa-installed');
+    
+    // Clear any dismissal timers
+    localStorage.removeItem('pwaPromptDismissed');
 }
 
 function checkPwaInstallability() {
@@ -4199,8 +4224,8 @@ function showPwaPrompt() {
     
     if (prompt && deferredPrompt && !isAppInstalled) {
         prompt.style.display = 'block';
-        // Force reflow
-        prompt.offsetHeight;
+        // Force reflow for animation
+        void prompt.offsetWidth;
         prompt.classList.add('show');
         console.log('PWA prompt shown successfully');
     }
@@ -4234,51 +4259,49 @@ function installPwa() {
                 console.log('User accepted the install prompt');
                 isAppInstalled = true;
                 hidePwaPrompt();
-                // Clear dismissal timer since user accepted
+                document.body.classList.add('pwa-installed');
                 localStorage.removeItem('pwaPromptDismissed');
             } else {
                 console.log('User dismissed the install prompt');
-                // Don't show again for 1 minute
                 localStorage.setItem('pwaPromptDismissed', Date.now().toString());
-                
-                // Schedule to show again after 1 minute
-                setTimeout(() => {
-                    if (!isAppInstalled && deferredPrompt) {
-                        console.log('Showing PWA prompt again after user dismissal');
-                        showPwaPrompt();
-                    }
-                }, 60000); // 1 minute
             }
+            // Clear the deferredPrompt for garbage collection
             deferredPrompt = null;
         });
+    } else {
+        console.log('No deferred prompt available');
+        hidePwaPrompt();
     }
-    hidePwaPrompt();
 }
-// --- SERVICE WORKER REGISTRATION ---
+
+// Enhanced Service Worker Registration
 function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
         console.log('Service Worker is supported');
         
-        window.addEventListener('load', function() {
-            // Register service worker
-            navigator.serviceWorker.register('/sw.js')
-                .then(function(registration) {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                    
-                    // Check if service worker is controlling the page
-                    if (navigator.serviceWorker.controller) {
-                        console.log('Service worker is controlling the page');
-                    }
-                })
-                .catch(function(error) {
-                    console.log('ServiceWorker registration failed: ', error);
+        // Register service worker immediately
+        navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                
+                // Check for updates
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    console.log('New service worker found:', newWorker);
                 });
+            })
+            .catch(function(error) {
+                console.log('ServiceWorker registration failed: ', error);
+            });
+            
+        // Listen for controller changes
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            console.log('Service worker controller changed');
         });
     } else {
         console.log('Service Worker is not supported in this browser');
     }
 }
-
 // --- SEARCH VISIBILITY TOGGLE ---
 function toggleSearchVisibility(tab) {
     const adminDashboard = document.getElementById('adminDashboard');
