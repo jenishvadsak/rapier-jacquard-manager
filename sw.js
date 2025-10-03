@@ -1,48 +1,49 @@
-// sw.js - Place this in your root directory
-importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
-
-firebase.initializeApp({
-  apiKey: "AIzaSyDHBa63-zdatu-5xvHA7tdJMeBx9wFb9fw",
-  authDomain: "rapier-manager.firebaseapp.com",
-  projectId: "rapier-manager",
-  storageBucket: "rapier-manager.firebasestorage.app",
-  messagingSenderId: "161632944775",
-  appId: "1:161632944775:web:be4a6493d8614938ceae22"
+// sw.js
+self.addEventListener('push', function(event) {
+    console.log('Push message received', event);
+    
+    if (!event.data) return;
+    
+    const data = event.data.json();
+    console.log('Push data:', data);
+    
+    const options = {
+        body: data.data.body,
+        icon: './icon-192.png',
+        badge: './icon-192.png',
+        tag: 'jacquard-manager',
+        data: data.data,
+        requireInteraction: true,
+        actions: [
+            {
+                action: 'view',
+                title: 'View Details'
+            },
+            {
+                action: 'dismiss',
+                title: 'Dismiss'
+            }
+        ]
+    };
+    
+    event.waitUntil(
+        self.registration.showNotification(data.data.title, options)
+    );
 });
 
-const messaging = firebase.messaging();
-
-// Handle background messages
-messaging.onBackgroundMessage((payload) => {
-  console.log('Received background message ', payload);
-
-  const notificationTitle = payload.notification?.title || 'New Notification';
-  const notificationOptions = {
-    body: payload.notification?.body || 'You have a new update',
-    icon: './icon-192.png',
-    badge: './icon-192.png',
-    tag: 'rapier-notification',
-    renotify: true
-  };
-
-  self.registration.showNotification(notificationTitle, notificationOptions);
+self.addEventListener('notificationclick', function(event) {
+    console.log('Notification click received', event);
+    
+    event.notification.close();
+    
+    if (event.action === 'view') {
+        // Open the app when notification is clicked
+        event.waitUntil(
+            clients.openWindow('/')
+        );
+    }
 });
 
-// Handle notification click
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  
-  event.waitUntil(
-    clients.matchAll({ type: 'window' }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url.includes('/') && 'focus' in client) {
-          return client.focus();
-        }
-      }
-      if (clients.openWindow) {
-        return clients.openWindow('/');
-      }
-    })
-  );
+self.addEventListener('notificationclose', function(event) {
+    console.log('Notification closed', event);
 });
