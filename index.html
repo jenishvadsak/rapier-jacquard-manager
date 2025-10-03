@@ -4470,7 +4470,7 @@ async function initializeFCM() {
 
     // Get FCM token
     fcmToken = await messaging.getToken({ 
-      vapidKey: 'BOQ8Q8_GxByEin5QVW6jlEtTdvuKt3s4K4COq0CgFAHUYE9I4gYbK4iw4BfgKKzW_s4Dste1Q5BT9j6JA-S8GI' 
+      vapidKey: 'BOWS7kTkuF3cmrKAiUAV6u51HLDujIfDGKYn_aME3kFN4Omi-8NLaJ06DFe6ugrBpeBLZdC5QqmxFhF0gK4OOYk' 
     });
     
     if (fcmToken) {
@@ -4553,7 +4553,7 @@ async function sendNotificationToOperators(title, message, actionType, programDa
         const response = await fetch('https://fcm.googleapis.com/fcm/send', {
           method: 'POST',
           headers: {
-            'Authorization': 'key=BOWS7kTkuF3cmrKAiUAV6u51HLDujIfDGKYn_aME3kFN4Omi-8NLaJ06DFe6ugrBpeBLZdC5QqmxFhF0gK4OOYk',
+            'Authorization': 'key=AIzaSyDHBa63-zdatu-5xvHA7tdJMeBx9wFb9fw',
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
