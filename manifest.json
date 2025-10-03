@@ -1,7 +1,7 @@
 {
   "name": "Rapier Jacquard Manager",
   "short_name": "Jacquard Manager",
-  "description": "Industrial Program Management for Rapier Jacquard Machines",
+  "description": "Industrial Program Management System",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#2c3e50",
