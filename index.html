@@ -4155,41 +4155,38 @@ function setupPWA() {
         document.body.classList.add('pwa-installed');
     }
     
-    // Listen for beforeinstallprompt event
-    window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('beforeinstallprompt event fired');
-        
-        // Prevent the mini-infobar from appearing on mobile
-        e.preventDefault();
-        
-        // Stash the event so it can be triggered later
-        deferredPrompt = e;
-        
-        console.log('Deferred prompt stored');
-        
-        // Check if prompt was recently dismissed
-        const promptDismissed = localStorage.getItem('pwaPromptDismissed');
-        const dismissTime = promptDismissed ? parseInt(promptDismissed) : 0;
-        const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-        
-        // Show install prompt if app is not installed and not recently dismissed
-        if (!isAppInstalled && dismissTime < oneWeekAgo) {
-            console.log('Showing PWA install prompt');
-            // Show after a short delay
-            setTimeout(() => {
-                showPwaPrompt();
-            }, 5000);
-        }
-    });
+    // Listen for beforeinstallprompt event - add this immediately
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     
-    // Listen for app installed event
-    window.addEventListener('appinstalled', (e) => {
-        console.log('App installed successfully');
-        isAppInstalled = true;
-        deferredPrompt = null;
-        hidePwaPrompt();
-        document.body.classList.add('pwa-installed');
-    });
+    // Also check if we can show prompt on load
+    setTimeout(checkPwaInstallability, 2000);
+}
+function handleBeforeInstallPrompt(e) {
+    console.log('beforeinstallprompt event fired');
+    
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+    
+    // Stash the event so it can be triggered later
+    deferredPrompt = e;
+    
+    console.log('Deferred prompt stored');
+    
+    // Show install prompt
+    checkPwaInstallability();
+}
+
+function checkPwaInstallability() {
+    // Check if prompt was recently dismissed
+    const promptDismissed = localStorage.getItem('pwaPromptDismissed');
+    const dismissTime = promptDismissed ? parseInt(promptDismissed) : 0;
+    const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    
+    // Show install prompt if app is not installed and not recently dismissed
+    if (!isAppInstalled && deferredPrompt && dismissTime < oneWeekAgo) {
+        console.log('Showing PWA install prompt');
+        showPwaPrompt();
+    }
 }
 
 function showPwaPrompt() {
@@ -4202,12 +4199,10 @@ function showPwaPrompt() {
     
     if (prompt && deferredPrompt && !isAppInstalled) {
         prompt.style.display = 'block';
-        setTimeout(() => {
-            prompt.classList.add('show');
-        }, 100);
+        // Force reflow
+        prompt.offsetHeight;
+        prompt.classList.add('show');
         console.log('PWA prompt shown successfully');
-    } else {
-        console.log('Cannot show PWA prompt - conditions not met');
     }
 }
 
@@ -4237,8 +4232,12 @@ function installPwa() {
         deferredPrompt.userChoice.then((choiceResult) => {
             if (choiceResult.outcome === 'accepted') {
                 console.log('User accepted the install prompt');
+                isAppInstalled = true;
+                hidePwaPrompt();
             } else {
                 console.log('User dismissed the install prompt');
+                // Don't show again for 7 days
+                localStorage.setItem('pwaPromptDismissed', Date.now().toString());
             }
             deferredPrompt = null;
         });
@@ -4340,4 +4339,3 @@ window.exportQueueToExcel = exportQueueToExcel;
 </script>
 </body>
 </html>
-
